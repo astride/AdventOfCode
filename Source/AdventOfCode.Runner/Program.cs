@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace AdventOfCode.Common
+namespace AdventOfCode.Runner
 {
 	// https://adventofcode.com/
 	class Program

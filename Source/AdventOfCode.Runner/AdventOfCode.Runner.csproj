@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{49DFD601-BF36-4EC6-B736-B73CFA5387A0}</ProjectGuid>
+    <ProjectGuid>{C6A5509F-B31A-40E8-AEF5-8C959D540470}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>AdventOfCode.Common</RootNamespace>
-    <AssemblyName>AdventOfCode.Common</AssemblyName>
+    <RootNamespace>AdventOfCode.Runner</RootNamespace>
+    <AssemblyName>AdventOfCode.Runner</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
