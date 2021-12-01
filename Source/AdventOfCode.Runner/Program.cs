@@ -11,7 +11,7 @@ namespace AdventOfCode.Runner
 	{
 		private const int RequestLimit = 10;
 
-		private const string InputDirectoryName = "Input";
+		private const string InputDirectoryName = "PuzzleInputs";
 		private readonly static string InputFileExtension = ".txt";
 
 		static void Main(string[] args)
@@ -99,7 +99,7 @@ namespace AdventOfCode.Runner
 				throw new Exception($"Puzzle root location not found. Tried to find grandparent of the assembly location ({assemblyLocation})");
 			}
 
-			var filePath = Path.Combine(puzzleRootLocation, InputDirectoryName, DirectoryNameForYear(year), InputFileName(day, testMode));
+			var filePath = Path.Combine(puzzleRootLocation, DirectoryNameForYear(year), InputDirectoryName, InputFileName(day, testMode));
 
 			if (!File.Exists(filePath))
 			{
@@ -113,7 +113,7 @@ namespace AdventOfCode.Runner
 			? $"{DirectoryNameForDay(day)}Test{InputFileExtension}"
 			: $"{DirectoryNameForDay(day)}{InputFileExtension}";
 
-		private static string DirectoryNameForYear(int year) => year.ToString();
+		private static string DirectoryNameForYear(int year) => $"AdventOfCode.{year}";
 
 		private static string DirectoryNameForDay(int day) => $"Day{day:D2}";
 	}
