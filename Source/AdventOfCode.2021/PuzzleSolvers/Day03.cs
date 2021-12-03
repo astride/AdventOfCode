@@ -30,8 +30,7 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 			for (var i = 0; i < bitCount; i++)
 			{
 				nthPositionBits = diagnosticReport
-					.Select(entry => entry[0].ToString())
-					.Select(entry => int.Parse(entry));
+					.Select(entry => entry[0].ToBit());
 
 				gammaRateBinary.Add(nthPositionBits.MostCommonBitOr1());
 			}
@@ -59,6 +58,8 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 
 	static class Day03Helpers
 	{
+		public static int ToBit(this char ch) => int.Parse(ch.ToString());
+		
 		public static int LeastCommonBitOr0(this IEnumerable<int> bits)
 		{
 			return bits
@@ -115,15 +116,15 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 			for (var i = 0; i < report.First().Length; i++)
 			{
 				nthPositionBits = diagnostics
-					.Select(entry => int.Parse(entry[i].ToString()));
+					.Select(entry => entry[i].ToBit());
 
-				diagnostics = diagnostics.Where(entry => criteriaValidator(int.Parse(entry[i].ToString()), nthPositionBits)).ToList();
+				diagnostics = diagnostics.Where(entry => criteriaValidator(entry[i].ToBit(), nthPositionBits)).ToList();
 
 				if (diagnostics.Count() == 1)
 				{
 					var rating = diagnostics.Single();
 
-					return rating.Select(ch => int.Parse(ch.ToString())).ToArray();
+					return rating.Select(ch => ch.ToBit()).ToArray();
 				}
 			}
 
