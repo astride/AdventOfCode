@@ -4,10 +4,10 @@ using System.Linq;
 
 namespace AdventOfCode.Y2021
 {
-	class Day02 : IPuzzleSolver<int>
+	class Day02 : IPuzzleSolver
 	{
-		public int Part1Solution { get; set; }
-		public int Part2Solution { get; set; }
+		public string Part1Solution { get; set; }
+		public string Part2Solution { get; set; }
 
 		public void SolvePuzzle(string[] rawInput)
 		{
@@ -17,8 +17,8 @@ namespace AdventOfCode.Y2021
 				.Select(entry => (entry[0], int.Parse(entry[1])))
 				.ToList();
 
-			Part1Solution = SolvePart1(input);
-			Part2Solution = SolvePart2(input);
+			Part1Solution = SolvePart1(input).ToString();
+			Part2Solution = SolvePart2(input).ToString();
 		}
 
 		private const string Forward = "forward";

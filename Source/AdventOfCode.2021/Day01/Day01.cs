@@ -3,10 +3,10 @@ using System.Linq;
 
 namespace AdventOfCode.Y2021
 {
-	class Day01 : IPuzzleSolver<int>
+	class Day01 : IPuzzleSolver
 	{
-		public int Part1Solution { get; set; }
-		public int Part2Solution { get; set; }
+		public string Part1Solution { get; set; }
+		public string Part2Solution { get; set; }
 
 		public void SolvePuzzle(string[] rawInput)
 		{
@@ -15,8 +15,8 @@ namespace AdventOfCode.Y2021
 				.Select(entry => int.Parse(entry))
 				.ToArray();
 
-			Part1Solution = SolvePart1(input);
-			Part2Solution = SolvePart2(input);
+			Part1Solution = SolvePart1(input).ToString();
+			Part2Solution = SolvePart2(input).ToString();
 		}
 
 		private int SolvePart1(int[] sonarSweepReport)
