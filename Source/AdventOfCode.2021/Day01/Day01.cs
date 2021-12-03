@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace AdventOfCode.Y2021
 {
-	class Day01 : IPuzzleSolver
+	public class Day01 : IPuzzleSolver
 	{
 		public string Part1Solution { get; set; }
 		public string Part2Solution { get; set; }

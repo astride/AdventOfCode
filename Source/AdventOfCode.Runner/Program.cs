@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventOfCode.Common;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,9 +17,23 @@ namespace AdventOfCode.Runner
 			//TODO Ask if wants today's puzzle first
 			var year = RequestYear();
 			var day = RequestDay();
-			var testMode = RequestTestMode();
 
-			var input = GetInputFor(year, day, testMode);
+			if (PuzzleSolverExistsFor(year, day, out Type solverType))
+			{
+				var testMode = RequestTestMode();
+
+				var input = GetInputFor(year, day, testMode);
+				//TODO valiate input file exists and has content
+
+				var solver = (IPuzzleSolver)Activator.CreateInstance(solverType);
+
+				solver.SolvePuzzle(input);
+
+				Console.WriteLine($"{nameof(solver.Part1Solution)}: {solver.Part1Solution}");
+				Console.WriteLine($"{nameof(solver.Part2Solution)}: {solver.Part2Solution}");
+			}
+
+			//TODO Inform that doesn't exist and ask for input again
 		}
 
 		static int RequestYear()
@@ -104,6 +119,31 @@ namespace AdventOfCode.Runner
 			}
 
 			return File.ReadAllLines(filePath, Encoding.Default);
+		}
+
+
+
+		private static bool PuzzleSolverExistsFor(int year, int day, out Type solverType)
+		{
+			var yearAssembly = year switch
+			{
+				2021 => typeof(Y2021.Day01).Assembly,
+				2020 => typeof(Y2020.Day01).Assembly,
+				_ => null
+			};
+
+			if (yearAssembly == null)
+			{
+				//TODO Inform: no solver exists for requested puzzle year
+				solverType = null;
+				return false;
+			}
+
+			solverType = yearAssembly
+				.GetTypes()
+				.FirstOrDefault(type => type.Name == DirectoryNameForDay(day));
+
+			return solverType is Type;
 		}
 
 		private static string InputFileName(int day, bool testMode) => testMode

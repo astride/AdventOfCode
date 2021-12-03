@@ -9,7 +9,7 @@
     <RootNamespace>AdventOfCode.Runner</RootNamespace>
     <AssemblyName>AdventOfCode.Runner</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-		<LangVersion>8.0</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -49,6 +49,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdventOfCode.2020\AdventOfCode.2020.csproj">
+      <Project>{c0b97459-e516-44e4-a998-9a4a7400cb3b}</Project>
+      <Name>AdventOfCode.2020</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AdventOfCode.2021\AdventOfCode.2021.csproj">
+      <Project>{753b969c-017c-4579-ba23-919f1a22232c}</Project>
+      <Name>AdventOfCode.2021</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AdventOfCode.Common\AdventOfCode.Common.csproj">
+      <Project>{49DFD601-BF36-4EC6-B736-B73CFA5387A0}</Project>
+      <Name>AdventOfCode.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
