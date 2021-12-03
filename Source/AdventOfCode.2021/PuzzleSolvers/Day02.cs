@@ -14,69 +14,61 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 			var input = rawInput
 				.Where(entry => !string.IsNullOrWhiteSpace(entry))
 				.Select(entry => entry.Split(' '))
-				.Select(entry => (Action: entry[0], Value: int.Parse(entry[1])))
+				.Select(entry => (entry[0], int.Parse(entry[1])))
 				.ToList();
 
-			Part1Solution = Solve(input);
-			Part2Solution = Solve(input, true);
+			Part1Solution = SolvePart1(input);
+			Part2Solution = SolvePart2(input);
 		}
 
 		private const string Forward = "forward";
 		private const string Down = "down";
 		private const string Up = "up";
 
-		private int Solve(
-			List<(string Action, int Value)> commands, 
-			bool includeAim = false)
+		private int SolvePart1(List<(string Action, int Units)> commands)
 		{
-			int aim = 0;
-			int x = 0;
+			int pos = 0;
 			int depth = 0;
 
 			foreach (var command in commands)
 			{
-				if (includeAim)
-				{
-					aim += GetAimChangeFrom(command.Action, command.Value);
-				}
-
-				x += GetHorizontalPositionChangeFrom(command.Action, command.Value);
-
-				depth += includeAim
-					? GetDepthChangeFrom(command.Action, command.Value, aim)
-					: GetDepthChangeFrom(command.Action, command.Value);
+				pos += GetHorizontalChange(command.Action, command.Units);
+				depth += GetVerticalChange(command.Action, command.Units);
 			}
 
-			return includeAim
-				? x * depth * aim
-				: x * depth;
+			return pos * depth;
 		}
 
-		int GetHorizontalPositionChangeFrom(string action, int value)
+		private int SolvePart2(List<(string Action, int Units)> commands)
 		{
-			return action == Forward ? value : 0;
-		}
+			int pos = 0;
+			int aim = 0;
+			int depth = 0;
 
-		int GetDepthChangeFrom(string action, int value, int? aim = null)
-		{
-			if (aim.HasValue)
+			foreach (var command in commands)
 			{
-				return action == Forward ? value * aim.Value : 0;
+				pos += GetHorizontalChange(command.Action, command.Units);
+				aim += GetVerticalChange(command.Action, command.Units);
+
+				if (command.Action == Forward)
+				{
+					depth += aim * command.Units;
+				}
 			}
 
+			return pos * depth;
+		}
+
+		private static int GetHorizontalChange(string action, int value) => action == Forward ? value : 0;
+
+		private static int GetVerticalChange(string action, int value)
+		{
 			//TODO C# 8 --> switch expression
 			return action == Down
 				? value
 				: action == Up
 					? (-1) * value
 					: 0;
-		}
-
-		private static int GetAimChangeFrom(string action, int value)
-		{
-			if (action == Forward) return 0;
-
-			return action == Down ? value : (-1) * value;
 		}
 	}
 }
