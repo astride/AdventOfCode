@@ -59,16 +59,17 @@ namespace AdventOfCode.Y2021
 			return pos * depth;
 		}
 
-		private static int GetHorizontalChange(string action, int value) => action == Forward ? value : 0;
-
-		private static int GetVerticalChange(string action, int value)
+		private static int GetHorizontalChange(string action, int value) => action switch
 		{
-			//TODO C# 8 --> switch expression
-			return action == Down
-				? value
-				: action == Up
-					? (-1) * value
-					: 0;
-		}
+			Forward => value,
+			_ => 0
+		};
+
+		private static int GetVerticalChange(string action, int value) => action switch
+		{
+			Down	=> value,
+			Up		=> value * (-1),
+			_		=> 0
+		};
 	}
 }
