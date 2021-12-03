@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AdventOfCode.Y2021.PuzzleSolvers
+namespace AdventOfCode.Y2021
 {
 	class Day02 : IPuzzleSolver<int>
 	{

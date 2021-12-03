@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AdventOfCode.Y2021.PuzzleSolvers
+namespace AdventOfCode.Y2021
 {
 	class Day03 : IPuzzleSolver<decimal>
 	{

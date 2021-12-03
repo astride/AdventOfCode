@@ -1,7 +1,7 @@
 ﻿using AdventOfCode.Common;
 using System.Linq;
 
-namespace AdventOfCode.Y2021.PuzzleSolvers
+namespace AdventOfCode.Y2021
 {
 	class Day01 : IPuzzleSolver<int>
 	{

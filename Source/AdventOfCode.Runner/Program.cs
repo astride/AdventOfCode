@@ -11,9 +11,6 @@ namespace AdventOfCode.Runner
 	{
 		private const int RequestLimit = 10;
 
-		private const string InputDirectoryName = "PuzzleInputs";
-		private readonly static string InputFileExtension = ".txt";
-
 		static void Main(string[] args)
 		{
 			//TODO Ask if wants today's puzzle first
@@ -99,7 +96,7 @@ namespace AdventOfCode.Runner
 				throw new Exception($"Puzzle root location not found. Tried to find grandparent of the assembly location ({assemblyLocation})");
 			}
 
-			var filePath = Path.Combine(puzzleRootLocation, DirectoryNameForYear(year), InputDirectoryName, InputFileName(day, testMode));
+			var filePath = Path.Combine(puzzleRootLocation, DirectoryNameForYear(year), DirectoryNameForDay(day), InputFileName(day, testMode));
 
 			if (!File.Exists(filePath))
 			{
@@ -110,8 +107,10 @@ namespace AdventOfCode.Runner
 		}
 
 		private static string InputFileName(int day, bool testMode) => testMode
-			? $"{DirectoryNameForDay(day)}Test{InputFileExtension}"
-			: $"{DirectoryNameForDay(day)}{InputFileExtension}";
+			? $"{InputFileNameBaseForDay(day)}Example.txt"
+			: $"{InputFileNameBaseForDay(day)}.txt";
+
+		private static string InputFileNameBaseForDay(int day) => $"{DirectoryNameForDay(day)}Input";
 
 		private static string DirectoryNameForYear(int year) => $"AdventOfCode.{year}";
 
