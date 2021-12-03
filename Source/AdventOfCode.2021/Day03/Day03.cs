@@ -30,7 +30,7 @@ namespace AdventOfCode.Y2021
 			for (var i = 0; i < bitCount; i++)
 			{
 				nthPositionBits = diagnosticReport
-					.Select(entry => entry[0].ToBit());
+					.Select(entry => entry[i].ToBit());
 
 				gammaRateBinary.Add(nthPositionBits.MostCommonBitOr1());
 			}
