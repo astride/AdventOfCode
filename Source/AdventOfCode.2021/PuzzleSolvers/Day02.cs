@@ -1,5 +1,4 @@
 ﻿using AdventOfCode.Common;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +14,7 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 			var input = rawInput
 				.Where(entry => !string.IsNullOrWhiteSpace(entry))
 				.Select(entry => entry.Split(' '))
-				.Select(entry => new Tuple<string, int> ( entry[0], int.Parse(entry[1]) ))
+				.Select(entry => (Action: entry[0], Value: int.Parse(entry[1])))
 				.ToList();
 
 			Part1Solution = SolvePart1(input);
@@ -26,21 +25,35 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 		private const string Down = "down";
 		private const string Up = "up";
 
-		private int SolvePart1(List<Tuple<string, int>> commands)
+		private int SolvePart1(List<(string Action, int Value)> commands)
 		{
 			int x = 0;
 			int depth = 0;
 
 			foreach (var command in commands)
 			{
-				x += GetHorizontalPositionChangeFrom(command.Item1, command.Item2);
-				depth += GetDepthChangeFrom(command.Item1, command.Item2);
+				x += GetHorizontalPositionChangeFrom(command.Action, command.Value);
+				depth += GetDepthChangeFrom(command.Action, command.Value);
 			}
 
 			return x * depth;
 		}
 
-		private static string[] commandParts = new string[2];
+		private int SolvePart2(List<(string Action, int Value)> commands)
+		{
+			int aim = 0;
+			int x = 0;
+			int depth = 0;
+
+			foreach (var command in commands)
+			{
+				aim += GetAimChangeFrom(command.Action, command.Value);
+				x += GetHorizontalPositionChangeFrom(command.Action, command.Value);
+				depth += GetDepthChangeFrom(command.Action, command.Value, aim);
+			}
+
+			return x * depth;
+		}
 
 		int GetHorizontalPositionChangeFrom(string action, int value)
 		{
@@ -57,20 +70,9 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 					: 0;
 		}
 
-		private int SolvePart2(List<Tuple<string, int>> commands)
+		private static int GetDepthChangeFrom(string action, int value, int aimValue)
 		{
-			int aim = 0;
-			int x = 0;
-			int depth = 0;
-
-			foreach (var command in commands)
-			{
-				aim += GetAimChangeFrom(command.Item1, command.Item2);
-				x += GetHorizontalPositionChangeFrom(command.Item1, command.Item2);
-				depth += GetDepthChangeFrom(command.Item1, command.Item2, aim);
-			}
-
-			return x * depth;
+			return action == Forward ? aimValue * value : 0;
 		}
 
 		private static int GetAimChangeFrom(string action, int value)
@@ -78,11 +80,6 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 			if (action == Forward) return 0;
 
 			return action == Down ? value : (-1) * value;
-		}
-
-		private static int GetDepthChangeFrom(string action, int value, int aimValue)
-		{
-			return action == Forward ? aimValue * value : 0;
 		}
 	}
 }
