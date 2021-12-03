@@ -17,29 +17,17 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 				.Select(entry => (Action: entry[0], Value: int.Parse(entry[1])))
 				.ToList();
 
-			Part1Solution = SolvePart1(input);
-			Part2Solution = SolvePart2(input);
+			Part1Solution = Solve(input);
+			Part2Solution = Solve(input, true);
 		}
 
 		private const string Forward = "forward";
 		private const string Down = "down";
 		private const string Up = "up";
 
-		private int SolvePart1(List<(string Action, int Value)> commands)
-		{
-			int x = 0;
-			int depth = 0;
-
-			foreach (var command in commands)
-			{
-				x += GetHorizontalPositionChangeFrom(command.Action, command.Value);
-				depth += GetDepthChangeFrom(command.Action, command.Value);
-			}
-
-			return x * depth;
-		}
-
-		private int SolvePart2(List<(string Action, int Value)> commands)
+		private int Solve(
+			List<(string Action, int Value)> commands, 
+			bool includeAim = false)
 		{
 			int aim = 0;
 			int x = 0;
@@ -47,12 +35,21 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 
 			foreach (var command in commands)
 			{
-				aim += GetAimChangeFrom(command.Action, command.Value);
+				if (includeAim)
+				{
+					aim += GetAimChangeFrom(command.Action, command.Value);
+				}
+
 				x += GetHorizontalPositionChangeFrom(command.Action, command.Value);
-				depth += GetDepthChangeFrom(command.Action, command.Value, aim);
+
+				depth += includeAim
+					? GetDepthChangeFrom(command.Action, command.Value, aim)
+					: GetDepthChangeFrom(command.Action, command.Value);
 			}
 
-			return x * depth;
+			return includeAim
+				? x * depth * aim
+				: x * depth;
 		}
 
 		int GetHorizontalPositionChangeFrom(string action, int value)
@@ -60,19 +57,19 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 			return action == Forward ? value : 0;
 		}
 
-		int GetDepthChangeFrom(string action, int value)
+		int GetDepthChangeFrom(string action, int value, int? aim = null)
 		{
+			if (aim.HasValue)
+			{
+				return action == Forward ? value * aim.Value : 0;
+			}
+
 			//TODO C# 8 --> switch expression
 			return action == Down
 				? value
 				: action == Up
 					? (-1) * value
 					: 0;
-		}
-
-		private static int GetDepthChangeFrom(string action, int value, int aimValue)
-		{
-			return action == Forward ? aimValue * value : 0;
 		}
 
 		private static int GetAimChangeFrom(string action, int value)
