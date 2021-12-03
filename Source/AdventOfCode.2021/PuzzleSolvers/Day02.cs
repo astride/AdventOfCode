@@ -1,4 +1,6 @@
 ﻿using AdventOfCode.Common;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AdventOfCode.Y2021.PuzzleSolvers
@@ -12,7 +14,9 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 		{
 			var input = rawInput
 				.Where(entry => !string.IsNullOrWhiteSpace(entry))
-				.ToArray();
+				.Select(entry => entry.Split(' '))
+				.Select(entry => new Tuple<string, int> ( entry[0], int.Parse(entry[1]) ))
+				.ToList();
 
 			Part1Solution = SolvePart1(input);
 			Part2Solution = SolvePart2(input);
@@ -22,15 +26,15 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 		private const string Down = "down";
 		private const string Up = "up";
 
-		private int SolvePart1(string[] commands)
+		private int SolvePart1(List<Tuple<string, int>> commands)
 		{
 			int x = 0;
 			int depth = 0;
 
 			foreach (var command in commands)
 			{
-				x += GetHorizontalPositionChangeFrom(command);
-				depth += GetDepthChangeFrom(command);
+				x += GetHorizontalPositionChangeFrom(command.Item1, command.Item2);
+				depth += GetDepthChangeFrom(command.Item1, command.Item2);
 			}
 
 			return x * depth;
@@ -38,27 +42,22 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 
 		private static string[] commandParts = new string[2];
 
-		int GetHorizontalPositionChangeFrom(string command)
+		int GetHorizontalPositionChangeFrom(string action, int value)
 		{
-			commandParts = command.Split(' ');
-
-			return commandParts[0] == Forward
-				? int.Parse(commandParts[1])
-				: 0;
+			return action == Forward ? value : 0;
 		}
 
-		int GetDepthChangeFrom(string command)
+		int GetDepthChangeFrom(string action, int value)
 		{
-			commandParts = command.Split(' ');
-
-			return commandParts[0] == Down
-				? int.Parse(commandParts[1])
-				: commandParts[0] == Up
-					? (-1) * int.Parse(commandParts[1])
+			//TODO C# 8 --> switch expression
+			return action == Down
+				? value
+				: action == Up
+					? (-1) * value
 					: 0;
 		}
 
-		private int SolvePart2(string[] commands)
+		private int SolvePart2(List<Tuple<string, int>> commands)
 		{
 			int aim = 0;
 			int x = 0;
@@ -66,32 +65,24 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 
 			foreach (var command in commands)
 			{
-				aim += GetAimChangeFrom(command);
-				x += GetHorizontalPositionChangeFrom(command);
-				depth += GetDepthChangeFrom(command, aim);
+				aim += GetAimChangeFrom(command.Item1, command.Item2);
+				x += GetHorizontalPositionChangeFrom(command.Item1, command.Item2);
+				depth += GetDepthChangeFrom(command.Item1, command.Item2, aim);
 			}
 
 			return x * depth;
 		}
 
-		private static int GetAimChangeFrom(string command)
+		private static int GetAimChangeFrom(string action, int value)
 		{
-			commandParts = command.Split(' ');
+			if (action == Forward) return 0;
 
-			if (commandParts[0] == Forward) return 0;
-
-			return commandParts[0] == Down
-				? int.Parse(commandParts[1])
-				: (-1) * int.Parse(commandParts[1]);
+			return action == Down ? value : (-1) * value;
 		}
 
-		private static int GetDepthChangeFrom(string command, int aim)
+		private static int GetDepthChangeFrom(string action, int value, int aimValue)
 		{
-			commandParts = command.Split(' ');
-
-			return commandParts[0] == Forward
-				? aim * int.Parse(commandParts[1])
-				: 0;
+			return action == Forward ? aimValue * value : 0;
 		}
 	}
 }
