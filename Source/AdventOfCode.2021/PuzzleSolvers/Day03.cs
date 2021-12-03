@@ -17,35 +17,33 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 				.ToArray();
 
 			Part1Solution = SolvePart1(input);
-			Part2Solution = SolvePart2(input);
 		}
 
 		private static decimal SolvePart1(string[] diagnosticReport)
 		{
-			var binaryNumberSize = diagnosticReport.First().Length;
-			List<int> gammaRateBits = new List<int>();
+			var bitCount = diagnosticReport.First().Length;
+			
+			IEnumerable<char> nthPositionBits;
+			List<int> gammaRateBinary = new List<int>();
 
-			for (var i = 0; i < binaryNumberSize; i++)
+			for (var i = 0; i < bitCount; i++)
 			{
-				gammaRateBits.Add(
-					GetMostCommonBit(diagnosticReport
-						.Select(entry => entry[i])));
+				nthPositionBits = diagnosticReport.Select(entry => entry[i]).ToList();
+
+				gammaRateBinary.Add(nthPositionBits.MostCommonBit());
 			}
 
-			var epsilonRateBits = ReverseBitValues(gammaRateBits);
+			var epsilonRateBinary = gammaRateBinary.ReverseBits();
 
-			decimal powerConsumption =
-				gammaRateBits.ToDecimal() * epsilonRateBits.ToDecimal();
+			decimal powerConsumption = gammaRateBinary.ToDecimal() * epsilonRateBinary.ToDecimal();
 
 			return powerConsumption;
 		}
+	}
 
-		private static decimal SolvePart2(string[] diagnosticReport)
-		{
-
-		}
-
-		private static int GetMostCommonBit(IEnumerable<char> bits)
+	static class Day03Helpers
+	{
+		public static int MostCommonBit(this IEnumerable<char> bits)
 		{
 			return int.Parse(bits
 				.GroupBy(b => b)
@@ -53,31 +51,28 @@ namespace AdventOfCode.Y2021.PuzzleSolvers
 				.First().Key.ToString());
 		}
 
-		private static List<int> ReverseBitValues(IEnumerable<int> bits)
+		public static int[] ReverseBits(this IList<int> bits)
 		{
 			return bits
 				.Select(b => b == 0 ? 1 : 0)
-				.ToList();
+				.ToArray();
 		}
-	}
 
-	static class Day03Helpers
-	{
-		public static decimal ToDecimal(this List<int> bits)
+		public static decimal ToDecimal(this IList<int> bits)
 		{
-			var bitsTemp = bits.ToList();
-			bitsTemp.Reverse();
+			var lsb = bits.Last();
 
-			decimal temp = 0;
+			var sbReversed = bits.Take(bits.Count() - 1).ToList(); //skip least significant bit (lsb)
+			sbReversed.Reverse();
 
-			for (var i = 0; i < bitsTemp.Count(); i++)
+			decimal value = lsb;
+
+			for (var i = 0; i < sbReversed.Count(); i++)
 			{
-				temp += i == 0
-					? bitsTemp[i]
-					: (decimal)Math.Pow(2 * bitsTemp[i], i);
+				value += (decimal)Math.Pow(2 * sbReversed[i], i + 1);
 			}
 
-			return (decimal)temp;
+			return value;
 		}
 	}
 }
