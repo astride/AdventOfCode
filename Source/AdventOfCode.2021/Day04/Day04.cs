@@ -41,31 +41,39 @@ namespace AdventOfCode.Y2021
 					.SkipWhile(line => string.IsNullOrWhiteSpace(line));
 			}
 
-			Part1Solution = SolvePart1(boards, drawStack).ToString();
-		}
-
-		private static int SolvePart1(List<List<int>> boards, int[] drawStack)
-		{
 			var boardsInPlay = boards
 				.Select(board => board
 					.Select(entry => (int?)entry)
 					.ToList())
 				.ToList();
 
-			var winnerBoard = Play(boardsInPlay, drawStack, out var lastDrawnNumber);
+			Part1Solution = SolvePart1(boardsInPlay, drawStack).ToString();
+			Part2Solution = SolvePart2(boardsInPlay, drawStack).ToString();
+		}
 
-			var finalScore = lastDrawnNumber * winnerBoard.Where(entry => entry.HasValue).Sum();
+		private static int SolvePart1(List<List<int?>> boards, int[] drawStack)
+		{
+			var winnerBoard = GetWinnerBoard(boards, drawStack, out var lastDrawnNumber);
 
-			if (!finalScore.HasValue || finalScore == 0)
-			{
-				//TODO
-				Console.WriteLine("Fuck");
-			}
+			var finalScore = winnerBoard.CalculateScore(lastDrawnNumber);
+
+			//TODO Handle when null
 
 			return finalScore.Value;
 		}
 
-		private static List<int?> Play(List<List<int?>> boards, int[] drawStack, out int lastDrawnNumber)
+		private static int SolvePart2(List<List<int?>> boards, int[] drawStack)
+		{
+			var lastWinningBoard = GetLastWinningBoard(boards, drawStack, out var lastDrawnNumber);
+
+			var finalScore = lastWinningBoard.CalculateScore(lastDrawnNumber);
+
+			//TODO Handle when null
+
+			return finalScore.Value;
+		}
+
+		private static List<int?> GetWinnerBoard(List<List<int?>> boards, int[] drawStack, out int lastDrawnNumber)
 		{
 			foreach (var number in drawStack)
 			{
@@ -84,8 +92,19 @@ namespace AdventOfCode.Y2021
 				}
 			}
 
-			lastDrawnNumber = -1;
+			//TODO Inform about no winning board
+			lastDrawnNumber = 0;
 			return new List<int?>();
+		}
+
+		private static List<int?> GetLastWinningBoard(List<List<int?>> boards, int[] drawStack, out int lastDrawnNumber)
+		{
+			while (boards.Count() > 1)
+			{
+				boards.Remove(GetWinnerBoard(boards, drawStack, out _));
+			}
+
+			return GetWinnerBoard(boards, drawStack, out lastDrawnNumber);
 		}
 	}
 
@@ -125,6 +144,11 @@ namespace AdventOfCode.Y2021
 				.SelectMany(iCol => rows
 					.Select(row => row[iCol]))
 				.ToList();
+		}
+
+		public static int? CalculateScore(this List<int?> board, int lastDrawnNumber)
+		{
+			return lastDrawnNumber * board.Where(entry => entry.HasValue).Sum();
 		}
 	}
 }
