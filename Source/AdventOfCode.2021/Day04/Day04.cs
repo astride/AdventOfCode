@@ -53,7 +53,7 @@ namespace AdventOfCode.Y2021
 
 		private static int SolvePart1(List<List<int?>> boards, int[] drawStack)
 		{
-			var winnerBoard = GetWinnerBoard(boards, drawStack, out var lastDrawnNumber);
+			var winnerBoard = boards.GetWinner(drawStack, out var lastDrawnNumber);
 
 			var finalScore = winnerBoard.CalculateScore(lastDrawnNumber);
 
@@ -64,7 +64,12 @@ namespace AdventOfCode.Y2021
 
 		private static int SolvePart2(List<List<int?>> boards, int[] drawStack)
 		{
-			var lastWinningBoard = GetLastWinningBoard(boards, drawStack, out var lastDrawnNumber);
+			while (boards.Count() > 1)
+			{
+				boards.Remove(boards.GetWinner(drawStack, out _));
+			}
+
+			var lastWinningBoard = boards.GetWinner(drawStack, out var lastDrawnNumber);
 
 			var finalScore = lastWinningBoard.CalculateScore(lastDrawnNumber);
 
@@ -72,22 +77,25 @@ namespace AdventOfCode.Y2021
 
 			return finalScore.Value;
 		}
+	}
 
-		private static List<int?> GetWinnerBoard(List<List<int?>> boards, int[] drawStack, out int lastDrawnNumber)
+	static class Day04Helpers
+	{
+		private const int RowSize = 5;
+		private const int RowCount = RowSize;
+
+		public static List<int?> GetWinner(this List<List<int?>> boards, int[] drawStack, out int lastDrawnNumber)
 		{
 			foreach (var number in drawStack)
 			{
 				foreach (var board in boards)
 				{
-					if (board.Contains(number))
-					{
-						board[board.IndexOf(number)] = null; // mark number
+					var bingo = board.Play(number);
 
-						if (board.HasBingo())
-						{
-							lastDrawnNumber = number;
-							return board;
-						}
+					if (bingo)
+					{
+						lastDrawnNumber = number;
+						return board;
 					}
 				}
 			}
@@ -97,21 +105,17 @@ namespace AdventOfCode.Y2021
 			return new List<int?>();
 		}
 
-		private static List<int?> GetLastWinningBoard(List<List<int?>> boards, int[] drawStack, out int lastDrawnNumber)
+		public static bool Play(this List<int?> board, int number)
 		{
-			while (boards.Count() > 1)
+			if (board.Contains(number))
 			{
-				boards.Remove(GetWinnerBoard(boards, drawStack, out _));
+				board[board.IndexOf(number)] = null; // mark number
+
+				return board.HasBingo();
 			}
 
-			return GetWinnerBoard(boards, drawStack, out lastDrawnNumber);
+			return false;
 		}
-	}
-
-	static class Day04Helpers
-	{
-		private const int RowSize = 5;
-		private const int RowCount = RowSize;
 
 		public static bool HasBingo(this List<int?> board)
 		{
