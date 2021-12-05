@@ -35,25 +35,15 @@ namespace AdventOfCode.Y2021
 
 		private static int SolvePart1(IEnumerable<Segment> linesOfVents, int maxRowIndex, int maxColIndex)
 		{
-			var overlapMap = new int[maxRowIndex + 1, maxColIndex + 1];
-
-			foreach (var line in linesOfVents.HorizontalSegments())
-			{
-				overlapMap.UpdateWith(line);
-			}
-
-			foreach (var line in linesOfVents.VerticalSegments())
-			{
-				overlapMap.UpdateWith(line);
-			}
-
-			var dangerousOverlapCount = overlapMap.Cast<int>()
-				.Count(overlapCount => overlapCount >= 2);
-
-			return dangerousOverlapCount;
+			return Solve(linesOfVents, maxRowIndex, maxColIndex);
 		}
 
 		private static int SolvePart2(IEnumerable<Segment> linesOfVents, int maxRowIndex, int maxColIndex)
+		{
+			return Solve(linesOfVents, maxRowIndex, maxColIndex, true);
+		}
+
+		private static int Solve(IEnumerable<Segment> linesOfVents, int maxRowIndex, int maxColIndex, bool includeDiagonalLines = false)
 		{
 			var overlapMap = new int[maxRowIndex + 1, maxColIndex + 1];
 
@@ -67,11 +57,14 @@ namespace AdventOfCode.Y2021
 				overlapMap.UpdateWith(line);
 			}
 
-			var diagonalSegments = linesOfVents.UpwardsDiagonalSegments().Concat(linesOfVents.DownWardsDiagonalSegments());
-
-			foreach (var line in diagonalSegments)
+			if (includeDiagonalLines)
 			{
-				overlapMap.UpdateWith(line);
+				var diagonalSegments = linesOfVents.UpwardsDiagonalSegments().Concat(linesOfVents.DownWardsDiagonalSegments());
+
+				foreach (var line in diagonalSegments)
+				{
+					overlapMap.UpdateWith(line);
+				}
 			}
 
 			var dangerousOverlapCount = overlapMap.Cast<int>()
@@ -100,9 +93,7 @@ namespace AdventOfCode.Y2021
 		public static IEnumerable<DiagonalSegment> UpwardsDiagonalSegments(this IEnumerable<Segment> segments)
 		{
 			return segments
-				.Where(s =>
-					Math.Abs(s.Y2 - s.Y1) == Math.Abs(s.X2 - s.X1) &&
-					Math.Sign(s.Y2 - s.Y1) == Math.Sign(s.X2 - s.X1))
+				.Where(s => s.Is45Degrees() && s.IsPointingUpwards())
 				.Select(s => new DiagonalSegment(
 					Math.Min(s.X1, s.X2),
 					Math.Min(s.Y1, s.Y2),
@@ -113,14 +104,22 @@ namespace AdventOfCode.Y2021
 		public static IEnumerable<DiagonalSegment> DownWardsDiagonalSegments(this IEnumerable<Segment> segments)
 		{
 			return segments
-				.Where(s => 
-					Math.Abs(s.Y2 - s.Y1) == Math.Abs(s.X2 - s.X1) &&
-					Math.Sign(s.Y1 - s.Y2) == Math.Sign(s.X2 - s.X1))
+				.Where(s => s.Is45Degrees() && !s.IsPointingUpwards())
 				.Select(s => new DiagonalSegment(
 					Math.Min(s.X1, s.X2),
 					Math.Max(s.Y1, s.Y2),
 					Math.Abs(s.X2 - s.X1) + 1,
 					false));
+		}
+
+		public static bool Is45Degrees(this Segment segment)
+		{
+			return Math.Abs(segment.Y2 - segment.Y1) == Math.Abs(segment.X2 - segment.X1);
+		}
+
+		public static bool IsPointingUpwards(this Segment segment)
+		{
+			return Math.Sign(segment.Y2 - segment.Y1) == Math.Sign(segment.X2 - segment.X1);
 		}
 
 		public static void UpdateWith(this int[,] map, HorizontalSegment segment)
