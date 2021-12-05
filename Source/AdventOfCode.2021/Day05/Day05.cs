@@ -146,16 +146,23 @@ namespace AdventOfCode.Y2021
 
 		public static void UpdateWith(this int[,] map, DiagonalSegment segment)
 		{
+			var x = segment.XStart;
+			var y = segment.YStart;
+
 			if (segment.IsPointingUpwards)
 			{
-				Enumerable.Range(0, segment.Length).ToList()
-					.ForEach(i => map[segment.XStart + i, segment.YStart + i]++);
+				for (var i = 0; i < segment.Length; i++)
+				{
+					map[x + i, y + i]++;
+				}
 
 				return;
 			}
 
-			Enumerable.Range(0, segment.Length).ToList()
-				.ForEach(i => map[segment.XStart + i, segment.YStart - i]++);
+			for (var i = 0; i < segment.Length; i++)
+			{
+				map[x + i, y - i]++;
+			}
 		}
 	}
 
