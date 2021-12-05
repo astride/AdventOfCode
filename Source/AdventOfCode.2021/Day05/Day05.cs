@@ -34,13 +34,8 @@ namespace AdventOfCode.Y2021
 
 		private static int SolvePart1(IEnumerable<Segment> linesOfVents, int maxRowIndex, int maxColIndex)
 		{
-			var horizontalLines = linesOfVents
-				.Where(line => line.Y1 == line.Y2)
-				.Select(line => new HorizontalSegment(line.X1, line.X2, line.Y1));
-
-			var verticalLines = linesOfVents
-				.Where(line => line.X1 == line.X2)
-				.Select(line => new VerticalSegment(line.X1, line.Y1, line.Y2));
+			var horizontalLines = linesOfVents.HorizontalSegments();
+			var verticalLines = linesOfVents.VerticalSegments();
 
 			var overlapMap = new int[maxRowIndex + 1, maxColIndex + 1];
 
@@ -63,6 +58,20 @@ namespace AdventOfCode.Y2021
 
 	static class Day05Helpers
 	{
+		public static IEnumerable<HorizontalSegment> HorizontalSegments(this IEnumerable<Segment> segments)
+		{
+			return segments
+				.Where(s => s.Y1 == s.Y2)
+				.Select(s => new HorizontalSegment(s.X1, s.X2, s.Y1));
+		}
+
+		public static IEnumerable<VerticalSegment> VerticalSegments(this IEnumerable<Segment> segments)
+		{
+			return segments
+				.Where(s => s.X1 == s.X2)
+				.Select(s => new VerticalSegment(s.X1, s.Y1, s.Y2));
+		}
+
 		public static void UpdateWith(this int[,] map, HorizontalSegment segment)
 		{
 			var xStart = Math.Min(segment.X1, segment.X2);
