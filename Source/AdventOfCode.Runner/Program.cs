@@ -8,9 +8,24 @@ using System.Text;
 
 namespace AdventOfCode.Runner
 {
-	// https://adventofcode.com/
 	class Program
 	{
+		private static IDictionary<int, Assembly> _yearAndAssembly = new Dictionary<int, Assembly>
+		{
+			[2021] = typeof(Y2021.Day01Solver).Assembly,
+			[2020] = typeof(Y2020.Day01Solver).Assembly
+		};
+
+		private static string _puzzleRootLocation;
+		
+		private const int December = 12;
+		private const string Day = "Day";
+		private const string Solver = "Solver";
+		private const string AdventOfCode = "AdventOfCode";
+		private const string InputWildcardFileName = "Input*.txt";
+		private const string InputFileName = "Input.txt";
+		private const string InputExampleFileName = "InputExample.txt";
+
 		static void Main(string[] args)
 		{
 			var today = DateTime.Today;
@@ -22,9 +37,9 @@ namespace AdventOfCode.Runner
 
 				if (string.IsNullOrEmpty(Console.ReadLine()))
 				{
-					var puzzle = availablePuzzles.First(puzzle => puzzle.Date == today);
+					var puzzle = availablePuzzles.Single(puzzle => puzzle.Date == today);
 
-					RequestModeAndSolve(today.Year, today.Day, puzzle.SolverType);
+					RequestModeAndSolve(puzzle);
 				}
 			}
 
@@ -38,7 +53,7 @@ namespace AdventOfCode.Runner
 					puzzle.Date.Year == year &&
 					puzzle.Date.Day == day);
 
-			RequestModeAndSolve(year, day, selectedPuzzle.SolverType);
+			RequestModeAndSolve(selectedPuzzle);
 		}
 
 		static IEnumerable<PuzzleInfo> GetAvailablePuzzles()
@@ -49,7 +64,8 @@ namespace AdventOfCode.Runner
 			var puzzleDates = puzzleSolvers
 				.Select(solver => solver.PuzzleDate)
 				.Intersect(puzzleInputs
-					.Select(input => input.PuzzleDate));
+					.Select(input => input.PuzzleDate))
+				.Distinct();
 
 			puzzleInputs = puzzleInputs.Where(input => puzzleDates.Contains(input.PuzzleDate));
 
@@ -57,14 +73,19 @@ namespace AdventOfCode.Runner
 				.Select(input => new PuzzleInfo(
 					input.PuzzleDate,
 					puzzleSolvers.First(solver => solver.PuzzleDate == input.PuzzleDate).SolverType,
-					input.inputFilePath,
-					input.inputExampleFilePath));
+					input.RelativeInputFilePath,
+					input.RelativeInputExampleFilePath));
 
 			return puzzles;
 		}
 
 		static string GetPuzzleRootLocation()
 		{
+			if (_puzzleRootLocation != null)
+			{
+				return _puzzleRootLocation;
+			}
+
 			var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location);
 
 			if (assemblyLocation == null)
@@ -79,7 +100,9 @@ namespace AdventOfCode.Runner
 				throw new Exception($"Puzzle root location not found. Tried to find grandparent of the assembly location ({assemblyLocation})");
 			}
 
-			return puzzleRootLocation;
+			_puzzleRootLocation = puzzleRootLocation;
+
+			return _puzzleRootLocation;
 		}
 
 		static int RequestYear(IEnumerable<DateTime> availableDates)
@@ -88,12 +111,16 @@ namespace AdventOfCode.Runner
 				.Select(date => date.Year)
 				.Distinct();
 
+			//TODO if only one; tell user and return year
+
 			while (true)
 			{
 				Console.WriteLine($"Hvilket år vil du bryne deg på? Du kan velge mellom {string.Join(", ", availableYears)}: ");
 
 				if (int.TryParse(Console.ReadLine(), out var year))
 				{
+					//TODO if year not in availableYears: tell user, don't return
+
 					return year;
 				}
 			}
@@ -105,12 +132,16 @@ namespace AdventOfCode.Runner
 				.Where(date => date.Year == year)
 				.Select(date => date.Day);
 
+			//TODO if only one: tell user and return day
+
 			while (true)
 			{
 				Console.WriteLine($"Hvilken dag i {year} vil du løse oppgaven for? Du kan velge mellom {string.Join(", ", availableDays)}: ");
 
 				if (int.TryParse(Console.ReadLine(), out var day))
 				{
+					//TODO if day not in availableDays: tell user, don't return
+
 					return day;
 				}
 			}
@@ -123,29 +154,27 @@ namespace AdventOfCode.Runner
 			return string.IsNullOrEmpty(Console.ReadLine());
 		}
 
-		static void RequestModeAndSolve(int year, int day, Type solverType)
+		static void RequestModeAndSolve(PuzzleInfo puzzle)
 		{
 			var testMode = RequestTestMode();
-			var puzzleDay = new DateTime(year, 12, day);
 
-			Console.WriteLine($"\nDa setter vi i gang! Oppgavedagen er {puzzleDay.ToString("dd. MMM yyyy")}, og vi løser den med {(testMode ? "testdata" : "reelle data")}.\n");
-
-			var input = GetInputFor(year, day, testMode); //TODO
-
-			var solver = (IPuzzleSolver)Activator.CreateInstance(solverType);
+			var solver = (IPuzzleSolver)Activator.CreateInstance(puzzle.SolverType);
+			
+			var inputFilePath = testMode ? puzzle.RelativeInputExampleFilePath : puzzle.RelativeInputFilePath;
+			var input = GetContent(inputFilePath);
 
 			solver.SolvePuzzle(input);
 
+			Console.WriteLine($"\nDa setter vi i gang! Oppgavedagen er {puzzle.Date.ToString("dd. MMM yyyy")}, og vi løser den med {(testMode ? "testdata" : "reelle data")}.\n");
 			Console.WriteLine("--- Løsninger ---");
 			Console.WriteLine($"{nameof(solver.Part1Solution)}: {solver.Part1Solution}");
 			Console.WriteLine($"{nameof(solver.Part2Solution)}: {solver.Part2Solution}");
+			Console.WriteLine("-----------------");
 		}
 
-		static string[] GetInputFor(int year, int day, bool testMode)
+		static string[] GetContent(string relativeFilePath)
 		{
-			var puzzleRootLocation = GetPuzzleRootLocation();
-
-			var filePath = Path.Combine(puzzleRootLocation, DirectoryNameForYear(year), DirectoryNameForDay(day), InputFileName(day, testMode));
+			var filePath = Path.Combine(GetPuzzleRootLocation(), relativeFilePath);
 
 			if (!File.Exists(filePath))
 			{
@@ -155,73 +184,98 @@ namespace AdventOfCode.Runner
 			return File.ReadAllLines(filePath, Encoding.Default);
 		}
 
-		private static IEnumerable<(DateTime PuzzleDate, string inputFilePath, string inputExampleFilePath)> GetPuzzleInputFilePaths()
+		private static IEnumerable<(DateTime PuzzleDate, string RelativeInputFilePath, string RelativeInputExampleFilePath)> GetPuzzleInputFilePaths()
 		{
-			//TODO
-			return default;
+			var puzzleRootLocation = GetPuzzleRootLocation();
+
+			var inputFilePaths = Directory.GetFiles(puzzleRootLocation, InputWildcardFileName, SearchOption.AllDirectories);
+
+			var pathsByYear = inputFilePaths
+				.Select(path => path
+					.Substring((puzzleRootLocation + Path.DirectorySeparatorChar).Length))
+				.GroupBy(path => int.Parse(path
+					.Split(Path.DirectorySeparatorChar)
+					.First(dir => dir.Contains(AdventOfCode))
+					.Split('.')[1]));
+
+			foreach (var yearAndPaths in pathsByYear)
+			{
+				foreach (var dayAndPaths in yearAndPaths
+					.GroupBy(yap => yap.Split(Path.DirectorySeparatorChar)[1]))
+				{
+					if (dayAndPaths.Count(path => path.Split(Path.DirectorySeparatorChar).Last() == InputFileName) == 1 &&
+						dayAndPaths.Count(path => path.Split(Path.DirectorySeparatorChar).Last() == InputExampleFileName) == 1)
+					{
+						yield return (
+							new DateTime(yearAndPaths.Key, December, int.Parse(dayAndPaths.Key.Substring(Day.Length))),
+							dayAndPaths.Single(path => path.Contains(InputFileName)),
+							dayAndPaths.Single(path => path.Contains(InputExampleFileName)));
+					}
+				}
+			}
 		}
 
 		private static IEnumerable<(DateTime PuzzleDate, Type SolverType)> GetPuzzleSolvers()
 		{
-			var yearAndAssembly = new Dictionary<int, Assembly>
-			{
-				[2021] = typeof(Y2021.Day01).Assembly,
-				[2020] = typeof(Y2020.Day01).Assembly
-			};
-
-			var solvers = new List<(DateTime Date, Type SolverType)>();
-
-			var types = yearAndAssembly
+			var types = _yearAndAssembly
 				.Select(yaa =>
 					new KeyValuePair<int, IEnumerable<Type>>(
-						yaa.Key,
-						yaa.Value.GetTypes()
-							.Where(type => IsPuzzleSolver(type))))
+						yaa.Key, //Fungerer
+						yaa.Value.GetTypes() //Fungerer ikke
+							.Where(type => IsPuzzleSolver(type))));
+
+			var solvers = types
 				.SelectMany(yearAndTypes => yearAndTypes.Value
 					.Select(type => (GetPuzzleDateFor(yearAndTypes.Key, type), type)));
 
-			return types;
+			return solvers;
 		}
 
 		private static bool IsPuzzleSolver(Type type)
 		{
-			//TODO
-			return default;
+			if (!type.Name.Contains(Day) ||
+				!type.Name.Contains(Solver)) return false;
+
+			var day = string.Join("", type.Name.Except(Day).Except(Solver));
+
+			if (day.Length != 2 ||
+				!int.TryParse(day, out _))
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		private static DateTime GetPuzzleDateFor(int year, Type solverType)
 		{
-			//TODO
+			var dayString = string.Join("", solverType.Name.Except(Day).Except(Solver));
+
+			if (int.TryParse(dayString, out int day))
+			{
+				return new DateTime(year, December, day);
+			}
+
 			return default;
 		}
-
-		private static string InputFileName(int day, bool testMode) => testMode
-			? $"{InputFileNameBaseForDay(day)}Example.txt"
-			: $"{InputFileNameBaseForDay(day)}.txt";
-
-		private static string InputFileNameBaseForDay(int day) => $"{DirectoryNameForDay(day)}Input";
-
-		private static string DirectoryNameForYear(int year) => $"AdventOfCode.{year}";
-
-		private static string DirectoryNameForDay(int day) => $"Day{day:D2}";
 	}
 
 	public class PuzzleInfo
 	{
-		public PuzzleInfo(DateTime date, Type solverType, string inputFilePath, string inputExampleFilePath)
+		public PuzzleInfo(DateTime date, Type solverType, string relativeInputFilePath, string relativeInputExampleFilePath)
 		{
 			Date = date;
 			SolverType = solverType;
-			InputFilePath = inputFilePath;
-			InputExampleFilePath = inputExampleFilePath;
+			RelativeInputFilePath = relativeInputFilePath;
+			RelativeInputExampleFilePath = relativeInputExampleFilePath;
 		}
 
 		public DateTime Date { get; set; }
 
 		public Type SolverType { get; set; }
 
-		public string InputFilePath { get; set; }
+		public string RelativeInputFilePath { get; set; }
 
-		public string InputExampleFilePath {get; set; }
+		public string RelativeInputExampleFilePath {get; set; }
 	}
 }

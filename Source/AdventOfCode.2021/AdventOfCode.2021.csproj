@@ -47,11 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Day04\Day04.cs" />
+    <Compile Include="Day04\Solver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Day03\Day03.cs" />
-    <Compile Include="Day02\Day02.cs" />
-    <Compile Include="Day01\Day01.cs" />
+    <Compile Include="Day03\Solver.cs" />
+    <Compile Include="Day02\Solver.cs" />
+    <Compile Include="Day01\Solver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -64,14 +64,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Day04\Day04Input.txt" />
-    <Content Include="Day04\Day04InputExample.txt" />
-    <Content Include="Day03\Day03Input.txt" />
-    <Content Include="Day02\Day02Input.txt" />
-    <Content Include="Day01\Day01Input.txt" />
-    <Content Include="Day03\Day03InputExample.txt" />
-    <Content Include="Day02\Day02InputExample.txt" />
-    <Content Include="Day01\Day01InputExample.txt" />
+    <Content Include="Day04\Input.txt" />
+    <Content Include="Day04\InputExample.txt" />
+    <Content Include="Day03\Input.txt" />
+    <Content Include="Day02\Input.txt" />
+    <Content Include="Day01\Input.txt" />
+    <Content Include="Day03\InputExample.txt" />
+    <Content Include="Day02\InputExample.txt" />
+    <Content Include="Day01\InputExample.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
