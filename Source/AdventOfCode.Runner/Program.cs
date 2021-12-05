@@ -42,18 +42,20 @@ namespace AdventOfCode.Runner
 					RequestModeAndSolve(puzzle);
 				}
 			}
+			else
+			{
+				var availablePuzzleDates = availablePuzzles.Select(puzzle => puzzle.Date);
 
-			var availablePuzzleDates = availablePuzzles.Select(puzzle => puzzle.Date);
+				int year = RequestYear(availablePuzzleDates);
+				int day = RequestDay(year, availablePuzzleDates);
 
-			int year = RequestYear(availablePuzzleDates);
-			int day = RequestDay(year, availablePuzzleDates);
+				var selectedPuzzle = availablePuzzles
+					.First(puzzle =>
+						puzzle.Date.Year == year &&
+						puzzle.Date.Day == day);
 
-			var selectedPuzzle = availablePuzzles
-				.First(puzzle => 
-					puzzle.Date.Year == year &&
-					puzzle.Date.Day == day);
-
-			RequestModeAndSolve(selectedPuzzle);
+				RequestModeAndSolve(selectedPuzzle);
+			}
 		}
 
 		static IEnumerable<PuzzleInfo> GetAvailablePuzzles()
@@ -169,7 +171,7 @@ namespace AdventOfCode.Runner
 			Console.WriteLine("--- Løsninger ---");
 			Console.WriteLine($"{nameof(solver.Part1Solution)}: {solver.Part1Solution}");
 			Console.WriteLine($"{nameof(solver.Part2Solution)}: {solver.Part2Solution}");
-			Console.WriteLine("-----------------");
+			Console.WriteLine("-----------------\n");
 		}
 
 		static string[] GetContent(string relativeFilePath)
