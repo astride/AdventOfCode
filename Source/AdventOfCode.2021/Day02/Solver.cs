@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AdventOfCode.Y2021
 {
-	public class Day02 : IPuzzleSolver
+	public class Day02Solver : IPuzzleSolver
 	{
 		public string Part1Solution { get; set; }
 		public string Part2Solution { get; set; }

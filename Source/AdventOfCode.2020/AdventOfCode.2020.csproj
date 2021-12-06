@@ -9,8 +9,8 @@
     <RootNamespace>AdventOfCode._2020</RootNamespace>
     <AssemblyName>AdventOfCode.2020</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-		<LangVersion>8.0</LangVersion>
-		<FileAlignment>512</FileAlignment>
+    <LangVersion>8.0</LangVersion>
+    <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -48,14 +48,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Day01\Day01.cs" />
+    <Compile Include="Day01\Solver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Day01\Day01Input.txt" />
-    <Content Include="Day01\Day01InputExample.txt" />
+    <Content Include="Day01\Input.txt" />
+    <Content Include="Day01\InputExample.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdventOfCode.Common\AdventOfCode.Common.csproj">
