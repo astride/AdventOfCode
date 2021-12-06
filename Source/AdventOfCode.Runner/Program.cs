@@ -231,7 +231,7 @@ namespace AdventOfCode.Runner
 					if (inputFileNames.Count(name => name == InputFileName) == 1 &&
 						inputFileNames.Count(name => name == InputExampleFileName) == 1)
 					{
-						day = int.Parse(dayAndPath.Key.ExceptString(Day));
+						day = int.Parse(dayAndPath.Key.Without(Day));
 
 						yield return (new DateTime(yearAndPath.Key, December, day));
 					}
@@ -260,7 +260,7 @@ namespace AdventOfCode.Runner
 			if (!type.Name.Contains(Day) ||
 				!type.Name.Contains(Solver)) return false;
 
-			var day = type.Name.ExceptString(Day).ExceptString(Solver);
+			var day = type.Name.Without(Day).Without(Solver);
 
 			if (day.Length != 2 ||
 				!int.TryParse(day, out _))
@@ -273,7 +273,7 @@ namespace AdventOfCode.Runner
 
 		private static DateTime GetPuzzleDateFor(int year, Type solverType)
 		{
-			var dayString = solverType.Name.ExceptString(Day).ExceptString(Solver);
+			var dayString = solverType.Name.Without(Day).Without(Solver);
 
 			if (int.TryParse(dayString, out int day))
 			{
