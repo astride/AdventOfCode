@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Day04\Solver.cs" />
+    <Compile Include="Day07\Solver.cs" />
     <Compile Include="Day06\Solver.cs" />
     <Compile Include="Day05\Solver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +75,8 @@
     <Content Include="Day03\InputExample.txt" />
     <Content Include="Day02\InputExample.txt" />
     <Content Include="Day01\InputExample.txt" />
+    <Content Include="Day07\Input.txt" />
+    <Content Include="Day07\InputExample.txt" />
     <Content Include="Day06\Input.txt" />
     <Content Include="Day06\InputExample.txt" />
     <Content Include="Day05\Input.txt" />
