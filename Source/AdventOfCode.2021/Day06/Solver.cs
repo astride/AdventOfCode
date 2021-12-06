@@ -100,14 +100,6 @@ namespace AdventOfCode.Y2021
 		#region Part 2
 		public static void SimulatePopulationChange(this List<decimal> entityCountPerTimerValue)
 		{
-			var spawnCount = entityCountPerTimerValue[TimerValuePreSpawning];
-
-			entityCountPerTimerValue.UpdateInternalTimers();
-			entityCountPerTimerValue.Spawn(spawnCount);
-		}
-
-		private static void UpdateInternalTimers(this List<decimal> entityCountPerTimerValue)
-		{
 			var entityCountAboutToSpawn = entityCountPerTimerValue[TimerValuePreSpawning];
 
 			for (var i = 0; i < TimerValueForSpawn; i++)
@@ -116,11 +108,7 @@ namespace AdventOfCode.Y2021
 			}
 
 			entityCountPerTimerValue[TimerValuePostSpawning] += entityCountAboutToSpawn;
-		}
-
-		private static void Spawn(this List<decimal> entityCountPerTimerValue, decimal count)
-		{
-			entityCountPerTimerValue[TimerValueForSpawn] = count;
+			entityCountPerTimerValue[TimerValueForSpawn] = entityCountAboutToSpawn;
 		}
 		#endregion
 	}
