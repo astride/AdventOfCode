@@ -17,32 +17,50 @@ namespace AdventOfCode.Y2021
 				.Single()
 				.Split(',')
 				.Where(entry => !string.IsNullOrWhiteSpace(entry))
-				.Select(entry => int.Parse(entry));
+				.Select(entry => int.Parse(entry))
+				.ToArray();
 
 			Part1Solution = SolvePart1(input).ToString();
+			Part2Solution = SolvePart2(input).ToString();
 		}
 
-		private const int Days = 80;
-
-		private static int SolvePart1(IEnumerable<int> timerValues)
+		private static int SolvePart1(int[] timerValues)
 		{
 			var shoal = timerValues.ToList();
 
-			foreach (var _ in Enumerable.Range(0, Days))
+			foreach (var _ in Enumerable.Range(0, 80))
 			{
 				shoal.SimulatePopulationChange();
 			}
 
 			return shoal.Count();
 		}
+
+		private static decimal SolvePart2(int[] timerValues)
+		{
+			var fishCountPerTimerValue = Enumerable.Repeat((decimal)0, Day06Helpers.TimerValueForSpawn + 1).ToList();
+
+			foreach (var timerValue in timerValues)
+			{
+				fishCountPerTimerValue[timerValue]++;
+			}
+
+			foreach (var _ in Enumerable.Range(0, 256))
+			{
+				fishCountPerTimerValue.SimulatePopulationChange();
+			}
+
+			return fishCountPerTimerValue.Sum();
+		}
 	}
 
 	public static class Day06Helpers
 	{
-		private const int TimerValueInit = 8;
-		private const int TimerValueAboutToSpawn = 0;
-		private const int TimerValueAfterSpawning = 6;
+		public const int TimerValueForSpawn = 8;
+		private const int TimerValuePreSpawning = 0;
+		private const int TimerValuePostSpawning = 6;
 
+		#region Part 1
 		public static void SimulatePopulationChange(this List<int> population)
 		{
 			var spawnCount = population.Count(entity => entity.IsReadyToSpawn());
@@ -53,7 +71,7 @@ namespace AdventOfCode.Y2021
 
 		private static bool IsReadyToSpawn(this int maternalTimer)
 		{
-			return maternalTimer == TimerValueAboutToSpawn;
+			return maternalTimer == TimerValuePreSpawning;
 		}
 
 		private static void UpdateInternalTimers(this List<int> timers)
@@ -66,8 +84,8 @@ namespace AdventOfCode.Y2021
 
 		private static int GetNextValue(this int value)
 		{
-			return value == TimerValueAboutToSpawn
-				? TimerValueAfterSpawning
+			return value == TimerValuePreSpawning
+				? TimerValuePostSpawning
 				: value - 1;
 		}
 
@@ -75,7 +93,35 @@ namespace AdventOfCode.Y2021
 		{
 			if (count == 0) return;
 
-			population.AddRange(Enumerable.Repeat(TimerValueInit, count));
+			population.AddRange(Enumerable.Repeat(TimerValueForSpawn, count));
 		}
+		#endregion
+
+		#region Part 2
+		public static void SimulatePopulationChange(this List<decimal> entityCountPerTimerValue)
+		{
+			var spawnCount = entityCountPerTimerValue[TimerValuePreSpawning];
+
+			entityCountPerTimerValue.UpdateInternalTimers();
+			entityCountPerTimerValue.Spawn(spawnCount);
+		}
+
+		private static void UpdateInternalTimers(this List<decimal> entityCountPerTimerValue)
+		{
+			var entityCountAboutToSpawn = entityCountPerTimerValue[TimerValuePreSpawning];
+
+			for (var i = 0; i < TimerValueForSpawn; i++)
+			{
+				entityCountPerTimerValue[i] = entityCountPerTimerValue[i + 1];
+			}
+
+			entityCountPerTimerValue[TimerValuePostSpawning] += entityCountAboutToSpawn;
+		}
+
+		private static void Spawn(this List<decimal> entityCountPerTimerValue, decimal count)
+		{
+			entityCountPerTimerValue[TimerValueForSpawn] = count;
+		}
+		#endregion
 	}
 }
