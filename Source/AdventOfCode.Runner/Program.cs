@@ -17,10 +17,12 @@ namespace AdventOfCode.Runner
 			[2020] = typeof(Y2020.Day01Solver).Assembly
 		};
 
-		private static string _puzzleRootLocation;
+		private static readonly string _puzzleRootLocation = 
+			Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
 
 		private const int December = 12;
 		private const string Day = "Day";
+		private const string Year = "Y";
 		private const string Solver = "Solver";
 		private const string AdventOfCode = "AdventOfCode";
 		private const string InputWildcardFileName = "Input*.txt";
@@ -64,32 +66,6 @@ namespace AdventOfCode.Runner
 			puzzleSolvers = puzzleSolvers.Where(solver => availablePuzzleDates.Contains(solver.Date));
 
 			return puzzleSolvers;
-		}
-
-		static string GetPuzzleRootLocation() //TODO Is this needed at all?
-		{
-			if (_puzzleRootLocation != null)
-			{
-				return _puzzleRootLocation;
-			}
-
-			var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location);
-
-			if (assemblyLocation == null)
-			{
-				throw new Exception("Assembly location not found");
-			}
-
-			var puzzleRootLocation = Directory.GetParent(assemblyLocation).Parent.Parent.FullName;
-
-			if (puzzleRootLocation == null)
-			{
-				throw new Exception($"Puzzle root location not found. Tried to find grandparent of the assembly location ({assemblyLocation})");
-			}
-
-			_puzzleRootLocation = puzzleRootLocation;
-
-			return _puzzleRootLocation;
 		}
 
 		static int ResolveYear(IEnumerable<DateTime> availableDates)
@@ -157,7 +133,7 @@ namespace AdventOfCode.Runner
 
 			var solver = (IPuzzleSolver)Activator.CreateInstance(puzzleSolver.Type);
 
-			var input = GetInput(puzzleSolver, testMode);
+			var input = GetInput(puzzleSolver.Date, testMode);
 
 			solver.SolvePuzzle(input);
 
@@ -170,13 +146,13 @@ namespace AdventOfCode.Runner
 			Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		}
 
-		static string[] GetInput(PuzzleSolverInfo puzzleSolver, bool testMode)
+		static string[] GetInput(DateTime date, bool testMode)
 		{
-			var yearDir = $"{AdventOfCode}.{puzzleSolver.Date.Year}";
-			var dayDir = $"{Day}{puzzleSolver.Date.Day:D2}";
+			var yearDir = $"{AdventOfCode}.{date.Year}";
+			var dayDir = $"{Day}{date.Day:D2}";
 			var fileName = testMode ? InputExampleFileName : InputFileName;
 
-			var filePath = Path.Combine(GetPuzzleRootLocation(), yearDir, dayDir, fileName);
+			var filePath = Path.Combine(_puzzleRootLocation, yearDir, dayDir, fileName);
 
 			if (!File.Exists(filePath))
 			{
@@ -188,12 +164,10 @@ namespace AdventOfCode.Runner
 
 		private static IEnumerable<DateTime> GetPuzzleInputDates()
 		{
-			var puzzleRootLocation = GetPuzzleRootLocation();
-
-			var inputFilePaths = Directory.GetFiles(puzzleRootLocation, InputWildcardFileName, SearchOption.AllDirectories);
+			var inputFilePaths = Directory.GetFiles(_puzzleRootLocation, InputWildcardFileName, SearchOption.AllDirectories);
 
 			var pathByYearCollection = inputFilePaths
-				.Select(path => path.Without(puzzleRootLocation + Path.DirectorySeparatorChar))
+				.Select(path => path.Without(_puzzleRootLocation + Path.DirectorySeparatorChar))
 				.GroupBy(path => int.Parse(path
 					.Split(Path.DirectorySeparatorChar)
 					.First(dirName => dirName.Contains(AdventOfCode))
@@ -224,22 +198,11 @@ namespace AdventOfCode.Runner
 
 		private static IEnumerable<PuzzleSolverInfo> GetPuzzleSolvers()
 		{
-			var temp = _assemblyByYear
-				.Select(yearAndAssembly => new KeyValuePair<int, IEnumerable<Type>>(
-						yearAndAssembly.Key,
-						yearAndAssembly.Value.GetTypes()));
-
-			var temp2 = temp.SelectMany(yearAndTypes => yearAndTypes.Value
-					.Select(type => new PuzzleSolverInfo(GetPuzzleDateFor(yearAndTypes.Key, type), type)));
-
-			//TODO droppe år? type.FullName har også år (.Y<år>.)
-
 			var solvers = _assemblyByYear
-				.Select(yearAndAssembly => new KeyValuePair<int, IEnumerable<Type>>(
-						yearAndAssembly.Key,
-						yearAndAssembly.Value.GetTypes().Where(type => IsPuzzleSolver(type))))
-				.SelectMany(yearAndTypes => yearAndTypes.Value
-					.Select(type => new PuzzleSolverInfo(GetPuzzleDateFor(yearAndTypes.Key, type), type)));
+				.SelectMany(yearAndAssembly => yearAndAssembly.Value
+					.GetTypes()
+					.Where(type => IsPuzzleSolver(type)))
+				.Select(type => new PuzzleSolverInfo(GetPuzzleDateFor(type), type));
 
 			return solvers;
 		}
@@ -261,11 +224,19 @@ namespace AdventOfCode.Runner
 			return true;
 		}
 
-		private static DateTime GetPuzzleDateFor(int year, Type solverType)
+		private static DateTime GetPuzzleDateFor(Type solverType)
 		{
-			var dayString = solverType.Name.Without(Day).Without(Solver);
+			var yearString = solverType.FullName
+				.Split('.')
+				.First(dirName => dirName.Contains(Year))
+				.Without(Year);
 
-			if (int.TryParse(dayString, out int day))
+			var dayString = solverType.Name
+				.Without(Day)
+				.Without(Solver);
+
+			if (int.TryParse(dayString, out int day) && day > 0 && day <= 25 &&
+				int.TryParse(yearString, out int year) && year >= DateTime.MinValue.Year)
 			{
 				return new DateTime(year, December, day);
 			}
