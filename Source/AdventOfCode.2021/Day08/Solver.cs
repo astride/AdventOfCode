@@ -15,7 +15,7 @@ namespace AdventOfCode.Y2021
 			List<(string[] InputValues, string[] OutputValues)> input;
 
 			if (rawInput.First().Last() == '|')
-            {
+			{
 				//We have example data
 				var inputValues = rawInput.Where(entry => entry.Last() == '|').ToList();
 				var outputValues = rawInput.Where(entry => entry.Last() != '|').ToList();
@@ -23,12 +23,14 @@ namespace AdventOfCode.Y2021
 				input = new List<(string[] InputValues, string[] OutputValues)>();
 
 				foreach (var i in Enumerable.Range(0, inputValues.Count()))
-                {
-					input.Add((inputValues[i].Split(' '), outputValues[i].Split(' ')));
-                }
-            }
+				{
+					input.Add((
+						inputValues[i].Split(' ').TakeWhile(value => value != "|").ToArray(),
+						outputValues[i].Split(' ')));
+				}
+			}
 			else
-            {
+			{
 				//We have real data
 				input = rawInput
 				.Where(entry => !string.IsNullOrWhiteSpace(entry))
@@ -46,12 +48,41 @@ namespace AdventOfCode.Y2021
 			}
 
 			Part1Solution = SolvePart1(input).ToString();
+			Part2Solution = SolvePart2(input).ToString();
 		}
 
-		private const int CharCountDigit1 = 2;
-		private const int CharCountDigit4 = 4;
-		private const int CharCountDigit7 = 3;
-		private const int CharCountDigit8 = 7;
+		private const char a = 'a';
+		private const char b = 'b';
+		private const char c = 'c';
+		private const char d = 'd';
+		private const char e = 'e';
+		private const char f = 'f';
+		private const char g = 'g';
+
+		private readonly static string AllChars = "abcdefg";
+
+		private readonly static IDictionary<int, string> _charsMakingDigit = new Dictionary<int, string>
+		{
+			[0] = "abcefg",
+			[1] = "cf",
+			[2] = "acdeg",
+			[3] = "acdfg",
+			[4] = "bcdf",
+			[5] = "abdfg",
+			[6] = "abdefg",
+			[7] = "acf",
+			[8] = "abcdefg",
+			[9] = "abcdfg"
+		};
+
+		private static readonly int CharCountDigit1 = _charsMakingDigit[1].Length;
+		private static readonly int CharCountDigit4 = _charsMakingDigit[4].Length;
+		private static readonly int CharCountDigit7 = _charsMakingDigit[7].Length;
+		private static readonly int CharCountDigit8 = _charsMakingDigit[8].Length;
+
+		private static readonly int SignalLinesSharingB = _charsMakingDigit.Values.Count(value => value.Contains(b));
+		private static readonly int SignalLinesSharingE = _charsMakingDigit.Values.Count(value => value.Contains(e));
+		private static readonly int SignalLinesSharingF = _charsMakingDigit.Values.Count(value => value.Contains(f));
 
 		private readonly static int[] SimpleDigits = new int[] { CharCountDigit1, CharCountDigit4, CharCountDigit7, CharCountDigit8 };
 
@@ -63,10 +94,69 @@ namespace AdventOfCode.Y2021
 
 			return simpleDigitCount;
 		}
-	}
 
-	public static class Day08Helpers
-	{
+		private static int SolvePart2(List<(string[] InputValues, string[] OutputValues)> input)
+		{
+			IDictionary<char, char> inputCharFromGoalChar = new Dictionary<char, char> { };
 
+			IEnumerable<(char Char, int Count)> charAndCount;
+			string output;
+			int total = 0;
+
+			foreach (var line in input)
+			{
+				inputCharFromGoalChar.Clear();
+
+				charAndCount = string.Join("", line.InputValues)
+					.GroupBy(ch => ch)
+					.Select(gr => (gr.Key, gr.Count()));
+
+				inputCharFromGoalChar[b] = charAndCount
+					.Single(ch => ch.Count == SignalLinesSharingB)
+					.Char;
+
+				inputCharFromGoalChar[e] = charAndCount
+					.Single(ch => ch.Count == SignalLinesSharingE)
+					.Char;
+
+				inputCharFromGoalChar[f] = charAndCount
+					.Single(ch => ch.Count == SignalLinesSharingF)
+					.Char;
+
+				inputCharFromGoalChar[c] = line.InputValues
+					.Single(entry => entry.Length == CharCountDigit1)
+					.Single(ch => ch != inputCharFromGoalChar[f]);
+
+				inputCharFromGoalChar[a] = line.InputValues
+					.Single(entry => entry.Length == CharCountDigit7)
+					.Single(ch =>
+						ch != inputCharFromGoalChar[c] &&
+						ch != inputCharFromGoalChar[f]);
+
+				inputCharFromGoalChar[d] = line.InputValues
+					.Single(entry => entry.Length == CharCountDigit4)
+					.Single(ch =>
+						ch != inputCharFromGoalChar[b] &&
+						ch != inputCharFromGoalChar[c] &&
+						ch != inputCharFromGoalChar[f]);
+
+				inputCharFromGoalChar[g] = AllChars
+					.Except(inputCharFromGoalChar.Values)
+					.Single();
+
+				output = string.Join("", line.OutputValues
+					.Select(value => _charsMakingDigit
+						.Single(digitsAndNeededChars => 
+							digitsAndNeededChars.Value.Length == value.Length &&
+							digitsAndNeededChars.Value
+								.Select(ch => inputCharFromGoalChar[ch])
+								.All(ch => value.Contains(ch)))
+						.Key));
+
+				total += int.Parse(string.Join("", output));
+			}
+
+			return total;
+		}
 	}
 }
