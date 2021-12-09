@@ -17,7 +17,7 @@ namespace AdventOfCode.Y2021
 			if (rawInput.Any(entry => !entry.Contains(Separator)))
 			{
 				//We have example input
-				var outputValues = rawInput.Where(entry => entry.Last() != Separator).ToList();
+				var outputValues = rawInput.Where(entry => !entry.Contains(Separator)).ToList();
 
 				var inputValues = rawInput
 					.Except(outputValues)
