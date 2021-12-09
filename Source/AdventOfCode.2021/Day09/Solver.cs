@@ -21,30 +21,41 @@ namespace AdventOfCode.Y2021
 
 		private static int SolvePart1(string[] heightMap)
 		{
-			var caveIndexMin = 0;
-			var caveIndexMax = heightMap.Length - 1;
-			var locationIndexMin = 0;
-			var locationIndexMax = heightMap.First().Length - 1;
+			var lowPoints = heightMap.GetLowPointCoordinates()
+				.Select(coor => int.Parse((heightMap[coor.X])[coor.Y].ToString()));
 
-			var lowPoints = new List<int>();
+			var riskLevelSum = lowPoints.Count() + lowPoints.Sum();
+
+			return riskLevelSum;
+		}
+	}
+
+	public static class Day09Helpers
+	{
+		public static IEnumerable<(int X, int Y)> GetLowPointCoordinates(this string[] map)
+		{
+			var caveIndexMin = 0;
+			var caveIndexMax = map.Length - 1;
+			var locationIndexMin = 0;
+			var locationIndexMax = map.First().Length - 1;
+
+			var lowPointCoordinates = new List<(int X, int Y)>();
 
 			foreach (var caveIndex in Enumerable.Range(caveIndexMin, caveIndexMax + 1))
 			{
 				foreach (var locationIndex in Enumerable.Range(locationIndexMin, locationIndexMax + 1))
 				{
-					if ((caveIndex == caveIndexMin || (heightMap[caveIndex])[locationIndex] < (heightMap[caveIndex - 1])[locationIndex]) &&
-						(caveIndex == caveIndexMax || (heightMap[caveIndex][locationIndex]) < (heightMap[caveIndex + 1])[locationIndex]) &&
-						(locationIndex == locationIndexMin || (heightMap[caveIndex][locationIndex]) < (heightMap[caveIndex])[locationIndex - 1]) &&
-						(locationIndex == locationIndexMax || (heightMap[caveIndex][locationIndex]) < (heightMap[caveIndex])[locationIndex + 1]))
+					if ((caveIndex == caveIndexMin || (map[caveIndex])[locationIndex] < (map[caveIndex - 1])[locationIndex]) &&
+						(caveIndex == caveIndexMax || (map[caveIndex][locationIndex]) < (map[caveIndex + 1])[locationIndex]) &&
+						(locationIndex == locationIndexMin || (map[caveIndex][locationIndex]) < (map[caveIndex])[locationIndex - 1]) &&
+						(locationIndex == locationIndexMax || (map[caveIndex][locationIndex]) < (map[caveIndex])[locationIndex + 1]))
 					{
-						lowPoints.Add(int.Parse((heightMap[caveIndex])[locationIndex].ToString()));
+						lowPointCoordinates.Add((caveIndex, locationIndex));
 					}
 				}
 			}
 
-			var riskLevelSum = lowPoints.Count() + lowPoints.Sum();
-
-			return riskLevelSum;
+			return lowPointCoordinates;
 		}
 	}
 }
