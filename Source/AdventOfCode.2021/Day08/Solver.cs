@@ -14,42 +14,39 @@ namespace AdventOfCode.Y2021
 		{
 			List<(string[] InputValues, string[] OutputValues)> input;
 
-			if (rawInput.First().Last() == '|')
+			if (rawInput.Any(entry => !entry.Contains(Separator)))
 			{
-				//We have example data
-				var inputValues = rawInput.Where(entry => entry.Last() == '|').ToList();
-				var outputValues = rawInput.Where(entry => entry.Last() != '|').ToList();
+				//We have example input
+				var outputValues = rawInput.Where(entry => entry.Last() != Separator).ToList();
 
-				input = new List<(string[] InputValues, string[] OutputValues)>();
+				var inputValues = rawInput
+					.Except(outputValues)
+					.Select(input => input.Remove(input.IndexOf(Separator)).Trim()) //Remove separator and preceding space
+					.ToList();
 
-				foreach (var i in Enumerable.Range(0, inputValues.Count()))
-				{
-					input.Add((
-						inputValues[i].Split(' ').TakeWhile(value => value != "|").ToArray(),
-						outputValues[i].Split(' ')));
-				}
+				input = Enumerable.Range(0, inputValues.Count())
+					.Select(i => 
+						(inputValues[i].Split(' '),
+						outputValues[i].Split(' ')))
+					.ToList();
 			}
 			else
 			{
-				//We have real data
+				//We have real input
 				input = rawInput
-				.Where(entry => !string.IsNullOrWhiteSpace(entry))
-				.Select(entry => entry.Split('|'))
-				.Select(entry =>
-					(entry[0]
-						.Split(' ')
-						.Where(inputValue => !string.IsNullOrWhiteSpace(inputValue))
-						.ToArray(),
-					entry[1]
-						.Split(' ')
-						.Where(outputValue => !string.IsNullOrWhiteSpace(outputValue))
-						.ToArray()))
-				.ToList();
+					.Where(entry => !string.IsNullOrWhiteSpace(entry))
+					.Select(entry => entry.Split(Separator))
+					.Select(entry =>
+						(entry[0].Split(' ').ToArray(),
+						entry[1].Split(' ').ToArray()))
+					.ToList();
 			}
 
 			Part1Solution = SolvePart1(input).ToString();
 			Part2Solution = SolvePart2(input).ToString();
 		}
+
+		private const char Separator = '|';
 
 		private const char a = 'a';
 		private const char b = 'b';
@@ -80,11 +77,11 @@ namespace AdventOfCode.Y2021
 		private static readonly int CharCountDigit7 = _charsMakingDigit[7].Length;
 		private static readonly int CharCountDigit8 = _charsMakingDigit[8].Length;
 
+		private readonly static int[] SimpleDigits = new int[] { CharCountDigit1, CharCountDigit4, CharCountDigit7, CharCountDigit8 };
+
 		private static readonly int SignalLinesSharingB = _charsMakingDigit.Values.Count(value => value.Contains(b));
 		private static readonly int SignalLinesSharingE = _charsMakingDigit.Values.Count(value => value.Contains(e));
 		private static readonly int SignalLinesSharingF = _charsMakingDigit.Values.Count(value => value.Contains(f));
-
-		private readonly static int[] SimpleDigits = new int[] { CharCountDigit1, CharCountDigit4, CharCountDigit7, CharCountDigit8 };
 
 		private static int SolvePart1(List<(string[] InputValues, string[] OutputValues)> input)
 		{
@@ -107,7 +104,7 @@ namespace AdventOfCode.Y2021
 			{
 				inputCharFromGoalChar.Clear();
 
-				charAndCount = string.Join("", line.InputValues)
+				charAndCount = string.Concat(line.InputValues)
 					.GroupBy(ch => ch)
 					.Select(gr => (gr.Key, gr.Count()));
 
@@ -144,7 +141,7 @@ namespace AdventOfCode.Y2021
 					.Except(inputCharFromGoalChar.Values)
 					.Single();
 
-				output = string.Join("", line.OutputValues
+				output = string.Concat(line.OutputValues
 					.Select(value => _charsMakingDigit
 						.Single(digitsAndNeededChars => 
 							digitsAndNeededChars.Value.Length == value.Length &&
@@ -153,7 +150,7 @@ namespace AdventOfCode.Y2021
 								.All(ch => value.Contains(ch)))
 						.Key));
 
-				total += int.Parse(string.Join("", output));
+				total += int.Parse(string.Concat(output));
 			}
 
 			return total;
