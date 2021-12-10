@@ -17,6 +17,7 @@ namespace AdventOfCode.Y2021
 				.ToArray();
 
 			Part1Solution = SolvePart1(input).ToString();
+			Part2Solution = SolvePart2(input).ToString();
 		}
 
 		private static int SolvePart1(string[] navigationSystem)
@@ -26,6 +27,15 @@ namespace AdventOfCode.Y2021
 				.Sum();
 
 			return totalSyntaxErrorScore;
+		}
+
+		private static double SolvePart2(string[] navigationSystem)
+		{
+			var completionScores = navigationSystem
+				.Where(line => !line.IsCorrupted())
+				.Select(line => line.GetCompletionScore());
+
+			return completionScores.GetMiddleScore();
 		}
 	}
 
@@ -49,6 +59,37 @@ namespace AdventOfCode.Y2021
 			['>'] = 25137,
 		};
 
+		private static IDictionary<char, int> PointValueForClosingCharMatchingOpeningChar = new Dictionary<char, int>
+		{
+			['('] = 1,
+			['['] = 2,
+			['{'] = 3,
+			['<'] = 4
+		};
+
+		public static bool IsCorrupted(this string input)
+		{
+			var openingChars = new List<char>();
+
+			foreach (var ch in input)
+			{
+				if (OpeningChars.Contains(ch))
+				{
+					openingChars.Add(ch);
+				}
+				else if (ch == ClosingCharForOpeningChar[openingChars.Last()])
+				{
+					openingChars.RemoveAt(openingChars.Count() - 1);
+				}
+				else
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+		
 		public static int GetSyntaxErrorScore(this string input)
 		{
 			var openingChars = new List<char>();
@@ -70,6 +111,47 @@ namespace AdventOfCode.Y2021
 			}
 
 			return 0;
+		}
+
+		public static double GetCompletionScore(this string input)
+		{
+			var openingCharsMissingClosingChars = input.GetOpeningCharsMissingClosingChar();
+			openingCharsMissingClosingChars.Reverse();
+
+			double completionScore = 0;
+
+			foreach (var ch in openingCharsMissingClosingChars)
+			{
+				completionScore = 5 * completionScore + PointValueForClosingCharMatchingOpeningChar[ch];
+			}
+
+			return completionScore;
+		}
+
+		public static List<char> GetOpeningCharsMissingClosingChar(this string input)
+		{
+			var openingChars = new List<char>();
+
+			foreach (var ch in input)
+			{
+				if (OpeningChars.Contains(ch))
+				{
+					openingChars.Add(ch);
+				}
+				else if (ch == ClosingCharForOpeningChar[openingChars.Last()])
+				{
+					openingChars.RemoveAt(openingChars.Count() - 1);
+				}
+			}
+
+			return openingChars;
+		}
+
+		public static double GetMiddleScore(this IEnumerable<double> scores)
+		{
+			var middleIndex = (scores.Count() - 1) / 2;
+
+			return scores.OrderBy(_ => _).ToList()[middleIndex];
 		}
 	}
 }
