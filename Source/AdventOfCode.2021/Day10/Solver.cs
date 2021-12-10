@@ -19,10 +19,57 @@ namespace AdventOfCode.Y2021
 			Part1Solution = SolvePart1(input).ToString();
 		}
 
-		private static decimal SolvePart1(string[] input)
+		private static decimal SolvePart1(string[] navigationSystem)
 		{
-			//TODO
-			return -1;
+			var totalSyntaxErrorScore = navigationSystem
+				.Select(line => line.GetSyntaxErrorScore())
+				.Sum();
+
+			return totalSyntaxErrorScore;
+		}
+	}
+
+	public static class Day10Helpers
+	{
+		private static IEnumerable<char> OpeningChars = new List<char> { '(', '[', '{', '<' };
+
+		private static IDictionary<char, char> ClosingCharForOpeningChar = new Dictionary<char, char>
+		{
+			['('] = ')',
+			['['] = ']',
+			['{'] = '}',
+			['<'] = '>',
+		};
+		
+		private static IDictionary<char, int> ValueOfCorruptedEndingChar = new Dictionary<char, int>
+		{
+			[')'] = 3,
+			[']'] = 57,
+			['}'] = 1197,
+			['>'] = 25137,
+		};
+
+		public static int GetSyntaxErrorScore(this string input)
+		{
+			var openingChars = new List<char>();
+
+			foreach (var ch in input)
+			{
+				if (OpeningChars.Contains(ch))
+				{
+					openingChars.Add(ch);
+				}
+				else if (ch == ClosingCharForOpeningChar[openingChars.Last()])
+				{
+					openingChars.RemoveAt(openingChars.Count() - 1);
+				}
+				else
+				{
+					return ValueOfCorruptedEndingChar[ch];
+				}
+			}
+
+			return 0;
 		}
 	}
 }
