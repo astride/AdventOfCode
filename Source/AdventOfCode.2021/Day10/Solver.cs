@@ -19,7 +19,7 @@ namespace AdventOfCode.Y2021
 			Part1Solution = SolvePart1(input).ToString();
 		}
 
-		private static decimal SolvePart1(string[] navigationSystem)
+		private static int SolvePart1(string[] navigationSystem)
 		{
 			var totalSyntaxErrorScore = navigationSystem
 				.Select(line => line.GetSyntaxErrorScore())
