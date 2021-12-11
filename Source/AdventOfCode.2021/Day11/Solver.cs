@@ -16,6 +16,7 @@ namespace AdventOfCode.Y2021
 				.ToArray();
 
 			Part1Solution = SolvePart1(input).ToString();
+			Part2Solution = SolvePart2(input).ToString();
 		}
 
 		private static int SolvePart1(string[] octopusEnergyLevels)
@@ -24,6 +25,14 @@ namespace AdventOfCode.Y2021
 			var flashCounts = energyLevelsFlattened.Simulate(100);
 
 			return flashCounts.Sum();
+		}
+
+		private static int SolvePart2(string[] octopusEnergyLevels)
+		{
+			var energyLevelsFlattened = octopusEnergyLevels.ToFlattened();
+			var simultaneousStep = energyLevelsFlattened.SimulateUntilSynchronized();
+
+			return simultaneousStep;
 		}
 	}
 
@@ -54,13 +63,23 @@ namespace AdventOfCode.Y2021
 		{
 			foreach (var step in Enumerable.Range(1, steps))
 			{
-				energyLevels.ExecuteStep();
-
-				yield return energyLevels.Count(level => level == EnergyLevelAfterFlash);
+				yield return energyLevels.ExecuteStepAndGetFlashCount();
 			}
 		}
 
-		private static void ExecuteStep(this List<int> energyLevels)
+		public static int SimulateUntilSynchronized(this List<int> energyLevels)
+		{
+			var stepForSimultaneousFlash = 1;
+
+			while (energyLevels.ExecuteStepAndGetFlashCount() != EnergyLevelCount)
+			{
+				stepForSimultaneousFlash++;
+			}
+
+			return stepForSimultaneousFlash;
+		}
+
+		private static int ExecuteStepAndGetFlashCount(this List<int> energyLevels)
 		{
 			foreach (var i in Enumerable.Range(0, EnergyLevelCount))
 			{
@@ -76,6 +95,8 @@ namespace AdventOfCode.Y2021
 					energyLevels[i] = EnergyLevelAfterFlash;
 				}
 			}
+
+			return energyLevels.Count(level => level == EnergyLevelAfterFlash);
 		}
 
 		private static void DoTheFlashDance(this List<int> energyLevels)
