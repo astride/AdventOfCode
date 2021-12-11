@@ -19,8 +19,10 @@ namespace AdventOfCode.Y2021
 			Part1Solution = SolvePart1(input).ToString();
 		}
 
-		private static int SolvePart1(string[] input)
+		private static int SolvePart1(string[] octopusEnergyLevels)
 		{
+			var energyLevelsFlattened = octopusEnergyLevels.AsFlattened();
+
 			//TODO
 			return -1;
 		}
@@ -28,6 +30,27 @@ namespace AdventOfCode.Y2021
 
 	public static class Day11Helpers
 	{
-		
+		private readonly static int EnergyLevelMin = 0;
+		private readonly static int EnergyLevelMax = 9;
+
+		private static int EnergyLevelsRowCount;
+		private static int EnergyLevelRowSize;
+
+		public static List<int> AsFlattened(this string[] energyLevels)
+		{
+			EnergyLevelsRowCount = energyLevels.Length;
+			EnergyLevelRowSize = energyLevels.First().Length;
+
+			return energyLevels
+				.SelectMany(energyLevelRow => energyLevelRow
+					.ToCharArray()
+					.Select(energyLevel => int.Parse(energyLevel.ToString())))
+				.ToList();
+		}
+
+		public static void ExecuteStep(this List<int> energyLevels)
+		{
+
+		}
 	}
 }
