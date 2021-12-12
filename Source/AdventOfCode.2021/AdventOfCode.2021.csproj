@@ -82,6 +82,8 @@
     <Content Include="Day08\Input.txt" />
     <Content Include="Day08\InputExample.txt" />
     <Content Include="Day12\Input.txt" />
+    <Content Include="Day12\InputExample3.txt" />
+    <Content Include="Day12\InputExample2.txt" />
     <Content Include="Day12\InputExample.txt" />
     <Content Include="Day11\Input.txt" />
     <Content Include="Day11\InputExample.txt" />
