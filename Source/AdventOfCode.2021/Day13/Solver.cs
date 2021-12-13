@@ -14,13 +14,13 @@ namespace AdventOfCode.Y2021
 		{
 			IEnumerable<(int X, int Y)> markedPoints = rawInput
 				.TakeWhile(entry => !string.IsNullOrWhiteSpace(entry))
-				.Select(instruction => instruction.Split(','))
-				.Select(pointToMark => (int.Parse(pointToMark[0]), int.Parse(pointToMark[1])));
+				.Select(entry => entry.Split(','))
+				.Select(coor => (int.Parse(coor[0]), int.Parse(coor[1])));
 
 			List<(char AlongPlane, int Coor)> foldingInstructions = rawInput
 				.SkipWhile(entry => !entry.Contains("fold along"))
-				.Where(instruction => instruction != null)
-				.Select(instruction => instruction.Split(' '))
+				.Where(entry => entry != null)
+				.Select(entry => entry.Split(' '))
 				.Select(instruction => instruction.Last().Split('='))
 				.Select(foldingInstruction => (foldingInstruction[0].Single(), int.Parse(foldingInstruction[1])))
 				.ToList();
@@ -122,18 +122,18 @@ namespace AdventOfCode.Y2021
 		
 		private static void FoldAlongX(this bool[,] paper, int coordinate)
 		{
-			int foldedX;
+			int mirroredX;
 
 			foreach (var x in Enumerable.Range(0, coordinate + 1))
 			{
-				foldedX = coordinate + (coordinate - x);
+				mirroredX = coordinate + (coordinate - x);
 
 				foreach (var y in Enumerable.Range(0, SizeY))
 				{
-					if (foldedX < SizeX)
+					if (mirroredX < SizeX)
 					{
-						paper[x, y] = paper[x, y] || paper[foldedX, y];
-						paper[foldedX, y] = false;
+						paper[x, y] = paper[x, y] || paper[mirroredX, y];
+						paper[mirroredX, y] = false;
 					}
 				}
 			}
@@ -141,18 +141,18 @@ namespace AdventOfCode.Y2021
 
 		private static void FoldAlongY(this bool[,] paper, int coordinate)
 		{
-			int foldedY;
+			int mirroredY;
 
 			foreach (var y in Enumerable.Range(0, coordinate + 1))
 			{
-				foldedY = coordinate + (coordinate - y);
+				mirroredY = coordinate + (coordinate - y);
 
 				foreach (var x in Enumerable.Range(0, SizeX))
 				{
-					if (foldedY < SizeY)
+					if (mirroredY < SizeY)
 					{
-						paper[x, y] = paper[x, y] || paper[x, foldedY];
-						paper[x, foldedY] = false;
+						paper[x, y] = paper[x, y] || paper[x, mirroredY];
+						paper[x, mirroredY] = false;
 					}
 				}
 			}
