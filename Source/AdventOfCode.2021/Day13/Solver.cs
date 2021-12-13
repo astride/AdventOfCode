@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,6 +26,7 @@ namespace AdventOfCode.Y2021
 				.ToList();
 
 			Part1Solution = SolvePart1(markedPoints, foldingInstructions).ToString();
+			Part2Solution = SolvePart2(markedPoints, foldingInstructions);
 		}
 
 		private static int SolvePart1(
@@ -34,17 +36,41 @@ namespace AdventOfCode.Y2021
 			var markedPaper = markedPoints.CreateAndMarkPaper();
 			markedPaper.Fold(foldingInstructions.First());
 
-			var marks = 0;
+			return markedPaper.CountMarks();
+		}
 
-			foreach (var point in markedPaper)
+		private static string SolvePart2(
+			IEnumerable<(int X, int Y)> markedPoints,
+			List<(char Plane, int Coor)> foldingInstructions)
+		{
+			var markedPaper = markedPoints.CreateAndMarkPaper();
+			
+			foreach (var instruction in foldingInstructions)
 			{
-				if (point) // == true when point is marked
-				{
-					marks++;
-				}
+				markedPaper.Fold(instruction);
 			}
 
-			return marks;
+			var maxX = foldingInstructions
+				.Where(instruction => instruction.Plane == 'x')
+				.Select(instruction => instruction.Coor)
+				.Min();
+
+			var maxY = foldingInstructions
+				.Where(instruction => instruction.Plane == 'y')
+				.Select(instruction => instruction.Coor)
+				.Min();
+
+			foreach (var y in Enumerable.Range(0, maxY))
+			{
+				foreach (var x in Enumerable.Range(0, maxX))
+				{
+					Console.Write(markedPaper[x, y] ? "# " : "  ");
+				}
+
+				Console.WriteLine();
+			}
+
+			return "Read the note yourself --^";
 		}
 	}
 
@@ -79,6 +105,21 @@ namespace AdventOfCode.Y2021
 			else if (instruction.AlongPlane == 'y') paper.FoldAlongY(instruction.Coor);
 		}
 
+		public static int CountMarks(this bool[,] paper)
+		{
+			var count = 0;
+
+			foreach (var point in paper)
+			{
+				if (point) // == true when point is marked
+				{
+					count++;
+				}
+			}
+
+			return count;
+		}
+		
 		private static void FoldAlongX(this bool[,] paper, int coordinate)
 		{
 			int foldedX;
