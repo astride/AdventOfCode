@@ -33,11 +33,11 @@ namespace AdventOfCode.Y2021
 	{
 		private static double[,] LowestTotalRiskMap;
 
-		public static double[,] AsRiskLevelMap(this string[] squaredMap)
+		public static int[,] AsRiskLevelMap(this string[] squaredMap)
 		{
 			var mapSize = squaredMap.Length;
 
-			var map = new double[mapSize, mapSize];
+			var map = new int[mapSize, mapSize];
 
 			foreach (var y in Enumerable.Range(0, mapSize))
 			{
@@ -50,7 +50,7 @@ namespace AdventOfCode.Y2021
 			return map;
 		}
 
-		public static double GetLowestTotalRiskOfSouthEastFacingPath(this double[,] squaredMap)
+		public static double GetLowestTotalRiskOfSouthEastFacingPath(this int[,] squaredMap)
 		{
 			var mapSize = squaredMap.GetLength(0);
 
