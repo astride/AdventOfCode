@@ -41,22 +41,27 @@ namespace AdventOfCode.Y2021
 			return countPerElement.Max() - countPerElement.Min();
 		}
 
-		private static int SolvePart2(string polymerTemplate, IDictionary<string, char> charToAddForPair)
+		private static double SolvePart2(string polymerTemplate, IDictionary<string, char> charToAddForPair)
 		{
 			charToAddForPair.PrepareDictionaries();
 
 			var polymerConfig = polymerTemplate.PreparePolymer();
 
-			//TODO
+			foreach (var _ in Enumerable.Range(1, 40))
+			{
+				polymerConfig = polymerConfig.InsertPairs();
+			}
 
-			return -1;
+			var elementCount = polymerConfig.GetElementCount();
+
+			return elementCount.Max() - elementCount.Min();
 		}
 	}
 
 	public static class Day14Helpers
 	{
-		static IDictionary<string, ((string, string) CreatedPairs, char RedundantChar)> ResultOfPair;
-		static IDictionary<char, double> RedundantOccurrencesOfChar;
+		static IDictionary<string, (string Pair1, string Pair2)> ResultOfPair;
+		static IEnumerable<char> Chars;
 
 		#region Part 1
 		public static IDictionary<string, string> GetResultForPairDict(this IDictionary<string, char> charCreatedFromPair)
@@ -85,18 +90,16 @@ namespace AdventOfCode.Y2021
 		#region Part 2
 		public static void PrepareDictionaries(this IDictionary<string, char> charToAddForPair)
 		{
-			RedundantOccurrencesOfChar = charToAddForPair
+			Chars = charToAddForPair
 				.Select(kvp => kvp.Value)
-				.Distinct()
-				.ToDictionary(ch => ch, ch => (double)0);
+				.Distinct();
 
 			ResultOfPair = charToAddForPair
 				.ToDictionary(
 					entry => entry.Key,
 					entry => (
 						(string.Concat(new char[] { entry.Key.First(), entry.Value }),
-						string.Concat(new char[] { entry.Value, entry.Key.Last() })),
-						entry.Value));
+						string.Concat(new char[] { entry.Value, entry.Key.Last() }))));
 		}
 
 		public static IDictionary<string, double> PreparePolymer(this string template)
@@ -111,18 +114,50 @@ namespace AdventOfCode.Y2021
 				polymerConfig[template.Substring(i, 2)]++;
 			}
 
-			foreach (var pair in polymerConfig)
-			{
-				RedundantOccurrencesOfChar[(ResultOfPair[pair.Key]).RedundantChar] += pair.Value;
-			}
-
 			return polymerConfig;
 		}
 
-		//public static IDictionary<string, double> InsertPairs(this IDictionary<string, double> polymerConfig)
-		//{
+		public static IDictionary<string, double> InsertPairs(this IDictionary<string, double> polymerConfig)
+		{
+			var updatedConfig = polymerConfig
+				.ToDictionary(
+					entry => entry.Key,
+					entry => (double)0);
 
-		//}
+			(string Pair1, string Pair2) resultOfPair;
+
+			foreach (var pair in polymerConfig.Where(entry => entry.Value > 0))
+			{
+				resultOfPair = ResultOfPair[pair.Key];
+
+				updatedConfig[resultOfPair.Pair1] += pair.Value;
+				updatedConfig[resultOfPair.Pair2] += pair.Value;
+			}
+
+			return updatedConfig;
+		}
+
+		public static IEnumerable<double> GetElementCount(this IDictionary<string, double> polymerConfig)
+		{
+			var charCount = Chars
+				.ToDictionary(
+					ch => ch,
+					ch => (double)0);
+
+			foreach (var ch in Chars)
+			{
+				charCount[ch] = polymerConfig
+					.Where(config => config.Key.Contains(ch))
+					.Select(configWithCh => configWithCh.Value)
+					.Sum() / 2;
+
+				charCount[ch] += polymerConfig
+					.Single(config => config.Key.All(configCh => configCh == ch))
+					.Value / 2;
+			}
+
+			return charCount.Select(entry => entry.Value);
+		}
 		#endregion
 	}
 }
