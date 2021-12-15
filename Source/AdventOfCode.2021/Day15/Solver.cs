@@ -12,12 +12,14 @@ namespace AdventOfCode.Y2021
 
 		public void SolvePuzzle(string[] rawInput)
 		{
-			var input = rawInput;
+			var map = rawInput
+				.Where(entry => !string.IsNullOrWhiteSpace(entry))
+				.ToArray();
 
-			Part1Solution = SolvePart1(input).ToString();
+			Part1Solution = SolvePart1(map).ToString();
 		}
 
-		private static int SolvePart1(string[] input)
+		private static int SolvePart1(string[] riskLevelMap)
 		{
 			return -1;
 		}
