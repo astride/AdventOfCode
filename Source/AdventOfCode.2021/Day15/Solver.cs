@@ -8,7 +8,7 @@ namespace AdventOfCode.Y2021
 	public class Day15Solver : IPuzzleSolver
 	{
 		public string Part1Solution { get; set; }
-		public string Part2Solution { get; set; }
+		public string Part2Solution { get; set; } //2860: Too high
 
 		public void SolvePuzzle(string[] rawInput)
 		{
@@ -41,8 +41,8 @@ namespace AdventOfCode.Y2021
 	public static class Day15Helpers
 	{
 		private static double[,] LowestTotalRiskMap;
-		private static double[][,] BottomRowLowestTotalRiskOfTileAtCoor;
-		private static double[][,] RightColLowestTotalRiskOfTileAtCoor;
+		private static double[,,] BottomRowLowestTotalRiskOfTileAtCoor;
+		private static double[,,] RightColLowestTotalRiskOfTileAtCoor;
 
 		public static int[,] AsRiskLevelMap(this string[] squaredMap)
 		{
@@ -61,32 +61,22 @@ namespace AdventOfCode.Y2021
 			return map;
 		}
 
-		private static void PopulateLowestTotalRiskMapOfSouthEastFacingPath(this int[,] squaredMap,
-			int[] bottomRowOfAboveTile = null,
-			int[] rightColOfLeftTile = null)
+		#region Part 1
+		public static double GetLowestTotalRiskOfSouthEastFacingPath(this int[,] squaredMap)
+		{
+			var mapSize = squaredMap.GetLength(0);
+
+			squaredMap.PopulateLowestTotalRiskMapOfSouthEastFacingPath();
+
+			return LowestTotalRiskMap[mapSize - 1, mapSize - 1];
+		}
+
+		public static void PopulateLowestTotalRiskMapOfSouthEastFacingPath(this int[,] squaredMap)
 		{
 			var mapSize = squaredMap.GetLength(0);
 
 			LowestTotalRiskMap = new double[mapSize, mapSize];
 
-			var isUppermostTile = bottomRowOfAboveTile == null;
-			var isLeftmostTile = rightColOfLeftTile == null;
-
-			// populate uppermost, leftmost cell if isn't base map
-			if (!isUppermostTile && !isLeftmostTile)
-			{
-				LowestTotalRiskMap[0, 0] = Math.Min(bottomRowOfAboveTile[0], rightColOfLeftTile[0]) + squaredMap[0, 0];
-			}
-			else if (!isUppermostTile)
-			{
-				LowestTotalRiskMap[0, 0] = bottomRowOfAboveTile[0] + squaredMap[0, 0];
-			}
-			else if (!isLeftmostTile)
-			{
-				LowestTotalRiskMap[0, 0] = rightColOfLeftTile[0] + squaredMap[0, 0];
-			}
-
-			// populate rest of map
 			foreach (var i in Enumerable.Range(1, mapSize - 1))
 			{
 				//calculate top--bottom along y axis
@@ -109,20 +99,16 @@ namespace AdventOfCode.Y2021
 				LowestTotalRiskMap[i, i] = Math.Min(LowestTotalRiskMap[i - 1, i], LowestTotalRiskMap[i, i - 1]) + squaredMap[i, i];
 			}
 		}
+		#endregion
 
-		public static double GetLowestTotalRiskOfSouthEastFacingPath(this int[,] squaredMap)
-		{
-			var mapSize = squaredMap.GetLength(0);
-
-			squaredMap.PopulateLowestTotalRiskMapOfSouthEastFacingPath();
-
-			return LowestTotalRiskMap[mapSize - 1, mapSize - 1];
-		}
-
+		#region Part 2
 		public static double GetLowestTotalRiskOfSouthEastFacingPath(this int[,] baseMap, int mapRepetitions)
 		{
 			var mapSize = baseMap.GetLength(0);
 			var map = new int[mapSize, mapSize]; //TODO unneccesary?
+
+			BottomRowLowestTotalRiskOfTileAtCoor = new double[mapRepetitions, mapRepetitions, mapSize];
+			RightColLowestTotalRiskOfTileAtCoor = new double[mapRepetitions, mapRepetitions, mapSize];
 
 			int incrementor;
 
@@ -139,7 +125,8 @@ namespace AdventOfCode.Y2021
 
 					if (isUppermostTile && isLeftmostTile)
 					{
-						baseMap.PopulateLowestTotalRiskMapOfSouthEastFacingPath();
+						// populate Lowest...Map
+						baseMap.PopulateLowestTotalRiskMapOfSouthEastFacingPath(0, 0);
 					}
 					else
 					{
@@ -154,27 +141,120 @@ namespace AdventOfCode.Y2021
 							}
 						}
 
-						// generate Lowest...Map
-						if (isUppermostTile)
-						{
-							// call generate method w/previous rightcol array
-						}
-						else if (isLeftmostTile)
-						{
-							// call generate method w/previous bottomrow array
-						}
-						else
-						{
-							// call generate method w/previous rightcol and bottomrow array
-						}
+						// populate Lowest...Map
+						map.PopulateLowestTotalRiskMapOfSouthEastFacingPath(x, y);
 					}
-
-					// update BottomRow...AtCoor
-					// update RightCol...AtCoor
 				}
 			}
 
 			return LowestTotalRiskMap[mapSize - 1, mapSize - 1];
+		}
+
+		private static void PopulateLowestTotalRiskMapOfSouthEastFacingPath(this int[,] map, int xTile, int yTile)
+		{
+			var isUppermostTile = yTile == 0;
+			var isLeftmostTile = xTile == 0;
+
+			var mapSize = map.GetLength(0);
+
+			LowestTotalRiskMap = new double[mapSize, mapSize];
+
+			var riskLevel = map[0, 0];
+			double riskLevelLeftOf;
+			double riskLevelAbove;
+
+			// populate uppermost, leftmost cell if isn't base map
+			if (!isUppermostTile && !isLeftmostTile)
+			{
+				LowestTotalRiskMap[0, 0] = riskLevel
+					+ Math.Min(
+						BottomRowLowestTotalRiskOfTileAtCoor[xTile, yTile - 1, 0],
+						RightColLowestTotalRiskOfTileAtCoor[xTile - 1, yTile, 0]);
+			}
+			else if (!isUppermostTile)
+			{
+				LowestTotalRiskMap[0, 0] = riskLevel
+					+ BottomRowLowestTotalRiskOfTileAtCoor[xTile, yTile - 1, 0];
+			}
+			else if (!isLeftmostTile)
+			{
+				LowestTotalRiskMap[0, 0] = riskLevel
+					+ RightColLowestTotalRiskOfTileAtCoor[xTile - 1, yTile, 0];
+			}
+
+			bool isLastLevel;
+
+			// populate rest of map
+			foreach (var i in Enumerable.Range(1, mapSize - 1))
+			{
+				isLastLevel = i == mapSize - 1;
+
+				// populate top--bottom
+				foreach (var y in Enumerable.Range(0, i))
+				{
+					riskLevel = map[i, y];
+					riskLevelLeftOf = LowestTotalRiskMap[i - 1, y];
+
+					LowestTotalRiskMap[i, y] = y == 0
+						? isUppermostTile
+							? riskLevel + riskLevelLeftOf
+							: riskLevel + Math.Min(riskLevelLeftOf, BottomRowLowestTotalRiskOfTileAtCoor[xTile, yTile - 1, i])
+						: riskLevel + Math.Min(riskLevelLeftOf, LowestTotalRiskMap[i, y - 1]);
+
+					if (isLastLevel)
+					{
+						RightColLowestTotalRiskOfTileAtCoor[xTile, yTile, y] = LowestTotalRiskMap[i, y];
+					}
+				}
+
+				// populate left--right
+				foreach (var x in Enumerable.Range(0, i))
+				{
+					riskLevel = map[x, i];
+					riskLevelAbove = LowestTotalRiskMap[x, i - 1];
+
+					LowestTotalRiskMap[x, i] = x == 0
+						? isLeftmostTile
+							? riskLevel + riskLevelAbove
+							: riskLevel + Math.Min(riskLevelAbove, RightColLowestTotalRiskOfTileAtCoor[xTile - 1, yTile, i])
+						: riskLevel + Math.Min(riskLevelAbove, LowestTotalRiskMap[x - 1, i]);
+
+					if (isLastLevel)
+					{
+						BottomRowLowestTotalRiskOfTileAtCoor[xTile, yTile, x] = LowestTotalRiskMap[x, i];
+					}
+				}
+
+				// populate corner
+				riskLevel = map[i, i];
+				riskLevelLeftOf = LowestTotalRiskMap[i - 1, i];
+				riskLevelAbove = LowestTotalRiskMap[i, i - 1];
+
+				LowestTotalRiskMap[i, i] = riskLevel + Math.Min(riskLevelLeftOf, riskLevelAbove);
+
+				if (isLastLevel)
+				{
+					RightColLowestTotalRiskOfTileAtCoor[xTile, yTile, i] = LowestTotalRiskMap[i, i];
+					BottomRowLowestTotalRiskOfTileAtCoor[xTile, yTile, i] = LowestTotalRiskMap[i, i];
+				}
+			}
+		}
+		#endregion
+
+		//TODO move to common? nice to have
+		private static void Print<T>(this T[,] map)
+		{
+			foreach (var y in Enumerable.Range(0, map.GetLength(1)))
+			{
+				foreach (var x in Enumerable.Range(0, map.GetLength(0)))
+				{
+					Console.Write(map[x, y] + " ");
+				}
+
+				Console.WriteLine();
+			}
+
+			Console.WriteLine();
 		}
 	}
 }
