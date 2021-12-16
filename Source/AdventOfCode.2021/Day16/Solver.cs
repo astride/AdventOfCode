@@ -82,8 +82,10 @@ namespace AdventOfCode.Y2021
 			return PacketVersions.Sum();
         }
 
-		private static int UnwrapPackageAndReturnPackageContentLength(this string transmission, int packetIndex = 0, int siblingPacketCount = 0)
+		private static int UnwrapPackageAndReturnPackageContentLength(this string transmission, int packetIndex = 0)
         {
+			// This method should not know about siblings!
+
 			// LVPs are always the innermost packets(?)
 			// OPs and LVPs are never siblings(?)
 
@@ -93,20 +95,17 @@ namespace AdventOfCode.Y2021
 			// checking packet type ID
 			if (IntOf3BitBinary[transmission.Substring(packetIndex + PacketVersionLength, PacketTypeIdLength)] == LiteralValuePacketTypeId)
 			{
-				var packetLength = transmission.GetStartIndexOfLiteralValuePacketSibling(packetIndex) - packetIndex;
-
-				if (siblingPacketCount == 0) return packetLength;
-
-				return packetLength + transmission
-					.UnwrapPackageAndReturnPackageContentLength(packetIndex + packetLength, siblingPacketCount - 1);
+				return transmission.GetLiteralValuePacketLength(packetIndex);
             }
 			else
             {
+				var representingBitsIndex = packetIndex + PacketHeaderLength + 1;
+
 				// checking length type ID of operator packet
 				if (transmission[packetIndex + PacketHeaderLength] == '0')
 				{
 					var totalSubPacketBitsLengthEncoded = transmission
-						.Substring(packetIndex + PacketHeaderLength + 1, BitCountOfNumberRepresentingBitCountInSubPackets);
+						.Substring(representingBitsIndex, BitCountOfNumberRepresentingBitCountInSubPackets);
 
 					var totalSubPacketBitsLength = totalSubPacketBitsLengthEncoded.DecodeBinary();
 
@@ -116,24 +115,32 @@ namespace AdventOfCode.Y2021
 					while (unwrappedLength < totalSubPacketBitsLength)
                     {
 						unwrappedLength += transmission
-							.UnwrapPackageAndReturnPackageContentLength(packetIndex + PacketHeaderLength + 1 + BitCountOfNumberRepresentingBitCountInSubPackets + unwrappedLength);
+							.UnwrapPackageAndReturnPackageContentLength(representingBitsIndex + BitCountOfNumberRepresentingBitCountInSubPackets + unwrappedLength);
                     }
+
+					return unwrappedLength;
 				}
 				else
 				{
 					var subPacketCountEncoded = transmission
-						.Substring(packetIndex + PacketHeaderLength + 1, BitCountOfNumberRepresentingSubPacketCount);
+						.Substring(representingBitsIndex, BitCountOfNumberRepresentingSubPacketCount);
 
 					var subPacketCount = subPacketCountEncoded.DecodeBinary();
+					var unwrappedLength = 0;
 
-					transmission.UnwrapPackageAndReturnPackageContentLength(packetIndex + PacketHeaderLength + 1 + BitCountOfNumberRepresentingSubPacketCount, subPacketCount - 1);
+					// checking sub packets
+					foreach (var _ in Enumerable.Range(1, subPacketCount))
+                    {
+						unwrappedLength += transmission
+							.UnwrapPackageAndReturnPackageContentLength(representingBitsIndex + BitCountOfNumberRepresentingSubPacketCount + unwrappedLength);
+					}
+
+					return unwrappedLength;
 				}
-
-				// unwrapping siblings?
 			}
 		}
 
-        private static int GetStartIndexOfLiteralValuePacketSibling(this string transmission, int packetIndex)
+        private static int GetLiteralValuePacketLength(this string transmission, int packetIndex)
         {
             var groupCount = 0;
             var isLastGroup = false;
@@ -155,7 +162,7 @@ namespace AdventOfCode.Y2021
             var packetLength = PacketHeaderLength + (groupCount * LiteralValueGroupLength);
             //var paddedPacketLength = packetLength + (LiteralValuePartLength - (packetLength % LiteralValuePartLength));
 
-            return packetIndex + packetLength;
+            return packetLength;
         }
 
         private static string Decode(this string encodedTransmission)
@@ -176,7 +183,7 @@ namespace AdventOfCode.Y2021
 
 			foreach (var i in Enumerable.Range(1, binary.Length - 1))
             {
-				decoded += (int)Math.Pow(2 * binary[i], i);
+				decoded += (int)Math.Pow(2 * int.Parse(binary[binary.Length - (i + 1)].ToString()), i);
             }
 
 			return decoded;
