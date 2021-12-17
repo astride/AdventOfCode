@@ -1,5 +1,5 @@
 ﻿using AdventOfCode.Common;
-using System;
+using AdventOfCode.Common.Classes;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -35,7 +35,7 @@ namespace AdventOfCode.Y2021
 			var basinMap = heightMap.GenerateFramedBoolMap();
 
 			var basinOrigoCoordinates = heightMap.GetLowPointCoordinates()
-				.Select(coor => (coor.X + 1, coor.Y + 1));
+				.Select(coor => new Coordinate(coor.X + 1, coor.Y + 1));
 
 			var largestBasins = basinMap.GetLargestBasins(3, basinOrigoCoordinates);
 
@@ -45,14 +45,14 @@ namespace AdventOfCode.Y2021
 
 	public static class Day09Helpers
 	{
-		public static IEnumerable<(int X, int Y)> GetLowPointCoordinates(this string[] map)
+		public static IEnumerable<Coordinate> GetLowPointCoordinates(this string[] map)
 		{
 			var caveIndexMin = 0;
 			var caveIndexMax = map.Length - 1;
 			var locationIndexMin = 0;
 			var locationIndexMax = map.First().Length - 1;
 
-			var lowPointCoordinates = new List<(int X, int Y)>();
+			var lowPointCoordinates = new List<Coordinate>();
 
 			foreach (var caveIndex in Enumerable.Range(caveIndexMin, caveIndexMax + 1))
 			{
@@ -63,7 +63,7 @@ namespace AdventOfCode.Y2021
 						(locationIndex == locationIndexMin || (map[caveIndex][locationIndex]) < (map[caveIndex])[locationIndex - 1]) &&
 						(locationIndex == locationIndexMax || (map[caveIndex][locationIndex]) < (map[caveIndex])[locationIndex + 1]))
 					{
-						lowPointCoordinates.Add((locationIndex, caveIndex));
+						lowPointCoordinates.Add(new Coordinate(locationIndex, caveIndex));
 					}
 				}
 			}
@@ -92,7 +92,7 @@ namespace AdventOfCode.Y2021
 			return boolMap;
 		}
 
-		public static IEnumerable<int> GetLargestBasins(this bool[,] map, int basinCount, IEnumerable<(int X, int Y)> startingPoints)
+		public static IEnumerable<int> GetLargestBasins(this bool[,] map, int basinCount, IEnumerable<Coordinate> startingPoints)
 		{
 			var largestBasins = Enumerable.Repeat(0, basinCount).ToList();
 			int basinSize;
@@ -111,12 +111,12 @@ namespace AdventOfCode.Y2021
 			return largestBasins;
 		}
 
-		private static int GetBasinSize(this (int X, int Y) origo, bool[,] map)
+		private static int GetBasinSize(this Coordinate origo, bool[,] map)
 		{
-			return new List<(int X, int Y)> { origo }.GetBasinSize(map, origo);
+			return new List<Coordinate> { origo }.GetBasinSize(map, origo);
 		}
 
-		public static int GetBasinSize(this IEnumerable<(int X, int Y)> thisLevelCoors, bool[,] map, (int X, int Y) refCoor)
+		public static int GetBasinSize(this IEnumerable<Coordinate> thisLevelCoors, bool[,] map, Coordinate refCoor)
 		{
 			if (!thisLevelCoors.Any())
 			{
@@ -128,31 +128,31 @@ namespace AdventOfCode.Y2021
 			var coorsSearchingBelow = thisLevelCoors.Where(coor => coor.Y <= refCoor.Y);
 			var coorsSearchingLeft = thisLevelCoors.Where(coor => coor.X <= refCoor.X);
 
-			List<(int X, int Y)> nextLevelCoors = new List<(int X, int Y)>();
+			List<Coordinate> nextLevelCoors = new List<Coordinate>();
 
 			if (coorsSearchingAbove.Any())
 			{
 				nextLevelCoors.AddRange(coorsSearchingAbove
 					.Where(coor => map[coor.X, coor.Y + 1])
-					.Select(coor => (coor.X, coor.Y + 1)));
+					.Select(coor => new Coordinate(coor.X, coor.Y + 1)));
 			}
 			if (coorsSearchingRight.Any())
 			{
 				nextLevelCoors.AddRange(coorsSearchingRight
 					.Where(coor => map[coor.X + 1, coor.Y])
-					.Select(coor => (coor.X + 1, coor.Y)));
+					.Select(coor => new Coordinate(coor.X + 1, coor.Y)));
 			}
 			if (coorsSearchingBelow.Any())
 			{
 				nextLevelCoors.AddRange(coorsSearchingBelow
 					.Where(coor => map[coor.X, coor.Y - 1])
-					.Select(coor => (coor.X, coor.Y - 1)));
+					.Select(coor => new Coordinate(coor.X, coor.Y - 1)));
 			}
 			if (coorsSearchingLeft.Any())
 			{
 				nextLevelCoors.AddRange(coorsSearchingLeft
 					.Where(coor => map[coor.X - 1, coor.Y])
-					.Select(coor => (coor.X - 1, coor.Y)));
+					.Select(coor => new Coordinate(coor.X - 1, coor.Y)));
 			}
 
 			return thisLevelCoors.Count()
