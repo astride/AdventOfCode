@@ -50,6 +50,7 @@
     <Compile Include="Day10\Solver.cs" />
     <Compile Include="Day04\Solver.cs" />
     <Compile Include="Day08\Solver.cs" />
+    <Compile Include="Day18\Solver.cs" />
     <Compile Include="Day17\Solver.cs" />
     <Compile Include="Day13\Solver.cs" />
     <Compile Include="Day11\Solver.cs" />
@@ -85,6 +86,8 @@
     <Content Include="Day01\InputExample.txt" />
     <Content Include="Day08\Input.txt" />
     <Content Include="Day08\InputExample.txt" />
+    <Content Include="Day18\Input.txt" />
+    <Content Include="Day18\InputExample.txt" />
     <Content Include="Day17\Input.txt" />
     <Content Include="Day17\InputExample.txt" />
     <Content Include="Day13\Input.txt" />
