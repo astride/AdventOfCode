@@ -18,19 +18,12 @@ namespace AdventOfCode.Y2021
 				.Split(',')
 				.Select(entry => entry.Trim());
 
-			var xTargetRange = input
-				.Single(entry => entry.Contains('x'));
+			var targetArea = input.GetTargetArea();
 
-			var yTargetRange = input
-				.Single(entry => entry.Contains('y'));
-
-			(int Min, int Max) xTarget = (xTargetRange.GetMinTargetValue(), xTargetRange.GetMaxTargetValue());
-			(int Min, int Max) yTarget = (yTargetRange.GetMinTargetValue(), yTargetRange.GetMaxTargetValue());
-
-			Part1Solution = SolvePart1(xTarget, yTarget).ToString();
+			Part1Solution = SolvePart1(targetArea).ToString();
 		}
 
-		private static int SolvePart1((int Min, int Max) xTarget, (int Min, int Max) yTarget)
+		private static int SolvePart1(Area target)
 		{
 			var yMax = 0;
 
@@ -49,14 +42,14 @@ namespace AdventOfCode.Y2021
 					positionsOnPath.Clear();
 					stepCount = 1;
 
-					while (!position.IsInside(xTarget, yTarget) &&
-						!position.HasPassed(xTarget, yTarget))
+					while (!position.IsInside(target) &&
+						!position.HasPassed(target))
                     {
 						positionsOnPath.Add(position);
 						
 						position = initialVelocity.GetPositionAfterSteps(stepCount);
 
-						if (position.IsInside(xTarget, yTarget))
+						if (position.IsInside(target))
                         {
 							if (positionsOnPath.Any(pos => pos.Y > yMax))
                             {
@@ -77,28 +70,43 @@ namespace AdventOfCode.Y2021
 
 	public static class Day17Helpers
 	{
-		public static int GetMinTargetValue(this string targetRange)
+		public static Area GetTargetArea(this IEnumerable<string> targetRanges)
+        {
+			var xTargetRange = targetRanges
+				.Single(entry => entry.Contains('x'));
+
+			var yTargetRange = targetRanges
+				.Single(entry => entry.Contains('y'));
+
+			return new Area(
+				new Coordinate(xTargetRange.GetMinValue(), yTargetRange.GetMinValue()),
+				new Coordinate(xTargetRange.GetMaxValue(), yTargetRange.GetMaxValue()));
+		}
+
+		public static int GetMinValue(this string range)
 		{
-			return int.Parse(string.Concat(targetRange.Skip(2).TakeWhile(ch => ch != '.')));
+			return int.Parse(string.Concat(range.Skip(2).TakeWhile(ch => ch != '.')));
 		}
 			
-		public static int GetMaxTargetValue(this string targetRange)
+		public static int GetMaxValue(this string range)
 		{
-			return int.Parse(string.Concat(targetRange.SkipWhile(ch => ch != '.').SkipWhile(ch => ch == '.')));
+			return int.Parse(string.Concat(range.SkipWhile(ch => ch != '.').SkipWhile(ch => ch == '.')));
 		}
 
-		public static bool IsInside(this Coordinate position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
-        {
-			return position.X >= xTarget.Min && position.X <= xTarget.Max &&
-				position.Y >= yTarget.Min && position.Y <= yTarget.Max;
-
-        }
-
-		public static bool HasPassed(this Coordinate position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
+		public static bool IsInside(this Coordinate position, Area area)
         {
 			return
-				position.X > xTarget.Max ||
-				position.Y < yTarget.Min;
+				position.X >= area.Min.X &&
+				position.X <= area.Max.X &&
+				position.Y >= area.Min.Y &&
+				position.Y <= area.Max.Y;
+        }
+
+		public static bool HasPassed(this Coordinate position, Area area)
+        {
+			return
+				position.X > area.Max.X ||
+				position.Y < area.Min.Y;
 		}
 		
 		public static Coordinate GetPositionAfterSteps(this Velocity initialVelocity, int stepCount)
@@ -153,4 +161,17 @@ namespace AdventOfCode.Y2021
     {
         public Velocity(int x, int y) : base(x, y) { }
     }
+
+    public class Area
+	{
+        public Area(Coordinate min, Coordinate max)
+        {
+			Min = min;
+			Max = max;
+        }
+
+		public Coordinate Min { get; set; }
+
+		public Coordinate Max { get; set; }
+	}
 }
