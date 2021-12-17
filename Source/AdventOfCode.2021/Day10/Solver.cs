@@ -69,58 +69,28 @@ namespace AdventOfCode.Y2021
 
 		public static bool IsCorrupted(this string input)
 		{
-			var openingChars = new List<char>();
+			var corruptedChar = input.GetCorruptedEndingChar(out _);
 
-			foreach (var ch in input)
-			{
-				if (OpeningChars.Contains(ch))
-				{
-					openingChars.Add(ch);
-				}
-				else if (ch == ClosingCharForOpeningChar[openingChars.Last()])
-				{
-					openingChars.RemoveAt(openingChars.Count() - 1);
-				}
-				else
-				{
-					return true;
-				}
-			}
-
-			return false;
+			return corruptedChar.HasValue;
 		}
 		
 		public static int GetSyntaxErrorScore(this string input)
 		{
-			var openingChars = new List<char>();
+			var corruptedChar = input.GetCorruptedEndingChar(out _);
 
-			foreach (var ch in input)
-			{
-				if (OpeningChars.Contains(ch))
-				{
-					openingChars.Add(ch);
-				}
-				else if (ch == ClosingCharForOpeningChar[openingChars.Last()])
-				{
-					openingChars.RemoveAt(openingChars.Count() - 1);
-				}
-				else
-				{
-					return ValueOfCorruptedEndingChar[ch];
-				}
-			}
+			if (corruptedChar == null) return 0;
 
-			return 0;
+			return ValueOfCorruptedEndingChar[corruptedChar.Value];
 		}
 
 		public static double GetCompletionScore(this string input)
 		{
-			var openingCharsMissingClosingChars = input.GetOpeningCharsMissingClosingChar();
-			openingCharsMissingClosingChars.Reverse();
+			input.GetCorruptedEndingChar(out var openingCharsMissingClosingChar);
+			openingCharsMissingClosingChar.Reverse();
 
 			double completionScore = 0;
 
-			foreach (var ch in openingCharsMissingClosingChars)
+			foreach (var ch in openingCharsMissingClosingChar)
 			{
 				completionScore = 5 * completionScore + PointValueForClosingCharMatchingOpeningChar[ch];
 			}
@@ -128,23 +98,27 @@ namespace AdventOfCode.Y2021
 			return completionScore;
 		}
 
-		public static List<char> GetOpeningCharsMissingClosingChar(this string input)
-		{
-			var openingChars = new List<char>();
+		public static char? GetCorruptedEndingChar(this string input, out List<char> openingCharsMissingClosingChar)
+        {
+			openingCharsMissingClosingChar = new List<char>();
 
 			foreach (var ch in input)
 			{
 				if (OpeningChars.Contains(ch))
 				{
-					openingChars.Add(ch);
+					openingCharsMissingClosingChar.Add(ch);
 				}
-				else if (ch == ClosingCharForOpeningChar[openingChars.Last()])
+				else if (ch == ClosingCharForOpeningChar[openingCharsMissingClosingChar.Last()])
 				{
-					openingChars.RemoveAt(openingChars.Count() - 1);
+					openingCharsMissingClosingChar.RemoveAt(openingCharsMissingClosingChar.Count() - 1);
+				}
+				else
+				{
+					return ch;
 				}
 			}
 
-			return openingChars;
+			return null;
 		}
 
 		public static double GetMiddleScore(this IEnumerable<double> scores)
