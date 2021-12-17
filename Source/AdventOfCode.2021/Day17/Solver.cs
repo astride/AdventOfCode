@@ -34,15 +34,15 @@ namespace AdventOfCode.Y2021
 		{
 			var yMax = 0;
 
-			(int X, int Y) currentPosition;
-			var positionsOnPath = new List<(int X, int Y)>();
+			Coordinate currentPosition;
+			var positionsOnPath = new List<Coordinate>();
 			int stepCount;
 
             foreach (var velocityX in Enumerable.Range(1, 108)) // range length found experimentally
             {
 				foreach (var velocityY in Enumerable.Range(1, 108)) // range length found experimentally
                 {
-					currentPosition = (0, 0);
+					currentPosition = Coordinate.Origo;
 					positionsOnPath.Clear();
 					stepCount = 1;
 
@@ -84,23 +84,23 @@ namespace AdventOfCode.Y2021
 			return int.Parse(string.Concat(targetRange.SkipWhile(ch => ch != '.').SkipWhile(ch => ch == '.')));
 		}
 
-		public static bool IsInside(this (int X, int Y) position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
+		public static bool IsInside(this Coordinate position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
         {
 			return position.X >= xTarget.Min && position.X <= xTarget.Max &&
 				position.Y >= yTarget.Min && position.Y <= yTarget.Max;
 
         }
 
-		public static bool HasPassed(this (int X, int Y) position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
+		public static bool HasPassed(this Coordinate position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
         {
 			return
 				position.X > xTarget.Max ||
 				position.Y < yTarget.Min;
 		}
 		
-		public static (int X, int Y) GetPositionAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
+		public static Coordinate GetPositionAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
         {
-			return 
+			return new Coordinate
 				(initialVelocity.GetXAfterSteps(stepCount),
 				initialVelocity.GetYAfterSteps(stepCount));
         }
@@ -124,5 +124,20 @@ namespace AdventOfCode.Y2021
 					initialVelocity.Y - (step - 1))
 				.Sum();
 		}
+	}
+
+	public class Coordinate
+	{
+        public Coordinate(int x, int y)
+        {
+			X = x;
+			Y = y;
+        }
+
+		public int X { get; set; }
+
+		public int Y { get; set; }
+
+		public static Coordinate Origo => new Coordinate(0, 0);
 	}
 }
