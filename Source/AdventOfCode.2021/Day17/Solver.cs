@@ -21,6 +21,7 @@ namespace AdventOfCode.Y2021
 			var targetArea = input.GetTargetArea();
 
 			Part1Solution = SolvePart1(targetArea).ToString();
+			Part2Solution = SolvePart2(targetArea).ToString();
 		}
 
 		private static int SolvePart1(Area target)
@@ -33,38 +34,69 @@ namespace AdventOfCode.Y2021
 			var positionsOnPath = new List<Coordinate>();
 			int stepCount;
 
-            foreach (var velocityX in Enumerable.Range(1, 108)) // range length found experimentally
-            {
+			foreach (var velocityX in Enumerable.Range(1, 108)) // range length found experimentally
+			{
 				foreach (var velocityY in Enumerable.Range(1, 108)) // range length found experimentally
-                {
+				{
 					initialVelocity = new Velocity(velocityX, velocityY);
 					position = Coordinate.Origo;
 					positionsOnPath.Clear();
 					stepCount = 1;
 
-					while (!position.IsInside(target) &&
-						!position.HasPassed(target))
-                    {
+					while (!position.IsInside(target) && !position.HasPassed(target))
+					{
 						positionsOnPath.Add(position);
-						
+
 						position = initialVelocity.GetPositionAfterSteps(stepCount);
 
 						if (position.IsInside(target))
-                        {
+						{
 							if (positionsOnPath.Any(pos => pos.Y > yMax))
-                            {
-								yMax = positionsOnPath
-									.Select(pos => pos.Y)
-									.Max();
-                            }
-                        }
+							{
+								yMax = positionsOnPath.Select(pos => pos.Y).Max();
+							}
+						}
 
 						stepCount++;
 					}
 				}
-            }
+			}
 
-            return yMax;
+			return yMax;
+		}
+
+		private static int SolvePart2(Area target)
+        {
+			var possibleInitialVelocities = new List<Velocity>();
+
+			Velocity initialVelocity;
+			Coordinate position;
+
+			int stepCount;
+
+			foreach (var velocityX in Enumerable.Range(1, target.Max.X))
+			{
+				foreach (var velocityY in Enumerable.Range(target.Min.Y, Math.Abs(2 * target.Min.Y))) // range length found experimentally
+				{
+					initialVelocity = new Velocity(velocityX, velocityY);
+					position = Coordinate.Origo;
+					stepCount = 1;
+
+					while (!position.IsInside(target) && !position.HasPassed(target))
+					{
+						position = initialVelocity.GetPositionAfterSteps(stepCount);
+
+						if (position.IsInside(target))
+						{
+							possibleInitialVelocities.Add(initialVelocity);
+						}
+
+						stepCount++;
+					}
+				}
+			}
+
+			return possibleInitialVelocities.Count();
 		}
 	}
 
