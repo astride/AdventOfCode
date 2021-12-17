@@ -45,6 +45,11 @@ namespace AdventOfCode.Y2021
 
 	public static class Day09Helpers
 	{
+		private static readonly Coordinate Above = new Coordinate(0, 1);
+		private static readonly Coordinate Right = new Coordinate(1, 0);
+		private static readonly Coordinate Below = new Coordinate(0, -1);
+		private static readonly Coordinate Left	= new Coordinate(-1, 0);
+
 		public static IEnumerable<Coordinate> GetLowPointCoordinates(this string[] map)
 		{
 			var caveIndexMin = 0;
@@ -123,37 +128,22 @@ namespace AdventOfCode.Y2021
 				return 0;
 			}
 
-			var coorsSearchingAbove = thisLevelCoors.Where(coor => coor.Y >= refCoor.Y);
-			var coorsSearchingRight = thisLevelCoors.Where(coor => coor.X >= refCoor.X);
-			var coorsSearchingBelow = thisLevelCoors.Where(coor => coor.Y <= refCoor.Y);
-			var coorsSearchingLeft = thisLevelCoors.Where(coor => coor.X <= refCoor.X);
+			var coorsToSearchFromByCoorShift = new Dictionary<Coordinate, IEnumerable<Coordinate>>
+			{
+				[Above] = thisLevelCoors.Where(coor => coor.Y >= refCoor.Y),
+				[Right] = thisLevelCoors.Where(coor => coor.X >= refCoor.X),
+				[Below] = thisLevelCoors.Where(coor => coor.Y <= refCoor.Y),
+				[Left] = thisLevelCoors.Where(coor => coor.X <= refCoor.X)
+			};
 
-			List<Coordinate> nextLevelCoors = new List<Coordinate>();
+			var nextLevelCoors = new List<Coordinate>();
 
-			if (coorsSearchingAbove.Any())
-			{
-				nextLevelCoors.AddRange(coorsSearchingAbove
-					.Where(coor => map[coor.X, coor.Y + 1])
-					.Select(coor => new Coordinate(coor.X, coor.Y + 1)));
-			}
-			if (coorsSearchingRight.Any())
-			{
-				nextLevelCoors.AddRange(coorsSearchingRight
-					.Where(coor => map[coor.X + 1, coor.Y])
-					.Select(coor => new Coordinate(coor.X + 1, coor.Y)));
-			}
-			if (coorsSearchingBelow.Any())
-			{
-				nextLevelCoors.AddRange(coorsSearchingBelow
-					.Where(coor => map[coor.X, coor.Y - 1])
-					.Select(coor => new Coordinate(coor.X, coor.Y - 1)));
-			}
-			if (coorsSearchingLeft.Any())
-			{
-				nextLevelCoors.AddRange(coorsSearchingLeft
-					.Where(coor => map[coor.X - 1, coor.Y])
-					.Select(coor => new Coordinate(coor.X - 1, coor.Y)));
-			}
+			foreach (var searchScope in coorsToSearchFromByCoorShift)
+            {
+				nextLevelCoors.AddRange(searchScope.Value
+					.Where(coor => map[coor.X + searchScope.Key.X, coor.Y + searchScope.Key.Y])
+					.Select(coor => new Coordinate(coor.X + searchScope.Key.X, coor.Y + searchScope.Key.Y)));
+            }
 
 			return thisLevelCoors.Count()
 				+ nextLevelCoors.Distinct().GetBasinSize(map, refCoor);
