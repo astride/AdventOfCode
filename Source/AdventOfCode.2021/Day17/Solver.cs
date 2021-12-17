@@ -32,7 +32,43 @@ namespace AdventOfCode.Y2021
 
 		private static int SolvePart1((int Min, int Max) xTarget, (int Min, int Max) yTarget)
 		{
-			return -1;
+			var yMax = 0;
+
+			(int X, int Y) currentPosition;
+			var positionsOnPath = new List<(int X, int Y)>();
+			int stepCount;
+
+            foreach (var velocityX in Enumerable.Range(1, 108)) // range length found experimentally
+            {
+				foreach (var velocityY in Enumerable.Range(1, 108)) // range length found experimentally
+                {
+					currentPosition = (0, 0);
+					positionsOnPath.Clear();
+					stepCount = 1;
+
+					while (!currentPosition.IsInside(xTarget, yTarget) &&
+						!currentPosition.HasPassed(xTarget, yTarget))
+                    {
+						positionsOnPath.Add(currentPosition);
+						
+						currentPosition = (velocityX, velocityY).GetPositionAfterSteps(stepCount);
+
+						if (currentPosition.IsInside(xTarget, yTarget))
+                        {
+							if (positionsOnPath.Any(pos => pos.Y > yMax))
+                            {
+								yMax = positionsOnPath
+									.Select(pos => pos.Y)
+									.Max();
+                            }
+                        }
+
+						stepCount++;
+					}
+				}
+            }
+
+            return yMax;
 		}
 	}
 
@@ -42,10 +78,51 @@ namespace AdventOfCode.Y2021
 		{
 			return int.Parse(string.Concat(targetRange.Skip(2).TakeWhile(ch => ch != '.')));
 		}
-
+			
 		public static int GetMaxTargetValue(this string targetRange)
 		{
 			return int.Parse(string.Concat(targetRange.SkipWhile(ch => ch != '.').SkipWhile(ch => ch == '.')));
+		}
+
+		public static bool IsInside(this (int X, int Y) position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
+        {
+			return position.X >= xTarget.Min && position.X <= xTarget.Max &&
+				position.Y >= yTarget.Min && position.Y <= yTarget.Max;
+
+        }
+
+		public static bool HasPassed(this (int X, int Y) position, (int Min, int Max) xTarget, (int Min, int Max) yTarget)
+        {
+			return
+				position.X > xTarget.Max ||
+				position.Y < yTarget.Min;
+		}
+		
+		public static (int X, int Y) GetPositionAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
+        {
+			return 
+				(initialVelocity.GetXAfterSteps(stepCount),
+				initialVelocity.GetYAfterSteps(stepCount));
+        }
+
+		private static int GetXAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
+        {
+			//we know that initial position is (0, 0) <-- no need to include
+
+			return Enumerable.Range(1, stepCount)
+				.Select(step =>
+					Math.Max(0, initialVelocity.X - (step - 1)))
+				.Sum();
+		}
+
+		private static int GetYAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
+		{
+			//we know that initial position is (0, 0) <-- no need to include
+
+			return Enumerable.Range(1, stepCount)
+				.Select(step =>
+					initialVelocity.Y - (step - 1))
+				.Sum();
 		}
 	}
 }
