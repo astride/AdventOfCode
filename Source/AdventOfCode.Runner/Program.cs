@@ -23,7 +23,7 @@ namespace AdventOfCode.Runner
 		private const int December = 12;
 		private const string Day = "Day";
 		private const string Year = "Y";
-		private const string DateFormat = "dd.MM.yyyy";
+		private const string DateFormat = "dd. MMM yyyy";
 		private const string Solver = "Solver";
 		private const string AdventOfCode = "AdventOfCode";
 		private const string InputWildcardFileName = "Input*.txt";
@@ -41,13 +41,13 @@ namespace AdventOfCode.Runner
 			{
 				Console.WriteLine($"Do you want to solve today's puzzle? Today is {today.ToString(DateFormat)} (leave blank for 'yes'):");
 
-				InterpretAnswer(availablePuzzles, today);
+				InterpretResponseFor(today, availablePuzzles);
 			}
 			else if (availablePuzzles.Any(puzzle => puzzle.Date == yesterday))
             {
 				Console.WriteLine($"Today's puzzle is not available, but maybe you want to solve yesterday's puzzle? Yesterday was {yesterday.ToString(DateFormat)} (leave blank for 'yes'):");
 
-				InterpretAnswer(availablePuzzles, yesterday);
+				InterpretResponseFor(yesterday, availablePuzzles);
             }
 			else
 			{
@@ -55,7 +55,7 @@ namespace AdventOfCode.Runner
 
 				Console.WriteLine($"The latest available puzzle date is {latestAvailablePuzzleDate.ToString(DateFormat)}. Do you want to solve it? (leave blank for 'yes'):");
 
-				InterpretAnswer(availablePuzzles, latestAvailablePuzzleDate);
+				InterpretResponseFor(latestAvailablePuzzleDate, availablePuzzles);
 			}
 		}
 
@@ -73,11 +73,11 @@ namespace AdventOfCode.Runner
 			return puzzleSolvers;
 		}
 
-		static void InterpretAnswer(IEnumerable<PuzzleSolverInfo> availablePuzzles, DateTime selectedDate)
+		static void InterpretResponseFor(DateTime suggestedDate, IEnumerable<PuzzleSolverInfo> availablePuzzles)
         {
 			if (string.IsNullOrEmpty(Console.ReadLine()))
 			{
-				RequestModeAndSolve(availablePuzzles.Single(puzzle => puzzle.Date == selectedDate));
+				RequestModeAndSolve(availablePuzzles.Single(puzzle => puzzle.Date == suggestedDate));
 			}
 			else
 			{
@@ -99,7 +99,7 @@ namespace AdventOfCode.Runner
 			var additionalInfo = testMode ? " (test data)" : string.Empty;
 
 			Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-			Console.WriteLine($"Let's go! Puzzle day is {puzzleSolver.Date.ToString("dd. MMM yyyy")}.\n");
+			Console.WriteLine($"Let's go! Puzzle day is {puzzleSolver.Date.ToString(DateFormat)}.\n");
 			Console.WriteLine($"{nameof(solver.Part1Solution)}{additionalInfo}: {solver.Part1Solution}\n");
 			Console.WriteLine($"{nameof(solver.Part2Solution)}{additionalInfo}: {solver.Part2Solution}\n");
 			Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
@@ -150,13 +150,32 @@ namespace AdventOfCode.Runner
 			{
 				Console.WriteLine($"From which year would you like to select a puzzle to solve? You can choose between {string.Join(", ", availableYears.OrderBy(year => year))}:");
 
-				if (int.TryParse(Console.ReadLine(), out var year) &&
-					availableYears.Contains(year))
-				{
-					return year;
-				}
+				var response = Console.ReadLine();
 
-				Console.WriteLine($"\nThere are no puzzle solvers available for year {year}.");
+				if (int.TryParse(Console.ReadLine(), out var year))
+				{
+					if (availableYears.Contains(year))
+                    {
+						return year;
+                    }
+					else if (year > DateTime.Today.Year ||
+						(year == DateTime.Today.Year && DateTime.Today < new DateTime(year, December, 1)))
+                    {
+						Console.WriteLine($"\nGetting futuristic, now? No puzzles have been published for {year} yet.");
+					}
+					else if (year < 2015)
+                    {
+						Console.WriteLine("Advent of Code published its first puzzle in 2015. No puzzles will ever exist prior to 2015.");
+                    }
+					else
+                    {
+						Console.WriteLine($"\nThere are no puzzle solvers available for year {year}.");
+					}
+				}
+				else
+				{
+					Console.WriteLine($"\nTrying to fool me? Give me a number next time, please.");
+				}
 			}
 		}
 
@@ -179,13 +198,37 @@ namespace AdventOfCode.Runner
 			{
 				Console.WriteLine($"\nFor which day in {year} would you like to solve the puzzle? Available days are {string.Join(", ", availableDays.OrderBy(day => day))}:");
 
-				if (int.TryParse(Console.ReadLine(), out var day) &&
-					availableDays.Contains(day))
-				{
-					return day;
-				}
+				var response = Console.ReadLine();
 
-				Console.WriteLine($"\nDay {day} is not available for year {year}.");
+				if (int.TryParse(response, out var day))
+                {
+					if (availableDays.Contains(day))
+                    {
+						return day;
+                    }
+					else if (day < 1 || day > 31)
+                    {
+						Console.WriteLine($"\nCome on! What on earth are you entering {day} for? That's not a day you'll find in my calendar.");
+                    }
+					else if (day > 25)
+                    {
+						Console.WriteLine($"\nDay {day} is not a possible puzzle day. Valid puzzle days are from December 1st (puzzle day 1) until (and including) December 25th (puzzle day 25).");
+                    }
+					else if (year == DateTime.Today.Year && day > DateTime.Today.Day)
+                    {
+						var dayDiff = day - DateTime.Today.Day;
+
+						Console.WriteLine($"\nGetting futuristic, now? You'll need to wait {dayDiff} {(dayDiff == 1 ? "day" : "days")} for that puzzle to even be published.");
+                    }
+					else
+                    {
+						Console.WriteLine($"\nDay {day} is not available for year {year}.");
+					}
+				}
+				else
+                {
+					Console.WriteLine($"\nTrying to fool me? Give me a number next time, please.");
+                }
 			}
 		}
 
