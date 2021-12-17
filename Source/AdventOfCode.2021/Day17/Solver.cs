@@ -34,7 +34,9 @@ namespace AdventOfCode.Y2021
 		{
 			var yMax = 0;
 
-			Coordinate currentPosition;
+			Velocity initialVelocity;
+			Coordinate position;
+
 			var positionsOnPath = new List<Coordinate>();
 			int stepCount;
 
@@ -42,18 +44,19 @@ namespace AdventOfCode.Y2021
             {
 				foreach (var velocityY in Enumerable.Range(1, 108)) // range length found experimentally
                 {
-					currentPosition = Coordinate.Origo;
+					initialVelocity = new Velocity(velocityX, velocityY);
+					position = Coordinate.Origo;
 					positionsOnPath.Clear();
 					stepCount = 1;
 
-					while (!currentPosition.IsInside(xTarget, yTarget) &&
-						!currentPosition.HasPassed(xTarget, yTarget))
+					while (!position.IsInside(xTarget, yTarget) &&
+						!position.HasPassed(xTarget, yTarget))
                     {
-						positionsOnPath.Add(currentPosition);
+						positionsOnPath.Add(position);
 						
-						currentPosition = (velocityX, velocityY).GetPositionAfterSteps(stepCount);
+						position = initialVelocity.GetPositionAfterSteps(stepCount);
 
-						if (currentPosition.IsInside(xTarget, yTarget))
+						if (position.IsInside(xTarget, yTarget))
                         {
 							if (positionsOnPath.Any(pos => pos.Y > yMax))
                             {
@@ -98,14 +101,14 @@ namespace AdventOfCode.Y2021
 				position.Y < yTarget.Min;
 		}
 		
-		public static Coordinate GetPositionAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
+		public static Coordinate GetPositionAfterSteps(this Velocity initialVelocity, int stepCount)
         {
 			return new Coordinate
 				(initialVelocity.GetXAfterSteps(stepCount),
 				initialVelocity.GetYAfterSteps(stepCount));
         }
 
-		private static int GetXAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
+		private static int GetXAfterSteps(this Velocity initialVelocity, int stepCount)
         {
 			//we know that initial position is (0, 0) <-- no need to include
 
@@ -115,7 +118,7 @@ namespace AdventOfCode.Y2021
 				.Sum();
 		}
 
-		private static int GetYAfterSteps(this (int X, int Y) initialVelocity, int stepCount)
+		private static int GetYAfterSteps(this Velocity initialVelocity, int stepCount)
 		{
 			//we know that initial position is (0, 0) <-- no need to include
 
@@ -126,18 +129,28 @@ namespace AdventOfCode.Y2021
 		}
 	}
 
-	public class Coordinate
-	{
-        public Coordinate(int x, int y)
-        {
+	public class XY
+    {
+		public XY(int x, int y)
+		{
 			X = x;
 			Y = y;
-        }
+		}
 
 		public int X { get; set; }
 
 		public int Y { get; set; }
+	}
+
+	public class Coordinate : XY
+	{
+		public Coordinate(int x, int y) : base(x, y) { }
 
 		public static Coordinate Origo => new Coordinate(0, 0);
 	}
+
+    public class Velocity : XY
+    {
+        public Velocity(int x, int y) : base(x, y) { }
+    }
 }
