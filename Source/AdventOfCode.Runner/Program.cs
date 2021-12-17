@@ -23,15 +23,23 @@ namespace AdventOfCode.Runner
 		private const int December = 12;
 		private const string Day = "Day";
 		private const string Year = "Y";
+
 		private const string DateFormat = "dd. MMM yyyy";
+		
 		private const string Solver = "Solver";
 		private const string AdventOfCode = "AdventOfCode";
+		
 		private const string InputWildcardFileName = "Input*.txt";
 		private const string InputFileName = "Input.txt";
 		private const string InputExampleFileName = "InputExample.txt";
 
 		static void Main(string[] args)
 		{
+			ResolvePuzzleDateAndPlay();
+		}
+
+		static void ResolvePuzzleDateAndPlay()
+        {
 			var today = DateTime.Today;
 			var yesterday = today.AddDays(-1);
 
@@ -44,11 +52,11 @@ namespace AdventOfCode.Runner
 				InterpretResponseFor(today, availablePuzzles);
 			}
 			else if (availablePuzzles.Any(puzzle => puzzle.Date == yesterday))
-            {
+			{
 				Console.WriteLine($"Today's puzzle is not available, but maybe you want to solve yesterday's puzzle? Yesterday was {yesterday.ToString(DateFormat)} (leave blank for 'yes'):");
 
 				InterpretResponseFor(yesterday, availablePuzzles);
-            }
+			}
 			else
 			{
 				var latestAvailablePuzzleDate = availablePuzzles.Select(puzzle => puzzle.Date).Max();
@@ -141,18 +149,18 @@ namespace AdventOfCode.Runner
 			{
 				var year = availableYears.Single();
 
-				Console.WriteLine($"Puzzle solvers only exist for year {year}.");
+				Console.WriteLine($"\nPuzzle solvers only exist for year {year}.");
 
 				return year;
 			}
 
 			while (true)
 			{
-				Console.WriteLine($"From which year would you like to select a puzzle to solve? You can choose between {string.Join(", ", availableYears.OrderBy(year => year))}:");
+				Console.WriteLine($"\nFrom which year would you like to select a puzzle to solve? You can choose between {string.Join(", ", availableYears.OrderBy(year => year))}:");
 
 				var response = Console.ReadLine();
 
-				if (int.TryParse(Console.ReadLine(), out var year))
+				if (int.TryParse(response, out var year))
 				{
 					if (availableYears.Contains(year))
                     {
@@ -165,7 +173,7 @@ namespace AdventOfCode.Runner
 					}
 					else if (year < 2015)
                     {
-						Console.WriteLine("Advent of Code published its first puzzle in 2015. No puzzles will ever exist prior to 2015.");
+						Console.WriteLine("\nAdvent of Code published its first puzzle in 2015. No puzzles will ever exist prior to 2015.");
                     }
 					else
                     {
