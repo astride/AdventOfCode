@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Common;
+using AdventOfCode.Common.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -167,43 +168,5 @@ namespace AdventOfCode.Y2021
 					initialVelocity.Y - (step - 1))
 				.Sum();
 		}
-	}
-
-	public class XY
-    {
-		public XY(int x, int y)
-		{
-			X = x;
-			Y = y;
-		}
-
-		public int X { get; set; }
-
-		public int Y { get; set; }
-	}
-
-	public class Coordinate : XY
-	{
-		public Coordinate(int x, int y) : base(x, y) { }
-
-		public static Coordinate Origo => new Coordinate(0, 0);
-	}
-
-    public class Velocity : XY
-    {
-        public Velocity(int x, int y) : base(x, y) { }
-    }
-
-    public class Area
-	{
-        public Area(Coordinate min, Coordinate max)
-        {
-			Min = min;
-			Max = max;
-        }
-
-		public Coordinate Min { get; set; }
-
-		public Coordinate Max { get; set; }
 	}
 }
