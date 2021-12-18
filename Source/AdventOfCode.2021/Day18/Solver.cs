@@ -95,34 +95,6 @@ namespace AdventOfCode.Y2021
 			}
 		}
 
-		public void Reduce()
-		{
-			SnailFishNumber numberReadyToExplode;
-			SnailFishNumber numberReadyToSplit;
-
-			while (true)
-			{
-				numberReadyToExplode = GetLeftmostNumberContainingPairNestedAtLevel(DeepestNestingLevel);
-				numberReadyToSplit = GetLeftmostNumberContainingValueGreaterThan(ThresholdValue);
-
-				if (numberReadyToExplode != null)
-				{
-					Explode(numberReadyToExplode);
-				}
-				else if (numberReadyToSplit != null)
-				{
-					Split(numberReadyToSplit);
-				}
-				else
-				{
-					Console.WriteLine("\n\nReduction finished.");
-					return;
-				}
-
-				Print();
-			}
-		}
-
 		public int GetMagnitude()
 		{
 			return
@@ -149,6 +121,34 @@ namespace AdventOfCode.Y2021
 			else Ypair.PrintValues();
 
 			Console.Write(PairClosingChar);
+		}
+
+		public void Reduce()
+		{
+			SnailFishNumber numberReadyToExplode;
+			SnailFishNumber numberReadyToSplit;
+
+			while (true)
+			{
+				numberReadyToExplode = GetLeftmostNumberContainingPairNestedAtLevel(DeepestNestingLevel);
+				numberReadyToSplit = GetLeftmostNumberContainingValueGreaterThan(ThresholdValue);
+
+				if (numberReadyToExplode != null)
+				{
+					Explode(numberReadyToExplode);
+				}
+				else if (numberReadyToSplit != null)
+				{
+					Split(numberReadyToSplit);
+				}
+				else
+				{
+					Console.WriteLine("\n\nReduction finished.");
+					return;
+				}
+
+				Print();
+			}
 		}
 
 		private SnailFishNumber((string X, string Y) value)
@@ -219,6 +219,15 @@ namespace AdventOfCode.Y2021
 			UpdateNumberContaining(number, parent);
 		}
 
+		private SnailFishNumber GetLeftmostDescendant()
+		{
+			// find desc to update X value of: drill down through Xpair of descs until reaching desc with X value
+			if (X != null) return this;
+			if (Xpair != null) return Xpair.GetLeftmostDescendant();
+
+			return null;
+		}
+
 		private SnailFishNumber GetLeftmostNumberContainingPairNestedAtLevel(int level)
 		{
 			if (level == 0)
@@ -236,9 +245,102 @@ namespace AdventOfCode.Y2021
 				return null;
 			}
 
-			return 
+			return
 				Xpair?.GetLeftmostNumberContainingPairNestedAtLevel(level - 1) ??
 				Ypair?.GetLeftmostNumberContainingPairNestedAtLevel(level - 1);
+		}
+
+		private SnailFishNumber GetLeftmostNumberContainingValueGreaterThan(int value)
+		{
+			if (X > value || Y > value) return this;
+			if (Xpair == null && Ypair == null) return null;
+
+			return 
+				Xpair?.GetLeftmostNumberContainingValueGreaterThan(value) ??
+				Ypair?.GetLeftmostNumberContainingValueGreaterThan(value);
+		}
+	
+		private SnailFishNumber GetNearestAncestorWhereNumberIsDescendantOfXpair(SnailFishNumber number)
+		{
+			// find first ancestor where number is a descendant of Xpair
+			var parent = GetParentOf(number);
+
+			if (parent == null) return null;
+			if (parent.Xpair == number) return parent;
+
+			return GetNearestAncestorWhereNumberIsDescendantOfXpair(parent);
+		}
+
+		private SnailFishNumber GetNearestAncestorWhereNumberIsDescendantOfYpair(SnailFishNumber number)
+		{
+			// find first ancestor where number is a descendant of Ypair
+			var parent = GetParentOf(number);
+
+			if (parent == null) return null;
+			if (parent.Ypair == number) return parent;
+
+			return GetNearestAncestorWhereNumberIsDescendantOfYpair(parent);
+		}
+
+		private SnailFishNumber GetParentOf(SnailFishNumber number)
+		{
+			if (Xpair == null && Ypair == null) return null;
+
+			if (Xpair == number || Ypair == number) return this;
+
+			return Xpair?.GetParentOf(number) ?? Ypair?.GetParentOf(number);
+		}
+
+		private SnailFishNumber GetRightmostDescendant()
+		{
+			// find desc to update Y value of: drill down through Ypair of descs until reaching desc with Y value
+			if (Y != null) return this;
+			if (Ypair != null) return Ypair.GetRightmostDescendant();
+
+			return null;
+		}
+
+		private void Split(SnailFishNumber number)
+		{
+			decimal half;
+
+			if (number.X > ThresholdValue)
+			{
+				Console.WriteLine("\n\nSPLITTING number " + number.X);
+				
+				half = (decimal)number.X.Value / 2;
+
+				number.Xpair = new SnailFishNumber((int)Math.Floor(half), (int)Math.Ceiling(half));
+				number.X = null;
+			}
+			else if (number.Y > ThresholdValue)
+			{
+				Console.WriteLine("\n\nSPLITTING number " + number.Y);
+
+				half = (decimal)number.Y.Value / 2;
+
+				number.Ypair = new SnailFishNumber((int)Math.Floor(half), (int)Math.Ceiling(half));
+				number.Y = null;
+			}
+		}
+
+		private void UpdateNumberContaining(SnailFishNumber number, SnailFishNumber parent)
+		{
+			if (parent == null) return;
+
+			if (parent.Xpair?.X == number.X &&
+				parent.Xpair?.Y == number.Y)
+			{
+				parent.X = 0;
+				parent.Xpair = null;
+			}
+			else if (
+				parent.Ypair?.X == number.X &&
+				parent.Ypair?.Y == number.Y)
+			{
+				parent.Y = 0;
+				parent.Ypair = null;
+			}
 		}
 
 		private void UpdateValueLeftOf(SnailFishNumber number, SnailFishNumber parent)
@@ -301,108 +403,6 @@ namespace AdventOfCode.Y2021
 				if (descendant == null) return;
 				if (descendant.X != null) { descendant.X += value; return; }
 			}
-		}
-
-		private SnailFishNumber GetNearestAncestorWhereNumberIsDescendantOfYpair(SnailFishNumber number)
-		{
-			// find first ancestor where number is a descendant of Ypair
-			var parent = GetParentOf(number);
-
-			if (parent == null) return null;
-			if (parent.Ypair == number) return parent;
-
-			return GetNearestAncestorWhereNumberIsDescendantOfYpair(parent);
-		}
-
-		private SnailFishNumber GetNearestAncestorWhereNumberIsDescendantOfXpair(SnailFishNumber number)
-		{
-			// find first ancestor where number is a descendant of Xpair
-			var parent = GetParentOf(number);
-
-			if (parent == null) return null;
-			if (parent.Xpair == number) return parent;
-
-			return GetNearestAncestorWhereNumberIsDescendantOfXpair(parent);
-		}
-
-		private SnailFishNumber GetParentOf(SnailFishNumber number)
-		{
-			if (Xpair == null && Ypair == null) return null;
-
-			if (Xpair == number || Ypair == number) return this;
-
-			return Xpair?.GetParentOf(number) ?? Ypair?.GetParentOf(number);
-		}
-
-		private SnailFishNumber GetRightmostDescendant()
-		{
-			// find desc to update Y value of: drill down through Ypair of descs until reaching desc with Y value
-			if (Y != null) return this;
-			if (Ypair != null) return Ypair.GetRightmostDescendant();
-
-			return null;
-		}
-
-		private SnailFishNumber GetLeftmostDescendant()
-		{
-			// find desc to update X value of: drill down through Xpair of descs until reaching desc with X value
-			if (X != null) return this;
-			if (Xpair != null) return Xpair.GetLeftmostDescendant();
-
-			return null;
-		}
-
-		private void UpdateNumberContaining(SnailFishNumber number, SnailFishNumber parent)
-		{
-			if (parent == null) return;
-
-			if (parent.Xpair?.X == number.X &&
-				parent.Xpair?.Y == number.Y)
-			{
-				parent.X = 0;
-				parent.Xpair = null;
-			}
-			else if (
-				parent.Ypair?.X == number.X &&
-				parent.Ypair?.Y == number.Y)
-			{
-				parent.Y = 0;
-				parent.Ypair = null;
-			}
-		}
-
-		private void Split(SnailFishNumber number)
-		{
-			decimal half;
-
-			if (number.X > ThresholdValue)
-			{
-				Console.WriteLine("\n\nSPLITTING number " + number.X);
-				
-				half = (decimal)number.X.Value / 2;
-
-				number.Xpair = new SnailFishNumber((int)Math.Floor(half), (int)Math.Ceiling(half));
-				number.X = null;
-			}
-			else if (number.Y > ThresholdValue)
-			{
-				Console.WriteLine("\n\nSPLITTING number " + number.Y);
-
-				half = (decimal)number.Y.Value / 2;
-
-				number.Ypair = new SnailFishNumber((int)Math.Floor(half), (int)Math.Ceiling(half));
-				number.Y = null;
-			}
-		}
-
-		private SnailFishNumber GetLeftmostNumberContainingValueGreaterThan(int value)
-		{
-			if (X > value || Y > value) return this;
-			if (Xpair == null && Ypair == null) return null;
-
-			return 
-				Xpair?.GetLeftmostNumberContainingValueGreaterThan(value) ??
-				Ypair?.GetLeftmostNumberContainingValueGreaterThan(value);
 		}
 	}
 }
