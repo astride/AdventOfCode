@@ -15,7 +15,6 @@ namespace AdventOfCode.Y2021
 		{
 			var numbers = rawInput
 				.Where(entry => !string.IsNullOrWhiteSpace(entry))
-				.Select(entry => entry.Substring(1, entry.Length - 2)) // remove outer brackets
 				.Select(entry => new SnailFishNumber(entry))
 				.ToList();
 
@@ -40,31 +39,34 @@ namespace AdventOfCode.Y2021
 
 	public class SnailFishNumber
 	{
-		public SnailFishNumber(string number)
+		public SnailFishNumber(string number) : this(GetXYStringsOf(number)) { }
+
+		private static (string X, string Y) GetXYStringsOf(string number)
 		{
-			string xValue = null;
-			string yValue = null;
-			
+			var content = number.Substring(1, number.Length - 2); // remove outer brackets
+
 			var pairOpeningCharCount = 0;
 			var pairClosingCharCount = 0;
 			var i = 0;
 
-			while (xValue == null || yValue == null)
+			while (i < content.Length)
 			{
-				if (number[i] == ValueSeparator &&
+				if (content[i] == ValueSeparator &&
 					pairClosingCharCount == pairOpeningCharCount)
 				{
-					xValue = number.Substring(0, i);
-					yValue = number.Substring(i + 1);
+					var xValue = content.Substring(0, i);
+					var yValue = content.Substring(i + 1);
+
+					return (xValue, yValue);
 				}
 
-				if (number[i] == PairOpeningChar) pairOpeningCharCount++;
-				else if (number[i] == PairClosingChar) pairClosingCharCount++;
+				if (content[i] == PairOpeningChar) pairOpeningCharCount++;
+				else if (content[i] == PairClosingChar) pairClosingCharCount++;
 
 				i++;
 			}
 
-			new SnailFishNumber(xValue, yValue);
+			return (null, null);
 		}
 
 		public int? X { get; set; }
@@ -121,15 +123,31 @@ namespace AdventOfCode.Y2021
 				2 * (Y ?? Ypair.GetMagnitude());
 		}
 
-		private SnailFishNumber(string xValue, string yValue)
+		private SnailFishNumber((string X, string Y) value)
 		{
-			var isX = int.TryParse(xValue, out var x);
-			var isY = int.TryParse(yValue, out var y);
+			var isX = int.TryParse(value.X, out var x);
+			var isY = int.TryParse(value.Y, out var y);
 
-			if (isX && isY) new SnailFishNumber(x, y);
-			else if (isX)	new SnailFishNumber(x, new SnailFishNumber(yValue));
-			else if (isY)	new SnailFishNumber(new SnailFishNumber(xValue), y);
-			else			new SnailFishNumber(new SnailFishNumber(xValue), new SnailFishNumber(yValue));
+			if (isX && isY)
+			{
+				X = x;
+				Y = y;
+			}
+			else if (isX)
+			{
+				X = x;
+				Ypair = new SnailFishNumber(value.Y);
+			}
+			else if (isY)
+			{
+				Xpair = new SnailFishNumber(value.X);
+				Y = y;
+			}
+			else
+			{
+				Xpair = new SnailFishNumber(value.X);
+				Ypair = new SnailFishNumber(value.Y);
+			}
 		}
 
 		private SnailFishNumber(int x, int y)
@@ -229,8 +247,8 @@ namespace AdventOfCode.Y2021
 
 			if (pairIsXpair)
 			{
-				// find closest ancestor where pair is descendant of Ypair
-				var ancestor = GetInnermostAncestorWherePairIsDescendantOfYpair(pair);
+				// find closest ancestor where Xpair is descendant of Ypair
+				var ancestor = GetInnermostAncestorWhereXpairIsDescendantOfYpair(numberContainingPair);
 				if (ancestor == null) return;
 
 				var descendant = ancestor.GetDescendantToUpdateYvalueOf();
@@ -278,8 +296,8 @@ namespace AdventOfCode.Y2021
 			}
 			else if (pairIsYpair)
 			{
-				// find closest ancestor where pair is descendant of Xpair
-				var ancestor = GetInnermostAncestorWherePairIsDescendantOfXpair(pair);
+				// find closest ancestor where Ypair is descendant of Xpair
+				var ancestor = GetInnermostAncestorWhereNumberIsDescendantOfXpair(numberContainingPair);
 				if (ancestor == null) return;
 
 				var descendant = ancestor.GetDescendantToUpdateXvalueOf();
@@ -296,15 +314,51 @@ namespace AdventOfCode.Y2021
 			}
 		}
 
-		private SnailFishNumber GetInnermostAncestorWherePairIsDescendantOfYpair(XY pair)
+		private SnailFishNumber GetInnermostAncestorWhereXpairIsDescendantOfYpair(SnailFishNumber number)
 		{
-			// find innermost ancestor of pair where pair is part of a Ypair
+			// find innermost ancestor where number is a descendant of Ypair
+			if (!ParentExistsFor(number)) return null;
 
+			if (GetParentOf(number).Ypair == number) return GetParentOf(number);
+
+			return GetInnermostAncestorWhereXpairIsDescendantOfYpair(GetParentOf(number));
 		}
 
-		private SnailFishNumber GetInnermostAncestorWherePairIsDescendantOfXpair(XY pair)
+		private SnailFishNumber GetInnermostAncestorWhereNumberIsDescendantOfXpair(SnailFishNumber number)
 		{
-			//TODO
+			// find innermost ancestor where number is a descendant of Xpair
+			if (!ParentExistsFor(number)) return null;
+			
+			if (GetParentOf(number).Xpair == number) return GetParentOf(number);
+
+			return GetInnermostAncestorWhereNumberIsDescendantOfXpair(GetParentOf(number));
+		}
+
+		private bool ParentExistsFor(SnailFishNumber number)
+		{
+			if (Xpair == null && Ypair == null) return false;
+
+			if (Xpair == number || Ypair == number) return true;
+
+			return Xpair.ParentExistsFor(number) || Ypair.ParentExistsFor(number);
+		}
+
+		private bool ContainsDescendant(SnailFishNumber descendant)
+		{
+			if (Xpair == null && Ypair == null) return false;
+
+			if (Xpair == descendant || Ypair == descendant) return true;
+
+			return Xpair.ContainsDescendant(descendant) || Ypair.ContainsDescendant(descendant);
+		}
+
+		private SnailFishNumber GetParentOf(SnailFishNumber number)
+		{
+			if (Xpair == null && Ypair == null) return null;
+
+			if (Xpair == number || Ypair == number) return this;
+
+			return Xpair.GetParentOf(number) ?? Ypair.GetParentOf(number);
 		}
 
 		private SnailFishNumber GetDescendantToUpdateYvalueOf()
