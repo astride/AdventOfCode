@@ -47,6 +47,9 @@ namespace AdventOfCode.Y2021
 
 	public class SnailFishNumber
 	{
+		private const int DeepestNestingLevel = 4; // assuming there is never nesting beyond level 4
+		private const int ThresholdValue = 9;
+
 		public SnailFishNumber(string numberAsString)
 		{
 			//TODO
@@ -100,19 +103,19 @@ namespace AdventOfCode.Y2021
 
 		public void Reduce()
 		{
-			bool containsPairNestedAtLevel4;
-			bool containsRegularNumberGreaterThan9;
+			bool readyToExplode;
+			bool readyToSplit;
 
 			while (true)
 			{
-				containsPairNestedAtLevel4 = ContainsPairNestedAtLevel(4);
-				containsRegularNumberGreaterThan9 = ContainsRegularNumberGreaterThan(9);
+				readyToExplode = ContainsPairNestedAtLevel(DeepestNestingLevel);
+				readyToSplit = ContainsValueGreaterThan(ThresholdValue);
 
-				if (containsPairNestedAtLevel4)
+				if (readyToExplode)
 				{
 					Explode();
 				}
-				else if (containsRegularNumberGreaterThan9)
+				else if (readyToSplit)
 				{
 					Split();
 				}
@@ -125,18 +128,130 @@ namespace AdventOfCode.Y2021
 
 		public void Explode()
 		{
+			XY leftmostPairNestedInsideFourPairs = GetLeftmostPairNestedAtLevel(DeepestNestingLevel);
+
+			UpdateValueLeftOf(leftmostPairNestedInsideFourPairs);
+			UpdateValueRightOf(leftmostPairNestedInsideFourPairs);
+			UpdateNumberContaining(leftmostPairNestedInsideFourPairs);
+		}
+
+		public void UpdateValueLeftOf(XY pair)
+		{
 			//TODO
+		}
+
+		public void UpdateValueRightOf(XY pair)
+		{
+			//TODO
+		}
+
+		public void UpdateNumberContaining(XY pair)
+		{
+			var number = GetLeftmostNumberContaining(pair);
+
+			if (number.Xpair?.X == pair.X &&
+				number.Xpair?.Y == pair.Y)
+			{
+				number.X = 0;
+				number.Xpair = null;
+			}
+			else if (
+				number.Ypair?.X == pair.X &&
+				number.Ypair?.Y == pair.Y)
+			{
+				number.Y = 0;
+				number.Ypair = null;
+			}
+		}
+
+		public SnailFishNumber GetLeftmostNumberContaining(XY pair)
+		{
+			if (Xpair?.X == pair.X &&
+				Xpair?.Y == pair.Y)
+			{
+				return this;
+			}
+
+			if (Ypair?.X == pair.X &&
+				Ypair?.Y == pair.Y)
+			{
+				return this;
+			}
+
+			var matchInXpair = Xpair != null
+				? Xpair.GetLeftmostNumberContaining(pair)
+				: null;
+
+			var matchInYPair = Ypair != null
+				? Ypair.GetLeftmostNumberContaining(pair)
+				: null;
+
+			return matchInXpair ?? matchInYPair;
 		}
 
 		public void Split()
 		{
-			//TODO
+			var number = GetLeftmostNumberContainingValueGreaterThan(ThresholdValue);
+			decimal half;
+
+			if (number.X > ThresholdValue)
+			{
+				half = number.X.Value / 2;
+
+				number.Xpair = new SnailFishNumber((int)Math.Floor(half), (int)Math.Ceiling(half));
+				number.X = null;
+			}
+			else if (number.Y > ThresholdValue)
+			{
+				half = number.Y.Value / 2;
+
+				number.Ypair = new SnailFishNumber((int)Math.Floor(half), (int)Math.Ceiling(half));
+				number.Y = null;
+			}
+		}
+
+		public SnailFishNumber GetLeftmostNumberContainingValueGreaterThan(int value)
+		{
+			if (X == value || Y == value) return this;
+
+			var matchInXpair = Xpair != null
+				? Xpair.GetLeftmostNumberContainingValueGreaterThan(value)
+				: null;
+
+			var matchInYpair = Ypair != null
+				? Ypair.GetLeftmostNumberContainingValueGreaterThan(value)
+				: null;
+
+			return matchInXpair ?? matchInYpair;
 		}
 
 		public int GetMagnitude()
 		{
 			//TODO
 			return -1;
+		}
+
+		public XY GetLeftmostPairNestedAtLevel(int level)
+		{
+			if (level == 0)
+			{
+				if (X == null || Y == null)
+				{
+					return null;
+				}
+
+				return new XY(X.Value, Y.Value);
+			}
+
+			if (Xpair == null && Ypair == null)
+			{
+				return null;
+			}
+
+			var matchInXpair = Xpair?.GetLeftmostPairNestedAtLevel(level - 1);
+			var matchInYpair = Ypair?.GetLeftmostPairNestedAtLevel(level - 1);
+
+			return matchInXpair ?? matchInYpair;
 		}
 
 		public bool ContainsPairNestedAtLevel(int level)
@@ -156,13 +271,13 @@ namespace AdventOfCode.Y2021
 				(Ypair != null && Ypair.ContainsPairNestedAtLevel(level - 1));
 		}
 
-		public bool ContainsRegularNumberGreaterThan(int number)
+		public bool ContainsValueGreaterThan(int value)
 		{
 			return
-				X > number ||
-				Y > number ||
-				(Xpair != null && Xpair.ContainsRegularNumberGreaterThan(number)) ||
-				(Ypair != null && Ypair.ContainsRegularNumberGreaterThan(number));
+				X > value ||
+				Y > value ||
+				(Xpair != null && Xpair.ContainsValueGreaterThan(value)) ||
+				(Ypair != null && Ypair.ContainsValueGreaterThan(value));
 		}
 	}
 }
