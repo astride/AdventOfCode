@@ -1,5 +1,4 @@
 ﻿using AdventOfCode.Common;
-using AdventOfCode.Common.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +20,7 @@ namespace AdventOfCode.Y2021
 				.ToList();
 
 			Part1Solution = SolvePart1(basicImage, enhancementAlgorithm).ToString();
+			Part2Solution = SolvePart2(basicImage, enhancementAlgorithm).ToString();
 		}
 
 		private static int SolvePart1(List<string> imageInput, string algorithm)
@@ -29,14 +29,23 @@ namespace AdventOfCode.Y2021
 
 			var image = imageInput.CreateImage(enhancements);
 
-			image.Print();
+			foreach (var enhancementCount in Enumerable.Range(1, enhancements))
+			{
+				image.Enhance(algorithm, enhancements - enhancementCount);
+			}
+
+			return image.LightPixelCount();
+		}
+
+		private static int SolvePart2(List<string> imageInput, string algorithm)
+		{
+			int enhancements = 50;
+
+			var image = imageInput.CreateImage(enhancements);
 
 			foreach (var enhancementCount in Enumerable.Range(1, enhancements))
 			{
 				image.Enhance(algorithm, enhancements - enhancementCount);
-
-				Console.WriteLine($"\nAfter enhancement:\n");
-				image.Print();
 			}
 
 			return image.LightPixelCount();
@@ -67,12 +76,11 @@ namespace AdventOfCode.Y2021
 		private static IDictionary<char, int> ValueOfPos8 =
 			new Dictionary<char, int> { [DarkPixel] = 0, [LightPixel] = 256 };
 
-		public static char[,] CreateImage(this List<string> input, int extraLayers)
+		public static char[,] CreateImage(this List<string> input, int padding)
 		{
 			var inputWidth = input[0].Length;
 			var inputHeight = input.Count;
 
-			var padding = 1 + extraLayers;
 			var expansion = 2 * padding;
 
 			var image = CreateDarkImage(inputWidth + expansion, inputHeight + expansion);
@@ -113,21 +121,31 @@ namespace AdventOfCode.Y2021
 			Array.Copy(image, source, width * height);
 
 			int value;
+			int xLeftOf;
+			int xRightOf;
+			int yAbove;
+			int yBelow;
 
-			foreach (var x in Enumerable.Range(1 + remainingEnhancements, width - (2 * (1 + remainingEnhancements))))
+			foreach (var x in Enumerable.Range(0, width))
 			{
-				foreach (var y in Enumerable.Range(1 + remainingEnhancements, height - (2 * (1 + remainingEnhancements))))
+				xLeftOf = Math.Max(x - 1, 0);
+				xRightOf = Math.Min(x + 1, width - 1);
+
+				foreach (var y in Enumerable.Range(0, height))
 				{
+					yAbove = Math.Max(y - 1, 0);
+					yBelow = Math.Min(y + 1, height - 1);
+
 					value =
-						ValueOfPos8[source[x - 1,	y - 1]] +
-						ValueOfPos7[source[x,		y - 1]] +
-						ValueOfPos6[source[x + 1,	y - 1]] +
-						ValueOfPos5[source[x - 1,	y]] +
+						ValueOfPos8[source[xLeftOf, yAbove]] +
+						ValueOfPos7[source[x, yAbove]] +
+						ValueOfPos6[source[xRightOf, yAbove]] +
+						ValueOfPos5[source[xLeftOf,	y]] +
 						ValueOfPos4[source[x,		y]] +
-						ValueOfPos3[source[x + 1,	y]] +
-						ValueOfPos2[source[x - 1,	y + 1]] +
-						ValueOfPos1[source[x,		y + 1]] +
-						ValueOfPos0[source[x + 1,	y + 1]];
+						ValueOfPos3[source[xRightOf,	y]] +
+						ValueOfPos2[source[xLeftOf, yBelow]] +
+						ValueOfPos1[source[x, yBelow]] +
+						ValueOfPos0[source[xRightOf, yBelow]];
 
 					image[x, y] = enhancementAlgorithm[value];
 				}
