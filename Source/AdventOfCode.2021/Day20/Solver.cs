@@ -25,30 +25,16 @@ namespace AdventOfCode.Y2021
 
 		private static int SolvePart1(List<string> imageInput, string algorithm)
 		{
-			int enhancements = 2;
+			var lightPixelCount = imageInput.GetFinalLightPixelCount(algorithm, 2);
 
-			var image = imageInput.CreateImage(enhancements);
-
-			foreach (var enhancementCount in Enumerable.Range(1, enhancements))
-			{
-				image.Enhance(algorithm, enhancements - enhancementCount);
-			}
-
-			return image.LightPixelCount();
+			return lightPixelCount;
 		}
 
 		private static int SolvePart2(List<string> imageInput, string algorithm)
 		{
-			int enhancements = 50;
+			var lightPixelCount = imageInput.GetFinalLightPixelCount(algorithm, 50);
 
-			var image = imageInput.CreateImage(enhancements);
-
-			foreach (var enhancementCount in Enumerable.Range(1, enhancements))
-			{
-				image.Enhance(algorithm, enhancements - enhancementCount);
-			}
-
-			return image.LightPixelCount();
+			return lightPixelCount;
 		}
 	}
 
@@ -76,7 +62,19 @@ namespace AdventOfCode.Y2021
 		private static IDictionary<char, int> ValueOfPos8 =
 			new Dictionary<char, int> { [DarkPixel] = 0, [LightPixel] = 256 };
 
-		public static char[,] CreateImage(this List<string> input, int padding)
+		public static int GetFinalLightPixelCount(this List<string> imageInput, string algorithm, int enhancements)
+		{
+			var image = imageInput.CreateImage(enhancements);
+
+			foreach (var enhancementCount in Enumerable.Range(1, enhancements))
+			{
+				image.Enhance(algorithm, enhancements - enhancementCount);
+			}
+
+			return image.LightPixelCount();
+		}
+
+		private static char[,] CreateImage(this List<string> input, int padding)
 		{
 			var inputWidth = input[0].Length;
 			var inputHeight = input.Count;
@@ -111,7 +109,7 @@ namespace AdventOfCode.Y2021
 			return image;
 		}
 
-		public static void Enhance(this char[,] image, string enhancementAlgorithm, int remainingEnhancements)
+		private static void Enhance(this char[,] image, string enhancementAlgorithm, int remainingEnhancements)
 		{
 			var width = image.GetLength(0);
 			var height = image.GetLength(1);
@@ -152,7 +150,7 @@ namespace AdventOfCode.Y2021
 			}
 		}
 
-		public static int LightPixelCount(this char[,] image)
+		private static int LightPixelCount(this char[,] image)
 		{
 			var count = 0;
 
