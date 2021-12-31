@@ -18,11 +18,12 @@ namespace AdventOfCode.Y2021
 				.ToList();
 
 			Part1Solution = SolvePart1(assignment).ToString();
+			Part2Solution = SolvePart2(assignment).ToString();
 		}
 
 		private static int SolvePart1(List<List<object>> numbers)
 		{
-			var param = numbers.First();
+			var param = new List<object>(numbers.First());
 
 			foreach (var i in Enumerable.Range(1, numbers.Count() - 1))
 			{
@@ -30,9 +31,16 @@ namespace AdventOfCode.Y2021
 				param.SnailFishReduce();
 			}
 
-			param.Print();
-
 			return param.GetMagnitude();
+		}
+
+		private static int SolvePart2(List<List<object>> numbers)
+		{
+			var firstAddends = numbers
+				.Select(number => number.ToFirstAddend())
+				.ToList();
+
+			return Day18Helpers.FindLargestMagnitude(firstAddends, numbers);
 		}
 	}
 
@@ -47,26 +55,26 @@ namespace AdventOfCode.Y2021
 
 		public static List<object> AsSnailFishNumber(this string rawNumber)
 		{
-			var snailFishNumber = new List<object>();
-			char temp;
+			var number = new List<object>();
+			char ch;
 
 			while (rawNumber.Length > 0)
 			{
-				temp = rawNumber.First();
+				ch = rawNumber.First();
 
-				if (temp == PairOpeningChar || temp == PairClosingChar)
+				if (ch == PairOpeningChar || ch == PairClosingChar)
 				{
-					snailFishNumber.Add(temp);
+					number.Add(ch);
 				}
-				else if (temp != ValueSeparator)
+				else if (ch != ValueSeparator)
 				{
-					snailFishNumber.Add(int.Parse(temp.ToString()));
+					number.Add(int.Parse(ch.ToString()));
 				}
 
 				rawNumber = rawNumber.Substring(1);
 			}
 
-			return snailFishNumber;
+			return number;
 		}
 
 		public static void SnailFishAdd(this List<object> number, List<object> addend)
@@ -83,7 +91,7 @@ namespace AdventOfCode.Y2021
 
 			while (true)
 			{
-				explosionIndex = number.GetExplosionIndex();
+				explosionIndex = number.GetExplosionIndex(DeepestNestingLevel);
 				splitIndex = number.GetSplitIndex();
 
 				if (explosionIndex.HasValue) number.ExplodePairAt(explosionIndex.Value);
@@ -92,28 +100,25 @@ namespace AdventOfCode.Y2021
 			}
 		}
 
-		private static int? GetExplosionIndex(this List<object> number)
+		private static int? GetExplosionIndex(this List<object> number, int deepestNestingLevel)
 		{
 			var openingCharCount = 0;
-			object item;
 
 			foreach (var index in Enumerable.Range(0, number.Count))
 			{
-				item = number[index];
-
-				if (item is char ch && ch == PairOpeningChar)
+				if (number[index] is char ch)
 				{
-					openingCharCount++;
-
-					if (openingCharCount > DeepestNestingLevel)
+					if (ch == PairOpeningChar)
 					{
-						// Assuming the nesting is never deeper than the deepest nesting level + 1
-						return index;
+						// Assuming the nesting is never past one level deeper than the deepest nesting level
+						if (openingCharCount == deepestNestingLevel) return index; 
+						
+						openingCharCount++;
 					}
-				}
-				else if (item is char ch2 && ch2 == PairClosingChar)
-				{
-					openingCharCount--;
+					else if (ch == PairClosingChar)
+					{
+						openingCharCount--;
+					}
 				}
 			}
 
@@ -122,7 +127,8 @@ namespace AdventOfCode.Y2021
 
 		private static int? GetSplitIndex(this List<object> number)
 		{
-			var itemToSplit = number.FirstOrDefault(item => item is int num && num > ThresholdValue);
+			var itemToSplit = number
+				.FirstOrDefault(item => item is int num && num > ThresholdValue);
 
 			return itemToSplit != default
 				? (int?)number.IndexOf(itemToSplit)
@@ -131,12 +137,14 @@ namespace AdventOfCode.Y2021
 
 		private static void ExplodePairAt(this List<object> number, int index)
 		{
-			var explodingLeft = (int)number[index + 1];
-			var explodingRight = (int)number[index + 2];
+			var explodingValueLeft = (int)number[index + 1];
+			var explodingValueRight = (int)number[index + 2];
 
+			// Replace pair with 0
 			number.RemoveRange(index, 4);
 			number.Insert(index, 0);
 
+			// Update number to the left, if any
 			var leftNumber = number.Take(index).LastOrDefault(item => item is int);
 
 			if (leftNumber != default)
@@ -144,9 +152,10 @@ namespace AdventOfCode.Y2021
 				var leftNumberIndex = number.LastIndexOf(leftNumber, index - 1);
 				var leftNumberValue = (int)number[leftNumberIndex];
 
-				number[leftNumberIndex] = leftNumberValue + explodingLeft;
+				number[leftNumberIndex] = leftNumberValue + explodingValueLeft;
 			}
 
+			// Update number to the right, if any
 			var rightNumber = number.Skip(index + 1).FirstOrDefault(item => item is int);
 
 			if (rightNumber != default)
@@ -154,7 +163,7 @@ namespace AdventOfCode.Y2021
 				var rightNumberIndex = number.IndexOf(rightNumber, index + 1);
 				var rightNumberValue = (int)number[rightNumberIndex];
 
-				number[rightNumberIndex] = rightNumberValue + explodingRight;
+				number[rightNumberIndex] = rightNumberValue + explodingValueRight;
 			}
 		}
 
@@ -163,6 +172,7 @@ namespace AdventOfCode.Y2021
 			decimal half = (decimal)(int)number[index] / 2;
 
 			number.RemoveAt(index);
+
 			number.InsertRange(index, new List<object> 
 			{ 
 				PairOpeningChar, 
@@ -198,6 +208,47 @@ namespace AdventOfCode.Y2021
 					return;
 				}
 			}
+		}
+
+		public static List<object> ToFirstAddend(this List<object> number)
+		{
+			// Explode until there's nothing more to explode without affecting the (currently nonexisting) second addend
+			var addend = new List<object>(number);
+
+			int? explosionIndex;
+
+			while (true)
+			{
+				explosionIndex = addend.GetExplosionIndex(DeepestNestingLevel - 1);
+
+				if (explosionIndex == null || explosionIndex == addend.LastNumericIndex()) return addend;
+				else addend.ExplodePairAt(explosionIndex.Value);
+			}
+		}
+
+		private static int LastNumericIndex(this List<object> number) => number.FindLastIndex(item => item is int);
+
+		public static int FindLargestMagnitude(List<List<object>> firstAddends, List<List<object>> secondAddends)
+		{
+			var largestMagnitude = 0;
+			List<object> sum;
+
+			foreach (var firstIndex in Enumerable.Range(0, firstAddends.Count))
+			{
+				foreach (var secondIndex in Enumerable.Range(0, secondAddends.Count))
+				{
+					if (secondIndex == firstIndex) continue;
+
+					sum = new List<object>(firstAddends[firstIndex]);
+
+					sum.SnailFishAdd(secondAddends[secondIndex]);
+					sum.SnailFishReduce();
+
+					largestMagnitude = Math.Max(largestMagnitude, sum.GetMagnitude());
+				}
+			}
+
+			return largestMagnitude;
 		}
 
 		public static void Print(this List<object> number)
