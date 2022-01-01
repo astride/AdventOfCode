@@ -35,7 +35,7 @@ namespace AdventOfCode.Y2021
 			var basinMap = heightMap.GenerateFramedBoolMap();
 
 			var basinOrigoCoordinates = heightMap.GetLowPointCoordinates()
-				.Select(coor => new Coordinate(coor.X + 1, coor.Y + 1));
+				.Select(coor => new CoordinateXY(coor.X + 1, coor.Y + 1));
 
 			var largestBasins = basinMap.GetLargestBasins(3, basinOrigoCoordinates);
 
@@ -45,19 +45,19 @@ namespace AdventOfCode.Y2021
 
 	public static class Day09Helpers
 	{
-		private static readonly Coordinate Above = new Coordinate(0, 1);
-		private static readonly Coordinate Right = new Coordinate(1, 0);
-		private static readonly Coordinate Below = new Coordinate(0, -1);
-		private static readonly Coordinate Left	= new Coordinate(-1, 0);
+		private static readonly CoordinateXY Above = new CoordinateXY(0, 1);
+		private static readonly CoordinateXY Right = new CoordinateXY(1, 0);
+		private static readonly CoordinateXY Below = new CoordinateXY(0, -1);
+		private static readonly CoordinateXY Left	= new CoordinateXY(-1, 0);
 
-		public static IEnumerable<Coordinate> GetLowPointCoordinates(this string[] map)
+		public static IEnumerable<CoordinateXY> GetLowPointCoordinates(this string[] map)
 		{
 			var caveIndexMin = 0;
 			var caveIndexMax = map.Length - 1;
 			var locationIndexMin = 0;
 			var locationIndexMax = map.First().Length - 1;
 
-			var lowPointCoordinates = new List<Coordinate>();
+			var lowPointCoordinates = new List<CoordinateXY>();
 
 			foreach (var caveIndex in Enumerable.Range(caveIndexMin, caveIndexMax + 1))
 			{
@@ -68,7 +68,7 @@ namespace AdventOfCode.Y2021
 						(locationIndex == locationIndexMin || (map[caveIndex][locationIndex]) < (map[caveIndex])[locationIndex - 1]) &&
 						(locationIndex == locationIndexMax || (map[caveIndex][locationIndex]) < (map[caveIndex])[locationIndex + 1]))
 					{
-						lowPointCoordinates.Add(new Coordinate(locationIndex, caveIndex));
+						lowPointCoordinates.Add(new CoordinateXY(locationIndex, caveIndex));
 					}
 				}
 			}
@@ -97,7 +97,7 @@ namespace AdventOfCode.Y2021
 			return boolMap;
 		}
 
-		public static IEnumerable<int> GetLargestBasins(this bool[,] map, int basinCount, IEnumerable<Coordinate> startingPoints)
+		public static IEnumerable<int> GetLargestBasins(this bool[,] map, int basinCount, IEnumerable<CoordinateXY> startingPoints)
 		{
 			var largestBasins = Enumerable.Repeat(0, basinCount).ToList();
 			int basinSize;
@@ -116,19 +116,19 @@ namespace AdventOfCode.Y2021
 			return largestBasins;
 		}
 
-		private static int GetBasinSize(this Coordinate origo, bool[,] map)
+		private static int GetBasinSize(this CoordinateXY origo, bool[,] map)
 		{
-			return new List<Coordinate> { origo }.GetBasinSize(map, origo);
+			return new List<CoordinateXY> { origo }.GetBasinSize(map, origo);
 		}
 
-		public static int GetBasinSize(this IEnumerable<Coordinate> thisLevelCoors, bool[,] map, Coordinate refCoor)
+		public static int GetBasinSize(this IEnumerable<CoordinateXY> thisLevelCoors, bool[,] map, CoordinateXY refCoor)
 		{
 			if (!thisLevelCoors.Any())
 			{
 				return 0;
 			}
 
-			var coorsToSearchFromByCoorShift = new Dictionary<Coordinate, IEnumerable<Coordinate>>
+			var coorsToSearchFromByCoorShift = new Dictionary<CoordinateXY, IEnumerable<CoordinateXY>>
 			{
 				[Above] = thisLevelCoors.Where(coor => coor.Y >= refCoor.Y),
 				[Right] = thisLevelCoors.Where(coor => coor.X >= refCoor.X),
@@ -136,13 +136,13 @@ namespace AdventOfCode.Y2021
 				[Left] = thisLevelCoors.Where(coor => coor.X <= refCoor.X)
 			};
 
-			var nextLevelCoors = new List<Coordinate>();
+			var nextLevelCoors = new List<CoordinateXY>();
 
 			foreach (var searchScope in coorsToSearchFromByCoorShift)
             {
 				nextLevelCoors.AddRange(searchScope.Value
 					.Where(coor => map[coor.X + searchScope.Key.X, coor.Y + searchScope.Key.Y])
-					.Select(coor => new Coordinate(coor.X + searchScope.Key.X, coor.Y + searchScope.Key.Y)));
+					.Select(coor => new CoordinateXY(coor.X + searchScope.Key.X, coor.Y + searchScope.Key.Y)));
             }
 
 			return thisLevelCoors.Count()

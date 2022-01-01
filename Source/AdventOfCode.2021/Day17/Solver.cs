@@ -25,22 +25,22 @@ namespace AdventOfCode.Y2021
 			Part2Solution = SolvePart2(targetArea).ToString();
 		}
 
-		private static int SolvePart1(Area target)
+		private static int SolvePart1(AreaXY target)
 		{
 			var yMax = 0;
 
-			Velocity initialVelocity;
-			Coordinate position;
+			VelocityXY initialVelocity;
+			CoordinateXY position;
 
-			var positionsOnPath = new List<Coordinate>();
+			var positionsOnPath = new List<CoordinateXY>();
 			int stepCount;
 
 			foreach (var velocityX in Enumerable.Range(1, 108)) // range length found experimentally
 			{
 				foreach (var velocityY in Enumerable.Range(1, 108)) // range length found experimentally
 				{
-					initialVelocity = new Velocity(velocityX, velocityY);
-					position = Coordinate.Origo;
+					initialVelocity = new VelocityXY(velocityX, velocityY);
+					position = CoordinateXY.Origo;
 					positionsOnPath.Clear();
 					stepCount = 1;
 
@@ -66,12 +66,12 @@ namespace AdventOfCode.Y2021
 			return yMax;
 		}
 
-		private static int SolvePart2(Area target)
+		private static int SolvePart2(AreaXY target)
         {
-			var possibleInitialVelocities = new List<Velocity>();
+			var possibleInitialVelocities = new List<VelocityXY>();
 
-			Velocity initialVelocity;
-			Coordinate position;
+			VelocityXY initialVelocity;
+			CoordinateXY position;
 
 			int stepCount;
 
@@ -79,8 +79,8 @@ namespace AdventOfCode.Y2021
 			{
 				foreach (var velocityY in Enumerable.Range(target.Min.Y, Math.Abs(2 * target.Min.Y))) // range length found experimentally
 				{
-					initialVelocity = new Velocity(velocityX, velocityY);
-					position = Coordinate.Origo;
+					initialVelocity = new VelocityXY(velocityX, velocityY);
+					position = CoordinateXY.Origo;
 					stepCount = 1;
 
 					while (!position.IsInside(target) && !position.HasPassed(target))
@@ -103,7 +103,7 @@ namespace AdventOfCode.Y2021
 
 	public static class Day17Helpers
 	{
-		public static Area GetTargetArea(this IEnumerable<string> targetRanges)
+		public static AreaXY GetTargetArea(this IEnumerable<string> targetRanges)
         {
 			var xTargetRange = targetRanges
 				.Single(entry => entry.Contains('x'));
@@ -111,9 +111,9 @@ namespace AdventOfCode.Y2021
 			var yTargetRange = targetRanges
 				.Single(entry => entry.Contains('y'));
 
-			return new Area(
-				new Coordinate(xTargetRange.GetMinValue(), yTargetRange.GetMinValue()),
-				new Coordinate(xTargetRange.GetMaxValue(), yTargetRange.GetMaxValue()));
+			return new AreaXY(
+				new CoordinateXY(xTargetRange.GetMinValue(), yTargetRange.GetMinValue()),
+				new CoordinateXY(xTargetRange.GetMaxValue(), yTargetRange.GetMaxValue()));
 		}
 
 		public static int GetMinValue(this string range)
@@ -126,7 +126,7 @@ namespace AdventOfCode.Y2021
 			return int.Parse(string.Concat(range.SkipWhile(ch => ch != '.').SkipWhile(ch => ch == '.')));
 		}
 
-		public static bool IsInside(this Coordinate position, Area area)
+		public static bool IsInside(this CoordinateXY position, AreaXY area)
         {
 			return
 				position.X >= area.Min.X &&
@@ -135,21 +135,21 @@ namespace AdventOfCode.Y2021
 				position.Y <= area.Max.Y;
         }
 
-		public static bool HasPassed(this Coordinate position, Area area)
+		public static bool HasPassed(this CoordinateXY position, AreaXY area)
         {
 			return
 				position.X > area.Max.X ||
 				position.Y < area.Min.Y;
 		}
 		
-		public static Coordinate GetPositionAfterSteps(this Velocity initialVelocity, int stepCount)
+		public static CoordinateXY GetPositionAfterSteps(this VelocityXY initialVelocity, int stepCount)
         {
-			return new Coordinate
+			return new CoordinateXY
 				(initialVelocity.GetXAfterSteps(stepCount),
 				initialVelocity.GetYAfterSteps(stepCount));
         }
 
-		private static int GetXAfterSteps(this Velocity initialVelocity, int stepCount)
+		private static int GetXAfterSteps(this VelocityXY initialVelocity, int stepCount)
         {
 			//we know that initial position is (0, 0) <-- no need to include
 
@@ -159,7 +159,7 @@ namespace AdventOfCode.Y2021
 				.Sum();
 		}
 
-		private static int GetYAfterSteps(this Velocity initialVelocity, int stepCount)
+		private static int GetYAfterSteps(this VelocityXY initialVelocity, int stepCount)
 		{
 			//we know that initial position is (0, 0) <-- no need to include
 
