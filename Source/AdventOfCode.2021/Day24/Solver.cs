@@ -12,20 +12,73 @@ namespace AdventOfCode.Y2021
 
 		public void SolvePuzzle(string[] rawInput)
 		{
-			var input = rawInput;
+			var instructions = new List<MonadStep>();
+			List<string> monadStepInput;
 
-			Part1Solution = SolvePart1(input).ToString();
+			while (rawInput.Any())
+			{
+				monadStepInput = rawInput
+					.Skip(1)
+					.TakeWhile(entry => !entry.Contains("inp"))
+					.ToList();
+
+				monadStepInput.Add(rawInput.First());
+
+				instructions.Add(new MonadStep(monadStepInput.ToArray()));
+
+				rawInput = rawInput
+					.Skip(1 + instructions.Last().Operations.Count())
+					.ToArray();
+			}
+
+			Part1Solution = SolvePart1(instructions).ToString();
 		}
 
-		private static int SolvePart1(IEnumerable<string> input)
+		private static string SolvePart1(List<MonadStep> instructions)
 		{
-			return -1;
+			return instructions.GetLargestAcceptedModelNumber();
 		}
 	}
 
 	public static class Day24Helpers
 	{
-		
+		private const int InputValueMin = 1;
+		private const int InputValueMax = 9;
+		private const int InputPossibilities = InputValueMax - InputValueMin + 1;
+		private const int ModelNumberLength = 14;
+
+		private static IDictionary<int, List<int>> ResultingZValuePerDigitIndexForInputValue =
+			Enumerable.Range(InputValueMin, InputPossibilities)
+				.ToDictionary(
+					value => value,
+					value => new List<int>());
+
+		public static string GetLargestAcceptedModelNumber(this List<MonadStep> instructions)
+		{
+			int z = 0;
+
+			// Run all possible variations once and store in dictionary
+			foreach (var modelNumberDigitIndex in Enumerable.Range(0, ModelNumberLength - 1))
+			{
+				foreach (var possibleInputDigit in Enumerable.Range(InputValueMin, InputPossibilities))
+				{
+					z = instructions[modelNumberDigitIndex].CalculateZValueFor(possibleInputDigit);
+
+					ResultingZValuePerDigitIndexForInputValue[possibleInputDigit].Add(z);
+				}
+			}
+
+			// Work from there
+
+			// Observations (part 1 - real input):
+			// w is independent between digit places (input value / digit of model number to be tested)
+			// x is independent between digit places (always set to zero before usage)
+			// x is independent between digit places (always set to zero before usage)
+			// z is DEPENDENT between digit places
+
+			//TODO
+			return null;
+		}
 	}
 
 	public class MonadStep
@@ -53,7 +106,7 @@ namespace AdventOfCode.Y2021
 		{
 			var parts = operationString.Split(' ');
 
-			return parts.First() switch
+			return parts[0] switch
 			{
 				Addition => new Addition(parts[1], parts[2]),
 				Multiplication => new Multiplication(parts[1], parts[2]),
@@ -64,9 +117,15 @@ namespace AdventOfCode.Y2021
 			};
 		}
 
-		public static char InputVariable { get; set; }
+		public int CalculateZValueFor(int digit)
+		{
+			//TODO Switch on InputVariable to know where to store calculation
+			return -1;
+		}
 
-		public static List<Operation> Operations { get; set; }
+		public char InputVariable { get; set; }
+
+		public List<Operation> Operations { get; set; }
 	}
 
 	public class Operation
@@ -108,7 +167,7 @@ namespace AdventOfCode.Y2021
 			};
 		}
 
-		public virtual int Calculate(int w, int x, int y, int z) => 0;
+		public virtual int Calculate(int w, int x, int y, int z) => 0; // ?
 	}
 
 	public class Addition : Operation
