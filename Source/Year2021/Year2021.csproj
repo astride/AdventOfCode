@@ -1,0 +1,83 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Day01\Input.txt" />
+    <None Remove="Day01\InputExample.txt" />
+    <None Remove="Day02\Input.txt" />
+    <None Remove="Day02\InputExample.txt" />
+    <None Remove="Day03\Input.txt" />
+    <None Remove="Day03\InputExample.txt" />
+    <None Remove="Day04\Input.txt" />
+    <None Remove="Day04\InputExample.txt" />
+    <None Remove="Day05\Input.txt" />
+    <None Remove="Day05\InputExample.txt" />
+    <None Remove="Day06\Input.txt" />
+    <None Remove="Day06\InputExample.txt" />
+    <None Remove="Day07\Input.txt" />
+    <None Remove="Day07\InputExample.txt" />
+    <None Remove="Day08\Input.txt" />
+    <None Remove="Day08\InputExample.txt" />
+    <None Remove="Day09\Input.txt" />
+    <None Remove="Day09\InputExample.txt" />
+    <None Remove="Day10\Input.txt" />
+    <None Remove="Day10\InputExample.txt" />
+    <None Remove="Day11\Input.txt" />
+    <None Remove="Day11\InputExample.txt" />
+    <None Remove="Day13\Input.txt" />
+    <None Remove="Day13\InputExample.txt" />
+    <None Remove="Day17\Input.txt" />
+    <None Remove="Day17\InputExample.txt" />
+    <None Remove="Day18\Input.txt" />
+    <None Remove="Day18\InputExample.txt" />
+    <None Remove="Day20\Input.txt" />
+    <None Remove="Day20\InputExample.txt" />
+    <None Remove="Day21\Input.txt" />
+    <None Remove="Day21\InputExample.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Day01\Input.txt" />
+    <Content Include="Day01\InputExample.txt" />
+    <Content Include="Day02\Input.txt" />
+    <Content Include="Day02\InputExample.txt" />
+    <Content Include="Day03\Input.txt" />
+    <Content Include="Day03\InputExample.txt" />
+    <Content Include="Day04\Input.txt" />
+    <Content Include="Day04\InputExample.txt" />
+    <Content Include="Day05\Input.txt" />
+    <Content Include="Day05\InputExample.txt" />
+    <Content Include="Day06\Input.txt" />
+    <Content Include="Day06\InputExample.txt" />
+    <Content Include="Day07\Input.txt" />
+    <Content Include="Day07\InputExample.txt" />
+    <Content Include="Day08\Input.txt" />
+    <Content Include="Day08\InputExample.txt" />
+    <Content Include="Day09\Input.txt" />
+    <Content Include="Day09\InputExample.txt" />
+    <Content Include="Day10\Input.txt" />
+    <Content Include="Day10\InputExample.txt" />
+    <Content Include="Day11\Input.txt" />
+    <Content Include="Day11\InputExample.txt" />
+    <Content Include="Day13\Input.txt" />
+    <Content Include="Day13\InputExample.txt" />
+    <Content Include="Day17\Input.txt" />
+    <Content Include="Day17\InputExample.txt" />
+    <Content Include="Day18\Input.txt" />
+    <Content Include="Day18\InputExample.txt" />
+    <Content Include="Day20\Input.txt" />
+    <Content Include="Day20\InputExample.txt" />
+    <Content Include="Day21\Input.txt" />
+    <Content Include="Day21\InputExample.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AdventOfCode.CommonB\Common.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -48,21 +48,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Day01\Solver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Day01\Input.txt" />
-    <Content Include="Day01\InputExample.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AdventOfCode.Common\AdventOfCode.Common.csproj">
-      <Project>{49DFD601-BF36-4EC6-B736-B73CFA5387A0}</Project>
-      <Name>AdventOfCode.Common</Name>
+    <ProjectReference Include="..\AdventOfCode.CommonB\Common.csproj">
+      <Project>{d95573dd-af57-477e-a153-b38e5ce8374b}</Project>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
