@@ -40,7 +40,7 @@ public class Day17Solver : IPuzzleSolver
 			foreach (var velocityY in Enumerable.Range(1, 108)) // range length found experimentally
 			{
 				initialVelocity = new Velocity(velocityX, velocityY);
-				position = Coordinate.Origo;
+				position = Coordinate.Origin;
 				positionsOnPath.Clear();
 				stepCount = 1;
 
@@ -80,7 +80,7 @@ public class Day17Solver : IPuzzleSolver
 			foreach (var velocityY in Enumerable.Range(target.Min.Y, Math.Abs(2 * target.Min.Y))) // range length found experimentally
 			{
 				initialVelocity = new Velocity(velocityX, velocityY);
-				position = Coordinate.Origo;
+				position = Coordinate.Origin;
 				stepCount = 1;
 
 				while (!position.IsInside(target) && !position.HasPassed(target))

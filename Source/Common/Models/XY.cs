@@ -2,7 +2,7 @@ namespace Common.Models;
 
 public class XY
 {
-    public XY(int x, int y)
+    protected XY(int x, int y)
     {
         X = x;
         Y = y;

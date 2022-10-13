@@ -4,9 +4,9 @@ public class Coordinate : XY
 {
     public Coordinate(int x, int y) : base(x, y) { }
 
-    public static Coordinate Origo => new Coordinate(0, 0);
+    public static Coordinate Origin => new(0, 0);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is Coordinate other)
         {

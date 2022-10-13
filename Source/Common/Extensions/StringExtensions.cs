@@ -9,7 +9,7 @@ public static class StringExtensions
         {
             if (output == substring) return string.Empty;
 
-            var startIndex = output.IndexOf(substring);
+            var startIndex = output.IndexOf(substring, StringComparison.InvariantCulture);
 
             output = output.Substring(0, startIndex) + output.Substring(startIndex + substring.Length);
         }
