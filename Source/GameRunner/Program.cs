@@ -7,14 +7,16 @@ namespace GameRunner;
 
 public class Program
 {
-	private static IDictionary<int, Assembly> _assemblyByYear = new Dictionary<int, Assembly>
+	private static readonly IDictionary<int, Assembly> AssemblyByYear = new Dictionary<int, Assembly>
 	{
 		[2021] = typeof(Year2021.Day01Solver).Assembly,
 		[2020] = typeof(Year2020.Day01Solver).Assembly
 	};
 
-	private static readonly string _puzzleRootLocation = 
-		Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+	private static IReadOnlyCollection<PuzzleSolverInfo>? AvailablePuzzles;
+	private static IReadOnlyCollection<DateTime>? AvailablePuzzleDates;
+
+	private static string? PuzzleRootLocation;
 
 	private const int December = 12;
 	private const string Day = "Day";
@@ -28,42 +30,72 @@ public class Program
 	private const string InputFileName = "Input.txt";
 	private const string InputExampleFileName = "InputExample.txt";
 
-	static void Main(string[] args)
+	public static void Main(string[] args)
 	{
 		ResolvePuzzleDateAndPlay();
 	}
 
-	static void ResolvePuzzleDateAndPlay()
+	private static void ResolvePuzzleDateAndPlay()
     {
 		var today = DateTime.Today;
 		var yesterday = today.AddDays(-1);
 
-		var availablePuzzles = GetAvailablePuzzles();
+		var availablePuzzleDates = GetAvailablePuzzleDates();
 
-		if (availablePuzzles.Any(puzzle => puzzle.Date == today))
+		if (!availablePuzzleDates.Any())
+		{
+			Console.WriteLine("No puzzles are available. Now, go do some coding, you lazy ladybug.");
+			
+			EndGame();
+		}
+		else if (availablePuzzleDates.Contains(today))
 		{
 			Console.WriteLine($"Do you want to solve today's puzzle? Today is {today.ToString(DateFormat)} (leave blank for 'yes'):");
 
-			InterpretResponseFor(today, availablePuzzles);
+			InterpretResponseFor(today);
 		}
-		else if (availablePuzzles.Any(puzzle => puzzle.Date == yesterday))
+		else if (availablePuzzleDates.Contains(yesterday))
 		{
 			Console.WriteLine($"Today's puzzle is not available, but maybe you want to solve yesterday's puzzle? Yesterday was {yesterday.ToString(DateFormat)} (leave blank for 'yes'):");
 
-			InterpretResponseFor(yesterday, availablePuzzles);
+			InterpretResponseFor(yesterday);
 		}
 		else
 		{
-			var latestAvailablePuzzleDate = availablePuzzles.Select(puzzle => puzzle.Date).Max();
+			var latestAvailablePuzzleDate = availablePuzzleDates.Max();
 
 			Console.WriteLine($"The latest available puzzle date is {latestAvailablePuzzleDate.ToString(DateFormat)}. Do you want to solve it? (leave blank for 'yes'):");
 
-			InterpretResponseFor(latestAvailablePuzzleDate, availablePuzzles);
+			InterpretResponseFor(latestAvailablePuzzleDate);
 		}
 	}
 
-	static IEnumerable<PuzzleSolverInfo> GetAvailablePuzzles()
+	private static string GetPuzzleRootLocation()
 	{
+		if (!string.IsNullOrEmpty(PuzzleRootLocation))
+		{
+			return PuzzleRootLocation;
+		}
+		
+		var rootLocation = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent?.FullName;
+
+		if (string.IsNullOrEmpty(rootLocation))
+		{
+			throw new ArgumentNullException(nameof(rootLocation));
+		}
+
+		PuzzleRootLocation = rootLocation;
+
+		return rootLocation;
+	}
+
+	private static IReadOnlyCollection<PuzzleSolverInfo> GetAvailablePuzzles()
+	{
+		if (AvailablePuzzles != null)
+		{
+			return AvailablePuzzles;
+		}
+		
 		var puzzleSolvers = GetPuzzleSolvers();
 
 		var availablePuzzleDates = puzzleSolvers
@@ -71,50 +103,83 @@ public class Program
 			.Intersect(GetPuzzleInputDates())
 			.Distinct();
 
-		puzzleSolvers = puzzleSolvers.Where(solver => availablePuzzleDates.Contains(solver.Date));
+		AvailablePuzzles = puzzleSolvers
+			.Where(solver => availablePuzzleDates.Contains(solver.Date))
+			.ToList();
 
-		return puzzleSolvers;
+		return AvailablePuzzles;
 	}
 
-	static void InterpretResponseFor(DateTime suggestedDate, IEnumerable<PuzzleSolverInfo> availablePuzzles)
-    {
+	private static IReadOnlyCollection<DateTime> GetAvailablePuzzleDates()
+	{
+		if (AvailablePuzzleDates != null)
+		{
+			return AvailablePuzzleDates;
+		}
+		
+		AvailablePuzzleDates = GetAvailablePuzzles()
+			.Select(puzzle => puzzle.Date)
+			.ToList();
+
+		return AvailablePuzzleDates;
+	}
+
+	private static void InterpretResponseFor(DateTime suggestedDate)
+	{
+		var availablePuzzles = GetAvailablePuzzles();
+
 		if (string.IsNullOrEmpty(Console.ReadLine()))
 		{
 			RequestModeAndSolve(availablePuzzles.Single(puzzle => puzzle.Date == suggestedDate));
 		}
 		else
 		{
-			RequestDate(availablePuzzles);
+			RequestDate();
 		}
 	}
 
-	static void RequestModeAndSolve(PuzzleSolverInfo puzzleSolver)
+	private static void RequestModeAndSolve(PuzzleSolverInfo puzzleSolverInfo)
 	{
 		Console.WriteLine("\nTest mode? (leave blank for 'yes')");
 		var testMode = string.IsNullOrEmpty(Console.ReadLine());
 
-		var solver = (IPuzzleSolver)Activator.CreateInstance(puzzleSolver.Type);
+		var puzzleInstance = Activator.CreateInstance(puzzleSolverInfo.Type);
 
-		var input = GetInput(puzzleSolver.Date, testMode);
+		if (puzzleInstance == null)
+		{
+			throw new ArgumentNullException(nameof(puzzleInstance));
+		}
 
-		solver.SolvePuzzle(input);
+		var puzzleSolver = (IPuzzleSolver)puzzleInstance;
+
+		var input = GetInput(puzzleSolverInfo.Date, testMode);
+
+		puzzleSolver.SolvePuzzle(input);
 
 		var additionalInfo = testMode ? " (test data)" : string.Empty;
 
 		Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-		Console.WriteLine($"Let's go! Puzzle day is {puzzleSolver.Date.ToString(DateFormat)}.\n");
-		Console.WriteLine($"{nameof(solver.Part1Solution)}{additionalInfo}: {solver.Part1Solution}\n");
-		Console.WriteLine($"{nameof(solver.Part2Solution)}{additionalInfo}: {solver.Part2Solution}\n");
+		Console.WriteLine($"Let's go! Puzzle day is {puzzleSolverInfo.Date.ToString(DateFormat)}.\n");
+		Console.WriteLine($"{nameof(puzzleSolver.Part1Solution)}{additionalInfo}: {puzzleSolver.Part1Solution}\n");
+		Console.WriteLine($"{nameof(puzzleSolver.Part2Solution)}{additionalInfo}: {puzzleSolver.Part2Solution}\n");
 		Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		
+		EndGame();
 	}
 
-	static string[] GetInput(DateTime date, bool testMode)
+	private static void EndGame()
+	{
+		Console.WriteLine("Press any key to exit the game.");
+		Console.ReadLine();
+	}
+
+	private static string[] GetInput(DateTime date, bool testMode)
 	{
 		var yearDir = $"{Year}{date.Year}";
 		var dayDir = $"{Day}{date.Day:D2}";
 		var fileName = testMode ? InputExampleFileName : InputFileName;
 
-		var filePath = Path.Combine(_puzzleRootLocation, yearDir, dayDir, fileName);
+		var filePath = Path.Combine(GetPuzzleRootLocation(), yearDir, dayDir, fileName);
 
 		if (!File.Exists(filePath))
 		{
@@ -124,23 +189,27 @@ public class Program
 		return File.ReadAllLines(filePath, Encoding.Default);
 	}
 
-	static void RequestDate(IEnumerable<PuzzleSolverInfo> availablePuzzles)
+	private static void RequestDate()
 	{
-		var availableDates = availablePuzzles.Select(puzzle => puzzle.Date);
+		var year = ResolveYear();
+		var day = ResolveDay(year);
 
-		int year = ResolveYear(availableDates);
-		int day = ResolveDay(availableDates, year);
+		var targetDate = new DateTime(year, December, day);
 
-		RequestModeAndSolve(availablePuzzles.First(puzzle => puzzle.Date == new DateTime(year, December, day)));
+		var targetPuzzle = GetAvailablePuzzles()
+			.Single(puzzle => puzzle.Date == targetDate);
+
+		RequestModeAndSolve(targetPuzzle);
 	}
 
-	static int ResolveYear(IEnumerable<DateTime> availableDates)
+	private static int ResolveYear()
 	{
-		var availableYears = availableDates
+		var availableYears = GetAvailablePuzzleDates()
 			.Select(date => date.Year)
-			.Distinct();
+			.Distinct()
+			.ToList();
 
-		if (availableYears.Count() == 1)
+		if (availableYears.Count == 1)
 		{
 			var year = availableYears.Single();
 
@@ -151,7 +220,7 @@ public class Program
 
 		while (true)
 		{
-			Console.WriteLine($"\nFrom which year would you like to select a puzzle to solve? You can choose between {string.Join(", ", availableYears.OrderBy(year => year))}:");
+			Console.WriteLine($"\nFrom which year would you like to select a puzzle to solve? You can choose between {string.Join(", ", availableYears.OrderBy(_ => _))}:");
 
 			var response = Console.ReadLine();
 
@@ -161,7 +230,8 @@ public class Program
                 {
 					return year;
                 }
-				else if (year > DateTime.Today.Year ||
+
+				if (year > DateTime.Today.Year ||
 					(year == DateTime.Today.Year && DateTime.Today < new DateTime(year, December, 1)))
                 {
 					Console.WriteLine($"\nGetting futuristic, now? No puzzles have been published for {year} yet.");
@@ -182,13 +252,14 @@ public class Program
 		}
 	}
 
-	static int ResolveDay(IEnumerable<DateTime> availableDates, int year)
+	private static int ResolveDay(int year)
 	{
-		var availableDays = availableDates
+		var availableDays = GetAvailablePuzzleDates()
 			.Where(date => date.Year == year)
-			.Select(date => date.Day);
+			.Select(date => date.Day)
+			.ToList();
 
-		if (availableDays.Count() == 1)
+		if (availableDays.Count == 1)
 		{
 			var day = availableDays.Single();
 
@@ -199,7 +270,7 @@ public class Program
 
 		while (true)
 		{
-			Console.WriteLine($"\nFor which day in {year} would you like to solve the puzzle? Available days are {string.Join(", ", availableDays.OrderBy(day => day))}:");
+			Console.WriteLine($"\nFor which day in {year} would you like to solve the puzzle? Available days are {string.Join(", ", availableDays.OrderBy(_ => _))}:");
 
 			var response = Console.ReadLine();
 
@@ -237,45 +308,47 @@ public class Program
 
 	private static IEnumerable<DateTime> GetPuzzleInputDates()
 	{
-		var inputFilePaths = Directory.GetFiles(_puzzleRootLocation, InputWildcardFileName, SearchOption.AllDirectories);
+		var inputFilePaths = Directory.GetFiles(GetPuzzleRootLocation(), InputWildcardFileName, SearchOption.AllDirectories);
 
 		var pathByYearCollection = inputFilePaths
-			.Select(path => path.Without(_puzzleRootLocation + Path.DirectorySeparatorChar))
+			.Select(path => path.Without(GetPuzzleRootLocation() + Path.DirectorySeparatorChar))
 			.GroupBy(path => int.Parse(path
 				.Split(Path.DirectorySeparatorChar)
 				.First(dirName => dirName.Contains(Year))
 				.Without(Year)));
 
-		IEnumerable<IGrouping<string, string>> pathByDayCollection;
-		IEnumerable<string> inputFileNames;
-		int day;
-
 		foreach (var yearAndPath in pathByYearCollection)
 		{
-			pathByDayCollection = yearAndPath.GroupBy(path => path.Split(Path.DirectorySeparatorChar)[1]);
+			var pathByDayCollection = yearAndPath.GroupBy(path => path.Split(Path.DirectorySeparatorChar)[1]);
 
 			foreach (var dayAndPath in pathByDayCollection)
 			{
-				inputFileNames = dayAndPath.Select(path => path.Split(Path.DirectorySeparatorChar).Last());
+				var inputFileNames = dayAndPath
+					.Select(path => path.Split(Path.DirectorySeparatorChar).Last())
+					.ToList();
 
-				if (inputFileNames.Count(name => name == InputFileName) == 1 &&
-					inputFileNames.Count(name => name == InputExampleFileName) == 1)
+				if (inputFileNames.Count(name => name == InputFileName) != 1 ||
+					inputFileNames.Count(name => name == InputExampleFileName) != 1)
 				{
-					day = int.Parse(dayAndPath.Key.Without(Day));
-
-					yield return (new DateTime(yearAndPath.Key, December, day));
+					continue;
 				}
+				
+				var day = int.Parse(dayAndPath.Key.Without(Day));
+
+				yield return (new DateTime(yearAndPath.Key, December, day));
+
 			}
 		}
 	}
 
-	private static IEnumerable<PuzzleSolverInfo> GetPuzzleSolvers()
+	private static IReadOnlyCollection<PuzzleSolverInfo> GetPuzzleSolvers()
 	{
-		var solvers = _assemblyByYear
+		var solvers = AssemblyByYear
 			.SelectMany(yearAndAssembly => yearAndAssembly.Value
 				.GetTypes()
-				.Where(type => IsPuzzleSolver(type)))
-			.Select(type => new PuzzleSolverInfo(GetPuzzleDateFor(type), type));
+				.Where(IsPuzzleSolver))
+			.Select(type => new PuzzleSolverInfo(GetPuzzleDateFor(type), type))
+			.ToList();
 
 		return solvers;
 	}
@@ -289,16 +362,23 @@ public class Program
 
 		var day = type.Name.Without(Day).Without(Solver);
 
-		if (day.Length != 2 || !int.TryParse(day, out _))
-		{
-			return false;
-		}
+		var dayFormatIsValid = day.Length == 2 && int.TryParse(day, out _);
 
-		return true;
+		return dayFormatIsValid;
 	}
 
 	private static DateTime GetPuzzleDateFor(Type solverType)
 	{
+		if (solverType == null)
+		{
+			throw new ArgumentNullException(nameof(solverType));
+		}
+
+		if (string.IsNullOrEmpty(solverType.FullName))
+		{
+			throw new ArgumentNullException(nameof(solverType) + "." + nameof(solverType.FullName));
+		}
+		
 		var yearString = solverType.FullName
 			.Split('.')
 			.First(dirName => dirName.Contains(Year))
@@ -308,8 +388,10 @@ public class Program
 			.Without(Day)
 			.Without(Solver);
 
-		if (int.TryParse(dayString, out int day) && day > 0 && day <= 25 &&
-			int.TryParse(yearString, out int year) && year >= DateTime.MinValue.Year)
+		var temp1 = int.TryParse(dayString, out var day) && day is > 0 and <= 25;
+		var temp2 = int.TryParse(yearString, out var year) && year >= DateTime.MinValue.Year;
+
+		if (temp1 && temp2)
 		{
 			return new DateTime(year, December, day);
 		}
@@ -326,6 +408,6 @@ public class PuzzleSolverInfo
 		Type = solverType;
 	}
 
-	public DateTime Date { get; set; }
-	public Type Type { get; set; }
+	public DateTime Date { get; }
+	public Type Type { get; }
 }
