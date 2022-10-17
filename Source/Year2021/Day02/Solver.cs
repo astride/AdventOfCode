@@ -1,13 +1,11 @@
 ﻿using Common.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day02Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -25,10 +23,10 @@ public class Day02Solver : IPuzzleSolver
 	private const string Down = "down";
 	private const string Up = "up";
 
-	private int SolvePart1(List<(string Action, int Units)> commands)
+	private static int SolvePart1(List<(string Action, int Units)> commands)
 	{
-		int pos = 0;
-		int depth = 0;
+		var pos = 0;
+		var depth = 0;
 
 		foreach (var command in commands)
 		{
@@ -39,11 +37,11 @@ public class Day02Solver : IPuzzleSolver
 		return pos * depth;
 	}
 
-	private int SolvePart2(List<(string Action, int Units)> commands)
+	private static int SolvePart2(List<(string Action, int Units)> commands)
 	{
-		int pos = 0;
-		int aim = 0;
-		int depth = 0;
+		var pos = 0;
+		var aim = 0;
+		var depth = 0;
 
 		foreach (var command in commands)
 		{
