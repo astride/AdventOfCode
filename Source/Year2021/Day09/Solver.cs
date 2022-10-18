@@ -1,14 +1,12 @@
 ﻿using Common.Interfaces;
 using Common.Models;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day09Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -23,9 +21,10 @@ public class Day09Solver : IPuzzleSolver
 	private static int SolvePart1(string[] heightMap)
 	{
 		var lowPoints = heightMap.GetLowPointCoordinates()
-			.Select(coor => int.Parse((heightMap[coor.Y])[coor.X].ToString()));
+			.Select(coordinate => int.Parse((heightMap[coordinate.Y])[coordinate.X].ToString()))
+			.ToList();
 
-		var riskLevelSum = lowPoints.Count() + lowPoints.Sum();
+		var riskLevelSum = lowPoints.Count + lowPoints.Sum();
 
 		return riskLevelSum;
 	}
@@ -34,10 +33,10 @@ public class Day09Solver : IPuzzleSolver
 	{
 		var basinMap = heightMap.GenerateFramedBoolMap();
 
-		var basinOrigoCoordinates = heightMap.GetLowPointCoordinates()
-			.Select(coor => new Coordinate(coor.X + 1, coor.Y + 1));
+		var basinOriginCoordinates = heightMap.GetLowPointCoordinates()
+			.Select(coordinate => new Coordinate(coordinate.X + 1, coordinate.Y + 1));
 
-		var largestBasins = basinMap.GetLargestBasins(3, basinOrigoCoordinates);
+		var largestBasins = basinMap.GetLargestBasins(3, basinOriginCoordinates);
 
 		return largestBasins.Aggregate((x, y) => x * y);
 	}
@@ -45,16 +44,16 @@ public class Day09Solver : IPuzzleSolver
 
 public static class Day09Helpers
 {
-	private static readonly Coordinate Above = new Coordinate(0, 1);
-	private static readonly Coordinate Right = new Coordinate(1, 0);
-	private static readonly Coordinate Below = new Coordinate(0, -1);
-	private static readonly Coordinate Left	= new Coordinate(-1, 0);
+	private static readonly Coordinate Above = new(0, 1);
+	private static readonly Coordinate Right = new(1, 0);
+	private static readonly Coordinate Below = new(0, -1);
+	private static readonly Coordinate Left	= new(-1, 0);
 
 	public static IEnumerable<Coordinate> GetLowPointCoordinates(this string[] map)
 	{
-		var caveIndexMin = 0;
+		const int caveIndexMin = 0;
 		var caveIndexMax = map.Length - 1;
-		var locationIndexMin = 0;
+		const int locationIndexMin = 0;
 		var locationIndexMax = map.First().Length - 1;
 
 		var lowPointCoordinates = new List<Coordinate>();
@@ -100,11 +99,10 @@ public static class Day09Helpers
 	public static IEnumerable<int> GetLargestBasins(this bool[,] map, int basinCount, IEnumerable<Coordinate> startingPoints)
 	{
 		var largestBasins = Enumerable.Repeat(0, basinCount).ToList();
-		int basinSize;
 
 		foreach (var startingPoint in startingPoints)
 		{
-			basinSize = startingPoint.GetBasinSize(map);
+			var basinSize = startingPoint.GetBasinSize(map);
 
 			if (basinSize > largestBasins.Min())
 			{
@@ -116,36 +114,37 @@ public static class Day09Helpers
 		return largestBasins;
 	}
 
-	private static int GetBasinSize(this Coordinate origo, bool[,] map)
+	private static int GetBasinSize(this Coordinate origin, bool[,] map)
 	{
-		return new List<Coordinate> { origo }.GetBasinSize(map, origo);
+		return new List<Coordinate> { origin }.GetBasinSize(map, origin);
 	}
 
-	public static int GetBasinSize(this IEnumerable<Coordinate> thisLevelCoors, bool[,] map, Coordinate refCoor)
+	private static int GetBasinSize(this IReadOnlyCollection<Coordinate> thisLevelCoordinates, bool[,] map, Coordinate reference)
 	{
-		if (!thisLevelCoors.Any())
+		if (!thisLevelCoordinates.Any())
 		{
 			return 0;
 		}
 
-		var coorsToSearchFromByCoorShift = new Dictionary<Coordinate, IEnumerable<Coordinate>>
+		var coordinatesToSearchFromByCoordinateShift = new Dictionary<Coordinate, IEnumerable<Coordinate>>
 		{
-			[Above] = thisLevelCoors.Where(coor => coor.Y >= refCoor.Y),
-			[Right] = thisLevelCoors.Where(coor => coor.X >= refCoor.X),
-			[Below] = thisLevelCoors.Where(coor => coor.Y <= refCoor.Y),
-			[Left] = thisLevelCoors.Where(coor => coor.X <= refCoor.X)
+			[Above] = thisLevelCoordinates.Where(coordinate => coordinate.Y >= reference.Y),
+			[Right] = thisLevelCoordinates.Where(coordinate => coordinate.X >= reference.X),
+			[Below] = thisLevelCoordinates.Where(coordinate => coordinate.Y <= reference.Y),
+			[Left] = thisLevelCoordinates.Where(coordinate => coordinate.X <= reference.X)
 		};
 
-		var nextLevelCoors = new List<Coordinate>();
+		var nextLevelCoordinates = new List<Coordinate>();
 
-		foreach (var searchScope in coorsToSearchFromByCoorShift)
+		foreach (var searchScope in coordinatesToSearchFromByCoordinateShift)
         {
-			nextLevelCoors.AddRange(searchScope.Value
-				.Where(coor => map[coor.X + searchScope.Key.X, coor.Y + searchScope.Key.Y])
-				.Select(coor => new Coordinate(coor.X + searchScope.Key.X, coor.Y + searchScope.Key.Y)));
+			nextLevelCoordinates.AddRange(searchScope.Value
+				.Where(coordinate => map[coordinate.X + searchScope.Key.X, coordinate.Y + searchScope.Key.Y])
+				.Select(coordinate => new Coordinate(coordinate.X + searchScope.Key.X, coordinate.Y + searchScope.Key.Y)));
         }
 
-		return thisLevelCoors.Count()
-			+ nextLevelCoors.Distinct().GetBasinSize(map, refCoor);
+		return
+			thisLevelCoordinates.Count +
+			nextLevelCoordinates.Distinct().ToList().GetBasinSize(map, reference);
 	}
 }

@@ -1,13 +1,11 @@
 ﻿using Common.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day11Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -38,8 +36,8 @@ public class Day11Solver : IPuzzleSolver
 
 public static class Day11Helpers
 {
-	private readonly static int EnergyLevelAfterFlash = 0;
-	private readonly static int EnergyLevelFlash = 10;
+	private const int EnergyLevelAfterFlash = 0;
+	private const int EnergyLevelFlash = 10;
 
 	private static int EnergyLevelRowSize;
 	private static int EnergyLevelCount;

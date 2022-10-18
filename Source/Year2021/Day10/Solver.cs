@@ -1,14 +1,12 @@
-﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Globalization;
+using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day10Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -17,10 +15,10 @@ public class Day10Solver : IPuzzleSolver
 			.ToArray();
 
 		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
+		Part2Solution = SolvePart2(input).ToString(CultureInfo.InvariantCulture);
 	}
 
-	private static int SolvePart1(string[] navigationSystem)
+	private static int SolvePart1(IEnumerable<string> navigationSystem)
 	{
 		var totalSyntaxErrorScore = navigationSystem
 			.Select(line => line.GetSyntaxErrorScore())
@@ -29,21 +27,21 @@ public class Day10Solver : IPuzzleSolver
 		return totalSyntaxErrorScore;
 	}
 
-	private static double SolvePart2(string[] navigationSystem)
+	private static double SolvePart2(IEnumerable<string> navigationSystem)
 	{
 		var completionScores = navigationSystem
 			.Where(line => !line.IsCorrupted())
 			.Select(line => line.GetCompletionScore());
 
-		return completionScores.GetMiddleScore();
+		return completionScores.ToList().GetMiddleScore();
 	}
 }
 
 public static class Day10Helpers
 {
-	private static IEnumerable<char> OpeningChars = new List<char> { '(', '[', '{', '<' };
+	private static readonly IEnumerable<char> OpeningChars = new List<char> { '(', '[', '{', '<' };
 
-	private static IDictionary<char, char> ClosingCharForOpeningChar = new Dictionary<char, char>
+	private static readonly IDictionary<char, char> ClosingCharForOpeningChar = new Dictionary<char, char>
 	{
 		['('] = ')',
 		['['] = ']',
@@ -51,7 +49,7 @@ public static class Day10Helpers
 		['<'] = '>',
 	};
 	
-	private static IDictionary<char, int> ValueOfCorruptedEndingChar = new Dictionary<char, int>
+	private static readonly IDictionary<char, int> PointsForCorruptedEndingChar = new Dictionary<char, int>
 	{
 		[')'] = 3,
 		[']'] = 57,
@@ -59,7 +57,7 @@ public static class Day10Helpers
 		['>'] = 25137,
 	};
 
-	private static IDictionary<char, int> PointValueForClosingCharMatchingOpeningChar = new Dictionary<char, int>
+	private static readonly IDictionary<char, int> PointsForClosingCharMatchingOpeningChar = new Dictionary<char, int>
 	{
 		['('] = 1,
 		['['] = 2,
@@ -78,9 +76,12 @@ public static class Day10Helpers
 	{
 		var corruptedChar = input.GetCorruptedEndingChar(out _);
 
-		if (corruptedChar == null) return 0;
+		if (corruptedChar == null)
+		{
+			return 0;
+		}
 
-		return ValueOfCorruptedEndingChar[corruptedChar.Value];
+		return PointsForCorruptedEndingChar[corruptedChar.Value];
 	}
 
 	public static double GetCompletionScore(this string input)
@@ -92,13 +93,13 @@ public static class Day10Helpers
 
 		foreach (var ch in openingCharsMissingClosingChar)
 		{
-			completionScore = 5 * completionScore + PointValueForClosingCharMatchingOpeningChar[ch];
+			completionScore = 5 * completionScore + PointsForClosingCharMatchingOpeningChar[ch];
 		}
 
 		return completionScore;
 	}
 
-	public static char? GetCorruptedEndingChar(this string input, out List<char> openingCharsMissingClosingChar)
+	private static char? GetCorruptedEndingChar(this string input, out List<char> openingCharsMissingClosingChar)
     {
 		openingCharsMissingClosingChar = new List<char>();
 
@@ -110,7 +111,7 @@ public static class Day10Helpers
 			}
 			else if (ch == ClosingCharForOpeningChar[openingCharsMissingClosingChar.Last()])
 			{
-				openingCharsMissingClosingChar.RemoveAt(openingCharsMissingClosingChar.Count() - 1);
+				openingCharsMissingClosingChar.RemoveAt(openingCharsMissingClosingChar.Count - 1);
 			}
 			else
 			{
@@ -121,9 +122,9 @@ public static class Day10Helpers
 		return null;
 	}
 
-	public static double GetMiddleScore(this IEnumerable<double> scores)
+	public static double GetMiddleScore(this IReadOnlyCollection<double> scores)
 	{
-		var middleIndex = (scores.Count() - 1) / 2;
+		var middleIndex = (scores.Count - 1) / 2;
 
 		return scores.OrderBy(_ => _).ToList()[middleIndex];
 	}
