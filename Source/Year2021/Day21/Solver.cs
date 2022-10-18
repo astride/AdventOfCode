@@ -1,14 +1,12 @@
-﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Globalization;
+using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day21Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -25,7 +23,7 @@ public class Day21Solver : IPuzzleSolver
 				.Last());
 
 		Part1Solution = SolvePart1(startingPosition1, startingPosition2).ToString();
-		Part2Solution = SolvePart2(startingPosition1, startingPosition2).ToString();
+		Part2Solution = SolvePart2(startingPosition1, startingPosition2).ToString(CultureInfo.InvariantCulture);
 	}
 
 	private static int SolvePart1(int startingPosition1, int startingPosition2)
@@ -50,8 +48,8 @@ public static class Day21Helpers
 
 	private const int DiracDieGoal = 21;
 
-	private static double DiracDieWinCountPlayer1 = 0;
-	private static double DiracDieWinCountPlayer2 = 0;
+	private static double DiracDieWinCountPlayer1;
+	private static double DiracDieWinCountPlayer2;
 
 	private static readonly IDictionary<int, int> DiracDieSum = new Dictionary<int, int> 
 	{
@@ -177,11 +175,11 @@ public static class Day21Helpers
 		}
 	}
 
-	private static void PlayDiracDieInUniverse(this IEnumerable<int> previousDieSums, int dieSum, 
+	private static void PlayDiracDieInUniverse(this List<int> previousDieSums, int dieSum, 
 		int position1, int position2, int score1, int score2)
 	{
 		// Player 1's turn if count of previous die sums is even; player 2's turn otherwise
-		if (previousDieSums.Count() % 2 == 0)
+		if (previousDieSums.Count % 2 == 0)
 		{
 			position1 = GetBoardSpot(position1 + dieSum);
 			score1 += position1;
@@ -206,7 +204,7 @@ public static class Day21Helpers
 
 		foreach (var nextDieSum in UniverseCountForDiracDieSum.Keys)
 		{
-			previousDieSums.Append(dieSum).PlayDiracDieInUniverse(nextDieSum, position1, position2, score1, score2);
+			previousDieSums.Append(dieSum).ToList().PlayDiracDieInUniverse(nextDieSum, position1, position2, score1, score2);
 		}
 	}
 
