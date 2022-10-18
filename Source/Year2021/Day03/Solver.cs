@@ -1,14 +1,12 @@
-﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Globalization;
+using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day03Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -16,20 +14,19 @@ public class Day03Solver : IPuzzleSolver
 			.Where(entry => !string.IsNullOrWhiteSpace(entry))
 			.ToArray();
 
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
+		Part1Solution = SolvePart1(input).ToString(CultureInfo.InvariantCulture);
+		Part2Solution = SolvePart2(input).ToString(CultureInfo.InvariantCulture);
 	}
 
 	private static decimal SolvePart1(string[] diagnosticReport)
 	{
 		var bitCount = diagnosticReport.First().Length;
 		
-		IEnumerable<int> nthPositionBits;
-		List<int> gammaRateBinary = new List<int>();
+		var gammaRateBinary = new List<int>();
 
 		for (var i = 0; i < bitCount; i++)
 		{
-			nthPositionBits = diagnosticReport
+			var nthPositionBits = diagnosticReport
 				.Select(entry => entry[i].ToBit());
 
 			gammaRateBinary.Add(nthPositionBits.MostCommonBitOr1());
@@ -56,7 +53,7 @@ public class Day03Solver : IPuzzleSolver
 	private static bool Co2CriteriaValidator(int bit, IEnumerable<int> bits) => bit == bits.LeastCommonBitOr0();
 }
 
-static class Day03Helpers
+internal static class Day03Helpers
 {
 	public static int ToBit(this char ch) => int.Parse(ch.ToString());
 	
@@ -75,14 +72,6 @@ static class Day03Helpers
 			.First().Key;
 	}
 
-	public static IOrderedEnumerable<IGrouping<int, int>> GroupedAndOrderedByAscending(this IEnumerable<int> collection)
-	{
-		return collection
-			.GroupBy(b => b)
-			.OrderBy(b => b.Count())
-			.ThenBy(b => b.Key);
-	}
-
 	public static int[] FlipBitValues(this IList<int> bits)
 	{
 		return bits
@@ -99,7 +88,7 @@ static class Day03Helpers
 			.Skip(1) // exclude lsb
 			.ToList();
 
-		for (var i = 0; i < sbReversed.Count(); i++)
+		for (var i = 0; i < sbReversed.Count; i++)
 		{
 			value += (decimal)Math.Pow(2 * sbReversed[i], i + 1);
 		}
@@ -120,7 +109,7 @@ static class Day03Helpers
 
 			diagnostics = diagnostics.Where(entry => criteriaValidator(entry[i].ToBit(), nthPositionBits)).ToList();
 
-			if (diagnostics.Count() == 1)
+			if (diagnostics.Count == 1)
 			{
 				var rating = diagnostics.Single();
 
@@ -130,5 +119,13 @@ static class Day03Helpers
 
 		// Will (in theory) never be reached
 		return Array.Empty<int>();
+	}
+
+	private static IOrderedEnumerable<IGrouping<int, int>> GroupedAndOrderedByAscending(this IEnumerable<int> collection)
+	{
+		return collection
+			.GroupBy(b => b)
+			.OrderBy(b => b.Count())
+			.ThenBy(b => b.Key);
 	}
 }

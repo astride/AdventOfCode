@@ -1,44 +1,41 @@
 ﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day04Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
 		var drawStack = rawInput
 			.First()
 			.Split(',')
-			.Select(entry => int.Parse(entry))
+			.Select(int.Parse)
 			.ToList();
 
 		var input = rawInput
 			.Skip(1)
-			.SkipWhile(line => string.IsNullOrWhiteSpace(line));
+			.SkipWhile(string.IsNullOrWhiteSpace);
 
 		var boards = new List<List<int>>();
 
-		while (input != null && input.Any())
+		while (input.Any())
 		{
 			var board = input
 				.TakeWhile(line => !string.IsNullOrWhiteSpace(line))
 				.SelectMany(row => row
 					.Split(' ')
 					.Where(entry => !string.IsNullOrWhiteSpace(entry))
-					.Select(entry => int.Parse(entry)))
+					.Select(int.Parse))
 				.ToList();
 
 			boards.Add(board);
 
 			input = input
 				.SkipWhile(line => !string.IsNullOrWhiteSpace(line))
-				.SkipWhile(line => string.IsNullOrWhiteSpace(line));
+				.SkipWhile(string.IsNullOrWhiteSpace);
 		}
 
 		Part1Solution = SolvePart1(boards, drawStack).ToString();
@@ -57,9 +54,12 @@ public class Day04Solver : IPuzzleSolver
 
 		var finalScore = winnerBoard.CalculateScore(lastDrawnNumber);
 
-		//TODO Handle when null
+		if (finalScore == null)
+		{
+			Console.WriteLine($"Could not calculate the score for part 1. You should do some debugging...");
+		}
 
-		return finalScore.Value;
+		return finalScore ?? -1;
 	}
 
 	private static int SolvePart2(List<List<int>> boards, List<int> drawStack)
@@ -85,7 +85,10 @@ public class Day04Solver : IPuzzleSolver
 			{
 				var finalScore = lastBoard.CalculateScore(number);
 
-				return finalScore.Value;
+				if (finalScore != null)
+				{
+					return finalScore.Value;
+				}
 			}
 		}
 
@@ -93,7 +96,7 @@ public class Day04Solver : IPuzzleSolver
 	}
 }
 
-static class Day04Helpers
+internal static class Day04Helpers
 {
 	private const int RowSize = 5;
 	private const int RowCount = RowSize;
@@ -114,7 +117,8 @@ static class Day04Helpers
 			}
 		}
 
-		//TODO Inform about no winning board
+		Console.WriteLine("Unfortunately, there was no winner this time.");
+
 		lastDrawnNumber = -1;
 		return new List<int?>();
 	}
@@ -124,19 +128,24 @@ static class Day04Helpers
 		boards.Remove(boards.GetWinner(drawStack, out _));
 	}
 
-	public static bool HasBingoWith(this List<int?> board, int number)
+	public static int? CalculateScore(this List<int?> board, int lastDrawnNumber)
 	{
-		if (board.Contains(number))
-		{
-			board[board.IndexOf(number)] = null; // mark number
-
-			return board.HasBingo();
-		}
-
-		return false;
+		return lastDrawnNumber * board.Where(entry => entry.HasValue).Sum();
 	}
 
-	public static bool HasBingo(this List<int?> board)
+	public static bool HasBingoWith(this List<int?> board, int number)
+	{
+		if (!board.Contains(number))
+		{
+			return false;
+		}
+
+		board[board.IndexOf(number)] = null; // mark number
+
+		return board.HasBingo();
+	}
+
+	private static bool HasBingo(this List<int?> board)
 	{
 		foreach (var rowNumber in Enumerable.Range(1, RowCount))
 		{
@@ -150,7 +159,7 @@ static class Day04Helpers
 		return false;
 	}
 
-	public static List<int?> GetRow(this List<int?> board, int rowNumber)
+	private static List<int?> GetRow(this List<int?> board, int rowNumber)
 	{
 		return board
 			.Skip(RowSize * (rowNumber - 1))
@@ -158,25 +167,20 @@ static class Day04Helpers
 			.ToList();
 	}
 
-	public static bool IsBingo(this List<int?> row)
+	private static bool IsBingo(this List<int?> row)
 	{
 		return row.All(number => !number.HasValue);
 	}
 
-	public static List<int?> Transpose(this List<int?> board)
+	private static List<int?> Transpose(this List<int?> board)
 	{
 		var rows = Enumerable.Range(1, RowCount)
-			.Select(rowNumber => board.GetRow(rowNumber))
+			.Select(board.GetRow)
 			.ToList();
 
 		return Enumerable.Range(0, RowSize)
 			.SelectMany(colIndex => rows
 				.Select(row => row[colIndex]))
 			.ToList();
-	}
-
-	public static int? CalculateScore(this List<int?> board, int lastDrawnNumber)
-	{
-		return lastDrawnNumber * board.Where(entry => entry.HasValue).Sum();
 	}
 }

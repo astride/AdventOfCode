@@ -1,30 +1,27 @@
-﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Globalization;
+using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day06Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
 		var input = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.Single()
+			.Single(entry => !string.IsNullOrWhiteSpace(entry))
 			.Split(',')
 			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.Select(entry => int.Parse(entry))
+			.Select(int.Parse)
 			.ToArray();
 
 		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
+		Part2Solution = SolvePart2(input).ToString(CultureInfo.InvariantCulture);
 	}
 
-	private static int SolvePart1(int[] timerValues)
+	private static int SolvePart1(IEnumerable<int> timerValues)
 	{
 		var shoal = timerValues.ToList();
 
@@ -33,12 +30,13 @@ public class Day06Solver : IPuzzleSolver
 			shoal.SimulatePopulationChange();
 		}
 
-		return shoal.Count();
+		return shoal.Count;
 	}
 
-	private static decimal SolvePart2(int[] timerValues)
+	private static decimal SolvePart2(IEnumerable<int> timerValues)
 	{
-		var fishCountPerTimerValue = Enumerable.Repeat((decimal)0, Day06Helpers.TimerValueForSpawn + 1).ToList();
+		var fishCountPerTimerValue =
+			Enumerable.Repeat((decimal)0, Day06Helpers.TimerValueForSpawn + 1).ToList();
 
 		foreach (var timerValue in timerValues)
 		{
@@ -74,9 +72,9 @@ public static class Day06Helpers
 		return maternalTimer == TimerValuePreSpawning;
 	}
 
-	private static void UpdateInternalTimers(this List<int> timers)
+	private static void UpdateInternalTimers(this IList<int> timers)
 	{
-		for (var i = 0; i < timers.Count(); i++)
+		for (var i = 0; i < timers.Count; i++)
 		{
 			timers[i] = timers[i].GetNextValue();
 		}

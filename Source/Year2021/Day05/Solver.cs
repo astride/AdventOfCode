@@ -1,33 +1,28 @@
 ﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day05Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
 		var input = rawInput
 			.Where(line => !string.IsNullOrEmpty(line))
 			.Select(line => line.Split(' '))
-			.Select(coor => new Segment(coor[0], coor[2]));
+			.Select(coordinate => new Segment(coordinate[0], coordinate[2]));
 
 		var xMax = input
 			.Select(segment => Math.Max(segment.X1, segment.X2))
 			.Distinct()
-			.OrderByDescending(x => x)
-			.First();
+			.Max();
 
 		var yMax = input
 			.Select(segment => Math.Max(segment.Y1, segment.Y2))
 			.Distinct()
-			.OrderByDescending(y => y)
-			.First();
+			.Max();
 
 		Part1Solution = SolvePart1(input, xMax, yMax).ToString();
 		Part2Solution = SolvePart2(input, xMax, yMax).ToString();
@@ -112,12 +107,12 @@ static class Day05Helpers
 				false));
 	}
 
-	public static bool Is45Degrees(this Segment segment)
+	private static bool Is45Degrees(this Segment segment)
 	{
 		return Math.Abs(segment.Y2 - segment.Y1) == Math.Abs(segment.X2 - segment.X1);
 	}
 
-	public static bool IsPointingUpwards(this Segment segment)
+	private static bool IsPointingUpwards(this Segment segment)
 	{
 		return Math.Sign(segment.Y2 - segment.Y1) == Math.Sign(segment.X2 - segment.X1);
 	}
@@ -175,9 +170,9 @@ public class HorizontalSegment
 		Y = y;
 	}
 
-	public int X1 { get; set; }
-	public int X2 { get; set; }
-	public int Y { get; set; }
+	public int X1 { get; }
+	public int X2 { get; }
+	public int Y { get; }
 }
 
 public class VerticalSegment
@@ -189,9 +184,9 @@ public class VerticalSegment
 		Y2 = y2;
 	}
 
-	public int X { get; set; }
-	public int Y1 { get; set; }
-	public int Y2 { get; set; }
+	public int X { get; }
+	public int Y1 { get; }
+	public int Y2 { get; }
 }
 
 public class DiagonalSegment
@@ -204,10 +199,10 @@ public class DiagonalSegment
 		IsPointingUpwards = isPointingUpwards;
 	}
 
-	public int XStart { get; set; }
-	public int YStart { get; set; }
-	public int Length { get; set; }
-	public bool IsPointingUpwards { get; set; }
+	public int XStart { get; }
+	public int YStart { get; }
+	public int Length { get; }
+	public bool IsPointingUpwards { get; }
 }
 
 public class Segment
@@ -216,11 +211,11 @@ public class Segment
 	{
 		var start = startPoint
 			.Split(',')
-			.Select(coor => int.Parse(coor))
+			.Select(int.Parse)
 			.ToArray();
 		var end = endPoint
 			.Split(',')
-			.Select(coor => int.Parse(coor))
+			.Select(int.Parse)
 			.ToArray();
 
 		X1 = start[0];
@@ -229,8 +224,8 @@ public class Segment
 		Y2 = end[1];
 	}
 
-	public int X1 { get; set; }
-	public int Y1 { get; set; }
-	public int X2 { get; set; }
-	public int Y2 { get; set; }
+	public int X1 { get; }
+	public int Y1 { get; }
+	public int X2 { get; }
+	public int Y2 { get; }
 }
