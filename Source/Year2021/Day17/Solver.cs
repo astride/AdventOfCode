@@ -1,15 +1,12 @@
 ﻿using Common.Interfaces;
 using Common.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day17Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -17,7 +14,8 @@ public class Day17Solver : IPuzzleSolver
 			.Single(entry => !string.IsNullOrWhiteSpace(entry))
 			.Substring("target area: ".Length)
 			.Split(',')
-			.Select(entry => entry.Trim());
+			.Select(entry => entry.Trim())
+			.ToList();
 
 		var targetArea = input.GetTargetArea();
 
@@ -29,20 +27,17 @@ public class Day17Solver : IPuzzleSolver
 	{
 		var yMax = 0;
 
-		Velocity initialVelocity;
-		Coordinate position;
-
 		var positionsOnPath = new List<Coordinate>();
-		int stepCount;
 
 		foreach (var velocityX in Enumerable.Range(1, 108)) // range length found experimentally
 		{
 			foreach (var velocityY in Enumerable.Range(1, 108)) // range length found experimentally
 			{
-				initialVelocity = new Velocity(velocityX, velocityY);
-				position = Coordinate.Origin;
+				var initialVelocity = new Velocity(velocityX, velocityY);
+				var position = Coordinate.Origin;
+				var stepCount = 1;
+
 				positionsOnPath.Clear();
-				stepCount = 1;
 
 				while (!position.IsInside(target) && !position.HasPassed(target))
 				{
@@ -52,9 +47,11 @@ public class Day17Solver : IPuzzleSolver
 
 					if (position.IsInside(target))
 					{
-						if (positionsOnPath.Any(pos => pos.Y > yMax))
+						var yMaxOnPath = positionsOnPath.Max(pos => pos.Y);
+
+						if (yMaxOnPath > yMax)
 						{
-							yMax = positionsOnPath.Select(pos => pos.Y).Max();
+							yMax = yMaxOnPath;
 						}
 					}
 
@@ -70,18 +67,13 @@ public class Day17Solver : IPuzzleSolver
     {
 		var possibleInitialVelocities = new List<Velocity>();
 
-		Velocity initialVelocity;
-		Coordinate position;
-
-		int stepCount;
-
 		foreach (var velocityX in Enumerable.Range(1, target.Max.X))
 		{
 			foreach (var velocityY in Enumerable.Range(target.Min.Y, Math.Abs(2 * target.Min.Y))) // range length found experimentally
 			{
-				initialVelocity = new Velocity(velocityX, velocityY);
-				position = Coordinate.Origin;
-				stepCount = 1;
+				var initialVelocity = new Velocity(velocityX, velocityY);
+				var position = Coordinate.Origin;
+				var stepCount = 1;
 
 				while (!position.IsInside(target) && !position.HasPassed(target))
 				{
@@ -97,13 +89,13 @@ public class Day17Solver : IPuzzleSolver
 			}
 		}
 
-		return possibleInitialVelocities.Count();
+		return possibleInitialVelocities.Count;
 	}
 }
 
-public static class Day17Helpers
+internal static class Day17Helpers
 {
-	public static Area GetTargetArea(this IEnumerable<string> targetRanges)
+	public static Area GetTargetArea(this IReadOnlyCollection<string> targetRanges)
     {
 		var xTargetRange = targetRanges
 			.Single(entry => entry.Contains('x'));
@@ -116,12 +108,12 @@ public static class Day17Helpers
 			new Coordinate(xTargetRange.GetMaxValue(), yTargetRange.GetMaxValue()));
 	}
 
-	public static int GetMinValue(this string range)
+	private static int GetMinValue(this string range)
 	{
 		return int.Parse(string.Concat(range.Skip(2).TakeWhile(ch => ch != '.')));
 	}
 		
-	public static int GetMaxValue(this string range)
+	private static int GetMaxValue(this string range)
 	{
 		return int.Parse(string.Concat(range.SkipWhile(ch => ch != '.').SkipWhile(ch => ch == '.')));
 	}

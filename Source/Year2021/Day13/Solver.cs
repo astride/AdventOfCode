@@ -1,25 +1,22 @@
 ﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day13Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
-		IEnumerable<(int X, int Y)> markedPoints = rawInput
+		List<(int X, int Y)> markedPoints = rawInput
 			.TakeWhile(entry => !string.IsNullOrWhiteSpace(entry))
 			.Select(entry => entry.Split(','))
-			.Select(coor => (int.Parse(coor[0]), int.Parse(coor[1])));
+			.Select(coordinate => (int.Parse(coordinate[0]), int.Parse(coordinate[1])))
+			.ToList();
 
 		List<(char AlongPlane, int Coor)> foldingInstructions = rawInput
 			.SkipWhile(entry => !entry.Contains("fold along"))
-			.Where(entry => entry != null)
 			.Select(entry => entry.Split(' '))
 			.Select(instruction => instruction.Last().Split('='))
 			.Select(foldingInstruction => (foldingInstruction[0].Single(), int.Parse(foldingInstruction[1])))
@@ -30,8 +27,8 @@ public class Day13Solver : IPuzzleSolver
 	}
 
 	private static int SolvePart1(
-		IEnumerable<(int X, int Y)> markedPoints,
-		List<(char Plane, int Coor)> foldingInstructions)
+		IReadOnlyCollection<(int X, int Y)> markedPoints,
+		IEnumerable<(char Plane, int Coor)> foldingInstructions)
 	{
 		var markedPaper = markedPoints.CreateAndMarkPaper();
 		markedPaper.Fold(foldingInstructions.First());
@@ -40,7 +37,7 @@ public class Day13Solver : IPuzzleSolver
 	}
 
 	private static string SolvePart2(
-		IEnumerable<(int X, int Y)> markedPoints,
+		IReadOnlyCollection<(int X, int Y)> markedPoints,
 		List<(char Plane, int Coor)> foldingInstructions)
 	{
 		var markedPaper = markedPoints.CreateAndMarkPaper();
@@ -79,7 +76,7 @@ public static class Day13Helpers
 	private static int SizeX;
 	private static int SizeY;
 
-	public static bool[,] CreateAndMarkPaper(this IEnumerable<(int X, int Y)> pointsToMark)
+	public static bool[,] CreateAndMarkPaper(this IReadOnlyCollection<(int X, int Y)> pointsToMark)
 	{
 		SizeX = pointsToMark
 			.Select(point => point.X)
@@ -101,59 +98,58 @@ public static class Day13Helpers
 
 	public static void Fold(this bool[,] paper, (char AlongPlane, int Coor) instruction)
 	{
-		if (instruction.AlongPlane == 'x') paper.FoldAlongX(instruction.Coor);
-		else if (instruction.AlongPlane == 'y') paper.FoldAlongY(instruction.Coor);
+		switch (instruction.AlongPlane)
+		{
+			case 'x':
+				paper.FoldAlongX(instruction.Coor);
+				return;
+			case 'y':
+				paper.FoldAlongY(instruction.Coor);
+				return;
+		}
 	}
 
 	public static int CountMarks(this bool[,] paper)
 	{
-		var count = 0;
-
-		foreach (var point in paper)
-		{
-			if (point) // == true when point is marked
-			{
-				count++;
-			}
-		}
-
-		return count;
+		return paper
+			.Cast<bool>()
+			.Count(point => point); // == true when point is marked
 	}
 	
 	private static void FoldAlongX(this bool[,] paper, int coordinate)
 	{
-		int mirroredX;
-
 		foreach (var x in Enumerable.Range(0, coordinate + 1))
 		{
-			mirroredX = coordinate + (coordinate - x);
+			var mirroredX = coordinate + (coordinate - x);
+
+			if (mirroredX >= SizeX)
+			{
+				continue;
+			}
 
 			foreach (var y in Enumerable.Range(0, SizeY))
 			{
-				if (mirroredX < SizeX)
-				{
-					paper[x, y] = paper[x, y] || paper[mirroredX, y];
-					paper[mirroredX, y] = false;
-				}
+				paper[x, y] = paper[x, y] || paper[mirroredX, y];
+				paper[mirroredX, y] = false;
 			}
 		}
 	}
 
 	private static void FoldAlongY(this bool[,] paper, int coordinate)
 	{
-		int mirroredY;
-
 		foreach (var y in Enumerable.Range(0, coordinate + 1))
 		{
-			mirroredY = coordinate + (coordinate - y);
+			var mirroredY = coordinate + (coordinate - y);
+
+			if (mirroredY >= SizeY)
+			{
+				continue;
+			}
 
 			foreach (var x in Enumerable.Range(0, SizeX))
 			{
-				if (mirroredY < SizeY)
-				{
-					paper[x, y] = paper[x, y] || paper[x, mirroredY];
-					paper[x, mirroredY] = false;
-				}
+				paper[x, y] = paper[x, y] || paper[x, mirroredY];
+				paper[x, mirroredY] = false;
 			}
 		}
 	}

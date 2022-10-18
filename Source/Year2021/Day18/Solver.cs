@@ -1,14 +1,11 @@
 ﻿using Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Year2021;
 
 public class Day18Solver : IPuzzleSolver
 {
-	public string Part1Solution { get; set; }
-	public string Part2Solution { get; set; }
+	public string Part1Solution { get; set; } = string.Empty;
+	public string Part2Solution { get; set; } = string.Empty;
 
 	public void SolvePuzzle(string[] rawInput)
 	{
@@ -21,11 +18,11 @@ public class Day18Solver : IPuzzleSolver
 		Part2Solution = SolvePart2(assignment).ToString();
 	}
 
-	private static int SolvePart1(List<List<object>> numbers)
+	private static int SolvePart1(IReadOnlyList<List<object>> numbers)
 	{
-		var param = new List<object>(numbers.First());
+		var param = new List<object>(numbers[0]);
 
-		foreach (var i in Enumerable.Range(1, numbers.Count() - 1))
+		foreach (var i in Enumerable.Range(1, numbers.Count - 1))
 		{
 			param.SnailFishAdd(numbers[i]);
 			param.SnailFishReduce();
@@ -51,33 +48,32 @@ public static class Day18Helpers
 
 	private const char PairOpeningChar = '[';
 	private const char PairClosingChar = ']';
-	private const char ValueSeparator = ',';
+	private const char Separator = ',';
 
 	public static List<object> AsSnailFishNumber(this string rawNumber)
 	{
 		var number = new List<object>();
-		char ch;
 
 		while (rawNumber.Length > 0)
 		{
-			ch = rawNumber.First();
+			var ch = rawNumber[0];
 
-			if (ch == PairOpeningChar || ch == PairClosingChar)
+			if (ch is PairOpeningChar or PairClosingChar)
 			{
 				number.Add(ch);
 			}
-			else if (ch != ValueSeparator)
+			else if (ch != Separator)
 			{
 				number.Add(int.Parse(ch.ToString()));
 			}
 
-			rawNumber = rawNumber.Substring(1);
+			rawNumber = rawNumber[1..];
 		}
 
 		return number;
 	}
 
-	public static void SnailFishAdd(this List<object> number, List<object> addend)
+	public static void SnailFishAdd(this List<object> number, IEnumerable<object> addend)
 	{
 		number.Insert(0, PairOpeningChar);
 		number.AddRange(addend);
@@ -86,13 +82,10 @@ public static class Day18Helpers
 
 	public static void SnailFishReduce(this List<object> number)
 	{
-		int? explosionIndex;
-		int? splitIndex;
-
 		while (true)
 		{
-			explosionIndex = number.GetExplosionIndex(DeepestNestingLevel);
-			splitIndex = number.GetSplitIndex();
+			var explosionIndex = number.GetExplosionIndex(DeepestNestingLevel);
+			var splitIndex = number.GetSplitIndex();
 
 			if (explosionIndex.HasValue) number.ExplodePairAt(explosionIndex.Value);
 			else if (splitIndex.HasValue) number.SplitNumberAt(splitIndex.Value);
@@ -106,19 +99,26 @@ public static class Day18Helpers
 
 		foreach (var index in Enumerable.Range(0, number.Count))
 		{
-			if (number[index] is char ch)
+			if (number[index] is not char ch)
 			{
-				if (ch == PairOpeningChar)
-				{
-					// Assuming the nesting is never past one level deeper than the deepest nesting level
-					if (openingCharCount == deepestNestingLevel) return index; 
-					
+				continue;
+			}
+
+			// Assuming the nesting is never past one level deeper than the deepest nesting level
+			if (ch == PairOpeningChar &&
+			    openingCharCount == deepestNestingLevel)
+			{
+				return index;
+			}
+
+			switch (ch)
+			{
+				case PairOpeningChar:
 					openingCharCount++;
-				}
-				else if (ch == PairClosingChar)
-				{
+					break;
+				case PairClosingChar:
 					openingCharCount--;
-				}
+					break;
 			}
 		}
 
@@ -131,7 +131,7 @@ public static class Day18Helpers
 			.FirstOrDefault(item => item is int num && num > ThresholdValue);
 
 		return itemToSplit != default
-			? (int?)number.IndexOf(itemToSplit)
+			? number.IndexOf(itemToSplit)
 			: null;
 	}
 
@@ -215,11 +215,9 @@ public static class Day18Helpers
 		// Explode until there's nothing more to explode without affecting the (currently nonexisting) second addend
 		var addend = new List<object>(number);
 
-		int? explosionIndex;
-
 		while (true)
 		{
-			explosionIndex = addend.GetExplosionIndex(DeepestNestingLevel - 1);
+			var explosionIndex = addend.GetExplosionIndex(DeepestNestingLevel - 1);
 
 			if (explosionIndex == null || explosionIndex == addend.LastNumericIndex()) return addend;
 			else addend.ExplodePairAt(explosionIndex.Value);
@@ -231,7 +229,6 @@ public static class Day18Helpers
 	public static int FindLargestMagnitude(List<List<object>> firstAddends, List<List<object>> secondAddends)
 	{
 		var largestMagnitude = 0;
-		List<object> sum;
 
 		foreach (var firstIndex in Enumerable.Range(0, firstAddends.Count))
 		{
@@ -239,7 +236,7 @@ public static class Day18Helpers
 			{
 				if (secondIndex == firstIndex) continue;
 
-				sum = new List<object>(firstAddends[firstIndex]);
+				var sum = new List<object>(firstAddends[firstIndex]);
 
 				sum.SnailFishAdd(secondAddends[secondIndex]);
 				sum.SnailFishReduce();
@@ -249,38 +246,5 @@ public static class Day18Helpers
 		}
 
 		return largestMagnitude;
-	}
-
-	public static void Print(this List<object> number)
-	{
-		Console.WriteLine();
-
-		bool isNumber;
-		bool isOpeningChar;
-
-		bool prevIsNumber;
-		bool prevIsClosingChar;
-
-		foreach (var index in Enumerable.Range(0, number.Count))
-		{
-			isNumber = number[index] is int;
-			isOpeningChar = number[index].ToString() == "[";
-			
-			prevIsNumber = index > 0 && number[index - 1] is int;
-			prevIsClosingChar = index > 0 && number[index - 1].ToString() == "]";
-
-			if (index > 0 &&
-				((isOpeningChar && prevIsClosingChar) ||
-				(isNumber && prevIsNumber) ||
-				(isNumber && prevIsClosingChar) ||
-				(isOpeningChar && prevIsNumber)))
-			{
-				Console.Write(",");
-			}
-
-			Console.Write(number[index]);
-		}
-
-		Console.WriteLine();
 	}
 }
