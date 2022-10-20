@@ -12,5 +12,4 @@ https://adventofcode.com/
    - Year 2021, Day 14 (part 1, part 2)
    - Year 2021, Day 15 (part 1)
 - Accrediting the user from whom I got the inspiration for the puzzle solver "game" layout
-- Preparing for year 2022
 - Making a decent readme, including information about how to run/play the "game"
