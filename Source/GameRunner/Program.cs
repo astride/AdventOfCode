@@ -9,6 +9,7 @@ public class Program
 {
 	private static readonly IDictionary<int, Assembly> AssemblyByYear = new Dictionary<int, Assembly>
 	{
+		[2022] = typeof(Year2022.Day01Solver).Assembly,
 		[2021] = typeof(Year2021.Day01Solver).Assembly,
 		[2020] = typeof(Year2020.Day01Solver).Assembly
 	};
