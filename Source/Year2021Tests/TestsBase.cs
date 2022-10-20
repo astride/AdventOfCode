@@ -11,7 +11,10 @@ public abstract class TestsBase
     protected abstract string Part1ExampleSolution { get; }
     protected abstract string Part2ExampleSolution { get; }
 
-    protected IPuzzleSolver PuzzleSolver;
+    protected virtual bool SkipVerificationOfPart2 => false;
+    protected virtual bool SkipVerificationOfPart2Example => false;
+
+    protected IPuzzleSolver PuzzleSolver { get; init; }
 
     private const string ProjectName = "Year2021";
     private const string InputFileName = "Input.txt";
@@ -50,13 +53,21 @@ public abstract class TestsBase
     private void VerifySolutions()
     {
         Assert.AreEqual(Part1Solution, PuzzleSolver.Part1Solution);
-        Assert.AreEqual(Part2Solution, PuzzleSolver.Part2Solution);
+
+        if (!SkipVerificationOfPart2)
+        {
+            Assert.AreEqual(Part2Solution, PuzzleSolver.Part2Solution);
+        }
     }
 
     private void VerifySolutionsWithExampleInput()
     {
         Assert.AreEqual(Part1ExampleSolution, PuzzleSolver.Part1Solution);
-        Assert.AreEqual(Part2ExampleSolution, PuzzleSolver.Part2Solution);
+
+        if (!SkipVerificationOfPart2Example)
+        {
+            Assert.AreEqual(Part2ExampleSolution, PuzzleSolver.Part2Solution);
+        }
     }
 
     private string[] GetContentOf(string fileName)
