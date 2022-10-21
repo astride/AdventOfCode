@@ -12,7 +12,6 @@ public class Day13Tests : TestsBase
     protected override string Part2ExampleSolution => "[]"; // Displayed as image in console: Squared shape
 
     protected override bool SkipVerificationOfPart2 => true;
-    protected override bool SkipVerificationOfPart2Example => true;
 
     public Day13Tests()
     {

@@ -12,7 +12,6 @@ public abstract class TestsBase
     protected abstract string Part2ExampleSolution { get; }
 
     protected virtual bool SkipVerificationOfPart2 => false;
-    protected virtual bool SkipVerificationOfPart2Example => false;
 
     protected IPuzzleSolver PuzzleSolver { get; init; }
 
@@ -52,22 +51,30 @@ public abstract class TestsBase
 
     private void VerifySolutions()
     {
-        Assert.AreEqual(Part1Solution, PuzzleSolver.Part1Solution);
-
-        if (!SkipVerificationOfPart2)
-        {
-            Assert.AreEqual(Part2Solution, PuzzleSolver.Part2Solution);
-        }
+        VerifySolutionsAgainstExpectedOutput(Part1Solution, Part2Solution);
     }
 
     private void VerifySolutionsWithExampleInput()
     {
-        Assert.AreEqual(Part1ExampleSolution, PuzzleSolver.Part1Solution);
+        VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
+    }
 
-        if (!SkipVerificationOfPart2Example)
+    private void VerifySolutionsAgainstExpectedOutput(string expectedOutputPart1, string expectedOutputPart2)
+    {
+        Assert.AreEqual(expectedOutputPart1, PuzzleSolver.Part1Solution);
+
+        if (SkipVerificationOfPart2)
         {
-            Assert.AreEqual(Part2ExampleSolution, PuzzleSolver.Part2Solution);
+            InformUserThatVerificationOfPart2WasSkipped();
+            return;
         }
+
+        Assert.AreEqual(expectedOutputPart2, PuzzleSolver.Part2Solution);
+    }
+
+    private static void InformUserThatVerificationOfPart2WasSkipped()
+    {
+        Console.WriteLine("Verification of Part 2 was skipped. Has it not been solved yet?");
     }
 
     private string[] GetContentOf(string fileName)
