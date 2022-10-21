@@ -61,7 +61,7 @@ public abstract class TestsBase
 
     private void VerifySolutionsAgainstExpectedOutput(string expectedOutputPart1, string expectedOutputPart2)
     {
-        Assert.AreEqual(expectedOutputPart1, PuzzleSolver.Part1Solution);
+        Assert.AreEqual(expectedOutputPart1, PuzzleSolver.Part1Solution, "(Part 1)");
 
         if (SkipVerificationOfPart2)
         {
@@ -69,7 +69,7 @@ public abstract class TestsBase
             return;
         }
 
-        Assert.AreEqual(expectedOutputPart2, PuzzleSolver.Part2Solution);
+        Assert.AreEqual(expectedOutputPart2, PuzzleSolver.Part2Solution, "(Part 2)");
     }
 
     private static void InformUserThatVerificationOfPart2WasSkipped()
