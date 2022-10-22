@@ -7,6 +7,8 @@ namespace GameRunner;
 
 public class Program
 {
+	private const bool PlayGame = true;
+	
 	private static readonly IDictionary<int, Assembly> AssemblyByYear = new Dictionary<int, Assembly>
 	{
 		[2022] = typeof(Year2022.Day01Solver).Assembly,
@@ -33,7 +35,36 @@ public class Program
 
 	public static void Main(string[] args)
 	{
-		ResolvePuzzleDateAndPlay();
+		if (PlayGame)
+		{
+			ResolvePuzzleDateAndPlay();
+		}
+		else
+		{
+			PlayPuzzleForSpecificDay();
+		}
+	}
+
+	private static void PlayPuzzleForSpecificDay()
+	{
+		var puzzleSolver = new Year2022.Day01Solver();
+		var puzzleDate = new DateTime(2022, December, 1);
+
+		// Example input
+		puzzleSolver.SolvePuzzle(GetInput(puzzleDate, true));
+
+		Console.WriteLine("\nSolutions for example input:");
+		Console.WriteLine("Part 1: " + puzzleSolver.Part1Solution);
+		Console.WriteLine("Part 2: " + puzzleSolver.Part2Solution);
+		
+		// Real input
+		puzzleSolver.SolvePuzzle(GetInput(puzzleDate, false));
+		
+		Console.WriteLine("\nSolutions:");
+		Console.WriteLine("Part 1: " + puzzleSolver.Part1Solution);
+		Console.WriteLine("Part 2: " + puzzleSolver.Part2Solution);
+
+		Console.ReadLine();
 	}
 
 	private static void ResolvePuzzleDateAndPlay()
