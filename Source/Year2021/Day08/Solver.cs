@@ -36,8 +36,8 @@ public class Day08Solver : IPuzzleSolver
 				.Where(entry => !string.IsNullOrWhiteSpace(entry))
 				.Select(entry => entry.Split(Separator))
 				.Select(entry =>
-					(entry[0].Split(' ').ToArray(),
-					entry[1].Split(' ').ToArray()))
+					(entry[0].Trim().Split(' ').ToArray(),
+					entry[1].Trim().Split(' ').ToArray()))
 				.ToList();
 		}
 
