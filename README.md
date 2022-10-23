@@ -5,7 +5,6 @@ https://adventofcode.com/
 ## TODO
 
 - Fixing erroneous code for:
-   - Year 2021, Day 08 (part 2: bug in code, triggered when solving with real input)
    - Year 2021, Day 14 (part 2: test fails for both real and example input)
    - Year 2021, Day 18 (part 2: test fails for example input)
    - Year 2021, Day 21 (part 2: test fails for example input)
