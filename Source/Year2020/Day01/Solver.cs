@@ -21,21 +21,20 @@ public class Day01Solver : IPuzzleSolver
 
     private static int SolvePart1(IReadOnlyList<int> report)
     {
-        for (var i1 = 0; i1 < report.Count - 1; i1++)
+        var differences = new HashSet<int>();
+
+        foreach (var expense in report)
         {
-            var expense1 = report[i1];
+            var difference = Sum - expense;
 
-            for (var i2 = i1 + 1; i2 < report.Count; i2++)
+            if (differences.Contains(expense))
             {
-                var expense2 = report[i2];
-
-                if (expense1 + expense2 == Sum)
-                {
-                    return expense1 * expense2;
-                }
+                return expense * difference;
             }
-        }
 
+            differences.Add(difference);
+        }
+        
         return -1;
     }
 
