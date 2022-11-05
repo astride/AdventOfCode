@@ -40,22 +40,18 @@ public class Day01Solver : IPuzzleSolver
 
     private static int SolvePart2(IReadOnlyList<int> report)
     {
-        for (var i1 = 0; i1 < report.Count - 2; i1++)
+        for (var i = 0; i < report.Count - 2; i++)
         {
-            var expense1 = report[i1];
+            var expense1 = report[i];
+            var missingExpenses = Sum - expense1;
 
-            for (var i2 = i1 + 1; i2 < report.Count - 1; i2++)
+            foreach (var expense2 in report.Skip(i + 1).SkipLast(1))
             {
-                var expense2 = report[i2];
+                var expense3 = missingExpenses - expense2;
 
-                for (var i3 = i2 + 1; i3 < report.Count; i3++)
+                if (report.Skip(i + 2).Contains(expense3))
                 {
-                    var expense3 = report[i3];
-
-                    if (expense1 + expense2 + expense3 == Sum)
-                    {
-                        return expense1 * expense2 * expense3;
-                    }
+                    return expense1 * expense2 * expense3;
                 }
             }
         }
