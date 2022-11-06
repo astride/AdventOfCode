@@ -4,6 +4,7 @@ namespace Year2021;
 
 public class Day12Solver : IPuzzleSolver
 {
+	public string Title => "Passage Pathing";
 	public string Part1Solution { get; set; } = string.Empty;
 	public string Part2Solution { get; set; } = string.Empty;
 
