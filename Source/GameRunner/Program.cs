@@ -191,7 +191,7 @@ public class Program
 		var additionalInfo = testMode ? " (test data)" : string.Empty;
 
 		Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-		Console.WriteLine($"Let's go! Puzzle day is {puzzleSolverInfo.Date.ToString(DateFormat)}.\n");
+		Console.WriteLine($"Let's go! We are playing the {puzzleSolver.Title} puzzle from {puzzleSolverInfo.Date.ToString(DateFormat)}.\n");
 		Console.WriteLine($"{nameof(puzzleSolver.Part1Solution)}{additionalInfo}: {puzzleSolver.Part1Solution}\n");
 		Console.WriteLine($"{nameof(puzzleSolver.Part2Solution)}{additionalInfo}: {puzzleSolver.Part2Solution}\n");
 		Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
