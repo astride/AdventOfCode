@@ -4,6 +4,7 @@ namespace Year2021;
 
 public class Day08Solver : IPuzzleSolver
 {
+	public string Title => "Seven Segment Search";
 	public string Part1Solution { get; set; } = string.Empty;
 	public string Part2Solution { get; set; } = string.Empty;
 

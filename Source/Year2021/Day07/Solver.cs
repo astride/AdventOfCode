@@ -5,6 +5,7 @@ namespace Year2021;
 
 public class Day07Solver : IPuzzleSolver
 {
+	public string Title => "The Treachery of Whales";
 	public string Part1Solution { get; set; } = string.Empty;
 	public string Part2Solution { get; set; } = string.Empty;
 

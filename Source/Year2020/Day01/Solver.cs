@@ -4,6 +4,7 @@ namespace Year2020;
 
 public class Day01Solver : IPuzzleSolver
 {
+    public string Title => "Report Repair";
     public string Part1Solution { get; set; } = string.Empty;
     public string Part2Solution { get; set; } = string.Empty;
 

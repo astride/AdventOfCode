@@ -4,6 +4,7 @@ namespace Year2021
 {
 	public class Day15Solver : IPuzzleSolver
 	{
+		public string Title => "Chiton";
 		public string Part1Solution { get; set; } = string.Empty;
 		public string Part2Solution { get; set; } = string.Empty;
 
