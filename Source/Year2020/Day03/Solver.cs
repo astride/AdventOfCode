@@ -23,34 +23,58 @@ public class Day03Solver : IPuzzleSolver
         Part2Solution = SolvePart2(treeMap).ToString();
     }
 
-    private int SolvePart1(List<List<bool>> treeMap)
+    private static int SolvePart1(IReadOnlyList<IReadOnlyList<bool>> treeMap)
+    {
+        var slope = new Coordinate(3, 1);
+
+        var treeCount = treeMap.GetTreeCountFor(slope);
+
+        return treeCount;
+    }
+
+    private static long SolvePart2(IReadOnlyList<IReadOnlyList<bool>> treeMap)
+    {
+        var slopes = new Coordinate[]
+        {
+            new(1, 1),
+            new(3, 1),
+            new(5, 1),
+            new(7, 1),
+            new(1, 2),
+        };
+        
+        var treeCountsMultiplied = slopes.Aggregate(
+            (long)1,
+            (acc, slope) => acc * treeMap.GetTreeCountFor(slope));
+
+        return treeCountsMultiplied;
+    }
+}
+
+internal static class Day03Helpers
+{
+    public static int GetTreeCountFor(this IReadOnlyList<IReadOnlyList<bool>> treeMap, Coordinate slope)
     {
         var mapHeight = treeMap.Count;
-        var sourceMapWidth = treeMap[0].Count;
+        var mapWidth = treeMap[0].Count;
+
+        var slopeRepetitions = mapHeight / slope.Y;
 
         var startingPoint = Coordinate.Origin;
-
-        var slope = new Coordinate(3, 1);
-        var slopeRepetitions = mapHeight / slope.Y;
 
         var treeCount = 0;
 
         for (var i = 1; i < slopeRepetitions; i++)
         {
             var row = startingPoint.Y + i * slope.Y;
-            var column = (startingPoint.X + i * slope.X) % sourceMapWidth;
+            var column = (startingPoint.X + i * slope.X) % mapWidth;
             
             if (treeMap[row][column])
             {
                 treeCount++;
             }
         }
-        
-        return treeCount;
-    }
 
-    private int SolvePart2(List<List<bool>> treeMap)
-    {
-        return 0;
+        return treeCount;
     }
 }
