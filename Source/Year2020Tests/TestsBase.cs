@@ -49,14 +49,18 @@ public abstract class TestsBase
 
     private void VerifySolutions()
     {
-        Assert.AreEqual(Part1Solution, PuzzleSolver.Part1Solution);
-        Assert.AreEqual(Part2Solution, PuzzleSolver.Part2Solution);
+        VerifySolutionsAgainstExpectedOutput(Part1Solution, Part2Solution);
     }
 
     private void VerifySolutionsWithExampleInput()
     {
-        Assert.AreEqual(Part1ExampleSolution, PuzzleSolver.Part1Solution);
-        Assert.AreEqual(Part2ExampleSolution, PuzzleSolver.Part2Solution);
+        VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
+    }
+    
+    private void VerifySolutionsAgainstExpectedOutput(string expectedOutputPart1, string expectedOutputPart2)
+    {
+        Assert.AreEqual(expectedOutputPart1, PuzzleSolver.Part1Solution, "(Part 1)");
+        Assert.AreEqual(expectedOutputPart2, PuzzleSolver.Part2Solution, "(Part 2)");
     }
 
     private string[] GetContentOf(string fileName)
