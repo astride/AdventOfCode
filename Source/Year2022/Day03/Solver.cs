@@ -11,19 +11,19 @@ public class Day03Solver : IPuzzleSolver
 
     public void SolvePuzzle(string[] input)
     {
-        var puzzleInput = input.ToList();
-
-        Part1Solution = SolvePart1(puzzleInput).ToString();
-        Part2Solution = SolvePart2(puzzleInput).ToString();
+        Part1Solution = SolvePart1(input).ToString();
+        Part2Solution = SolvePart2(input).ToString();
     }
 
     private static int SolvePart1(IEnumerable<string> rucksackContents)
     {
         var contentByCompartments = rucksackContents
-            .Select(rucksackContent => rucksackContent
-                .Chunk(rucksackContent.Length / 2)
-                .Select(contentInCompartment => new string(contentInCompartment))
-                .ToList());
+            .Select(content =>
+                new[]
+                {
+                    content[..(content.Length / 2)],
+                    content[(content.Length / 2)..],
+                });
 
         var misplacedItemTypePerRucksack = contentByCompartments
             .Select(GetCommonItem);
