@@ -1,12 +1,10 @@
-using System.ComponentModel.Design;
-using System.Runtime.InteropServices;
 using Common.Interfaces;
 
 namespace Year2022;
 
 public class Day03Solver : IPuzzleSolver
 {
-    public string Title => "";
+    public string Title => "Rucksack Reorganization";
 
     public string Part1Solution { get; set; } = string.Empty;
     public string Part2Solution { get; set; } = string.Empty;
