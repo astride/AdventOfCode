@@ -17,42 +17,42 @@ public class Day03Solver : IPuzzleSolver
         Part2Solution = SolvePart2(puzzleInput).ToString();
     }
 
-    private static int SolvePart1(IEnumerable<string> input)
+    private static int SolvePart1(IEnumerable<string> rucksackContents)
     {
-        var contentInCompartments = input.
-            Select(rucksackContent => rucksackContent.Chunk(rucksackContent.Length / 2).ToList());
+        var contentByCompartments = rucksackContents
+            .Select(rucksackContent => rucksackContent
+                .Chunk(rucksackContent.Length / 2)
+                .Select(contentInCompartment => new string(contentInCompartment))
+                .ToList());
 
-        var doppelItemPerRucksack = contentInCompartments
-            .Select(rucksackCompartmentContents =>
-                rucksackCompartmentContents[0]
-                    .Intersect(rucksackCompartmentContents[1]))
-            .Select(commonItems => commonItems.Single());
+        var misplacedItemTypePerRucksack = contentByCompartments
+            .Select(GetCommonItem);
         
-        return doppelItemPerRucksack
-            .Sum(doppelItem => doppelItem.GetPriority());
+        return misplacedItemTypePerRucksack.Sum(GetPriority);
     }
 
-    private static int SolvePart2(IEnumerable<string> input)
+    private static int SolvePart2(IEnumerable<string> rucksackContents)
     {
-        var groups = input.Chunk(3).ToList();
+        var elfGroups = rucksackContents.Chunk(3).ToList();
 
-        var commonItemsPerGroup = groups
-            .Select(group => group[0]
-                .Intersect(group[1])
-                .Intersect(group[2]));
-
-        var commonItemPerGroup = commonItemsPerGroup
-            .Select(cipg => cipg.Single())
-            .ToList();
+        var badgePerElfGroup = elfGroups.Select(GetCommonItem);
         
-        return commonItemPerGroup
-            .Sum(cipg => cipg.GetPriority());
+        return badgePerElfGroup.Sum(GetPriority);
     }
-}
+    
+    private static char GetCommonItem(IReadOnlyCollection<IEnumerable<char>> collections)
+    {
+        var commonItems = collections.First();
 
-internal static class Day03Extensions
-{
-    public static int GetPriority(this char item)
+        foreach (var collection in collections.Skip(1))
+        {
+            commonItems = commonItems.Intersect(collection);
+        }
+
+        return commonItems.Single();
+    }
+    
+    private static int GetPriority(char item)
     {
         return item switch
         {
