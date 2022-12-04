@@ -11,20 +11,24 @@ public class Day04Solver : IPuzzleSolver
 
     public void SolvePuzzle(string[] input)
     {
-        Part1Solution = SolvePart1(input).ToString();
-        Part2Solution = SolvePart2(input).ToString();
+        var pairs = input
+            .Select(GetPair)
+            .ToList();
+        
+        Part1Solution = SolvePart1(pairs).ToString();
+        Part2Solution = SolvePart2(pairs).ToString();
     }
 
-    private static int SolvePart1(IEnumerable<string> input)
+    private static int SolvePart1(IEnumerable<ElfPair> pairs)
     {
-        var overlappingPairs = input
+        var overlappingPairs = pairs
             .Select(IsFullyOverlappingPair)
             .Count(overlappingPair => overlappingPair);
         
         return overlappingPairs;
     }
 
-    private static int SolvePart2(IEnumerable<string> input)
+    private static int SolvePart2(IEnumerable<ElfPair> input)
     {
         var partiallyOverlappingPairs = input
             .Select(IsPartiallyOverlappingPair)
@@ -33,18 +37,16 @@ public class Day04Solver : IPuzzleSolver
         return partiallyOverlappingPairs;
     }
 
-    private static bool IsFullyOverlappingPair(string pairStr)
+    private static bool IsFullyOverlappingPair(ElfPair pair)
     {
-        var detailedPair = GetDetailedPair(pairStr);
-
-        if (detailedPair[0][0] >= detailedPair[1][0] &&
-            detailedPair[0][1] <= detailedPair[1][1])
+        if (pair.First.FromSection >= pair.Second.FromSection &&
+            pair.First.ToSection <= pair.Second.ToSection)
         {
             return true;
         }
 
-        if (detailedPair[0][0] <= detailedPair[1][0] &&
-            detailedPair[0][1] >= detailedPair[1][1])
+        if (pair.First.FromSection <= pair.Second.FromSection &&
+            pair.First.ToSection >= pair.Second.ToSection)
         {
             return true;
         }
@@ -52,23 +54,21 @@ public class Day04Solver : IPuzzleSolver
         return false;
     }
 
-    private static bool IsPartiallyOverlappingPair(string pairStr)
+    private static bool IsPartiallyOverlappingPair(ElfPair pair)
     {
-        if (IsFullyOverlappingPair(pairStr))
+        if (IsFullyOverlappingPair(pair))
         {
             return true;
         }
-        
-        var detailedPair = GetDetailedPair(pairStr);
 
-        if (detailedPair[0][0] <= detailedPair[1][1] &&
-            detailedPair[0][0] >= detailedPair[1][0])
+        if (pair.First.FromSection <= pair.Second.ToSection &&
+            pair.First.FromSection >= pair.Second.FromSection)
         {
             return true;
         }
         
-        if (detailedPair[0][1] <= detailedPair[1][1] &&
-            detailedPair[0][1] >= detailedPair[1][0])
+        if (pair.First.ToSection <= pair.Second.ToSection &&
+            pair.First.ToSection >= pair.Second.FromSection)
         {
             return true;
         }
@@ -76,17 +76,26 @@ public class Day04Solver : IPuzzleSolver
         return false;
     }
 
-    private static List<List<int>> GetDetailedPair(string pairStr)
+    private static ElfPair GetPair(string pairDescription)
     {
-        var pair = pairStr.Split(',');
+        var pair = pairDescription.Split(',');
 
-        var detailedPair = pair
+        var sectionRange = pair
             .Select(pairedElf => pairedElf
                 .Split('-')
                 .Select(int.Parse)
                 .ToList())
+            .Select(sections => new SectionRange(sections[0], sections[1]))
             .ToList();
 
-        return detailedPair;
+        return new ElfPair(sectionRange[0], sectionRange[1]);
     }
 }
+
+internal record ElfPair(
+    SectionRange First,
+    SectionRange Second);
+
+internal record SectionRange(
+    int FromSection,
+    int ToSection);
