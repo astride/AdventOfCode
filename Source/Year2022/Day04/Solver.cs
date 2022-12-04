@@ -21,74 +21,72 @@ public class Day04Solver : IPuzzleSolver
 
     private static int SolvePart1(IEnumerable<ElfPair> pairs)
     {
-        var overlappingPairs = pairs
-            .Select(IsFullyOverlappingPair)
-            .Count(overlappingPair => overlappingPair);
+        var fullyOverlappingPairs = pairs
+            .Where(IsFullyOverlappingPair)
+            .Count();
         
-        return overlappingPairs;
+        return fullyOverlappingPairs;
     }
 
     private static int SolvePart2(IEnumerable<ElfPair> input)
     {
-        var partiallyOverlappingPairs = input
-            .Select(IsPartiallyOverlappingPair)
-            .Count(overlappingPair => overlappingPair);
+        var overlappingPairs = input
+            .Where(IsOverlappingPair)
+            .Count();
         
-        return partiallyOverlappingPairs;
+        return overlappingPairs;
     }
 
     private static bool IsFullyOverlappingPair(ElfPair pair)
     {
-        if (pair.First.FromSection >= pair.Second.FromSection &&
-            pair.First.ToSection <= pair.Second.ToSection)
+        if (!IsOverlappingPair(pair))
         {
-            return true;
+            return false;
         }
 
-        if (pair.First.FromSection <= pair.Second.FromSection &&
-            pair.First.ToSection >= pair.Second.ToSection)
+        if (pair.First.FromSection < pair.Second.FromSection &&
+            pair.First.ToSection < pair.Second.ToSection)
         {
-            return true;
+            return false;
         }
 
-        return false;
+        if (pair.First.FromSection > pair.Second.FromSection &&
+            pair.First.ToSection > pair.Second.ToSection)
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    private static bool IsPartiallyOverlappingPair(ElfPair pair)
+    private static bool IsOverlappingPair(ElfPair pair)
     {
-        if (IsFullyOverlappingPair(pair))
+        if (pair.First.ToSection < pair.Second.FromSection)
         {
-            return true;
+            return false;
         }
 
-        if (pair.First.FromSection <= pair.Second.ToSection &&
-            pair.First.FromSection >= pair.Second.FromSection)
+        if (pair.First.FromSection > pair.Second.ToSection)
         {
-            return true;
+            return false;
         }
-        
-        if (pair.First.ToSection <= pair.Second.ToSection &&
-            pair.First.ToSection >= pair.Second.FromSection)
-        {
-            return true;
-        }
-        
-        return false;
+
+        return true;
     }
 
     private static ElfPair GetPair(string pairDescription)
     {
         var pair = pairDescription.Split(',');
 
-        var sectionRange = pair
-            .Select(pairedElf => pairedElf
+        var sectionRangePair = pair
+            .Select(sectionRangeForElf => sectionRangeForElf
                 .Split('-')
                 .Select(int.Parse)
                 .ToList())
-            .Select(sections => new SectionRange(sections[0], sections[1]))
+            .Select(sectionRange => new SectionRange(sectionRange[0], sectionRange[1]))
             .ToList();
 
-        return new ElfPair(sectionRange[0], sectionRange[1]);
+        return new ElfPair(sectionRangePair[0], sectionRangePair[1]);
     }
 }
 
