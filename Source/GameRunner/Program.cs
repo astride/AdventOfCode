@@ -351,7 +351,9 @@ public class Program
 
 		foreach (var yearAndPath in pathByYearCollection)
 		{
-			var pathByDayCollection = yearAndPath.GroupBy(path => path.Split(Path.DirectorySeparatorChar)[1]);
+			var pathByDayCollection = yearAndPath
+				.GroupBy(path => path.Split(Path.DirectorySeparatorChar)[1])
+				.Where(entry => entry.Key.StartsWith(Day));
 
 			foreach (var dayAndPath in pathByDayCollection)
 			{
