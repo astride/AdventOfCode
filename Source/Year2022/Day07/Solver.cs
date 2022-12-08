@@ -33,17 +33,18 @@ public class Day07Solver : IPuzzleSolver
 
     private static double SolvePart2(Dictionary<string, double> totalFileSizeByDirName)
     {
-        const double availableDiskSpace = 70000000;
+        const double totalDiskSpace = 70000000;
         const double neededUnusedDiskSpace = 30000000;
-        
-        var spaceNeededToBeDeleted = neededUnusedDiskSpace - (availableDiskSpace - totalFileSizeByDirName["/root"]);
 
-        var temp = totalFileSizeByDirName
+        var availableDiskSpace = totalDiskSpace - totalFileSizeByDirName[RootDirName];
+        var spaceNeededToBeDeleted = neededUnusedDiskSpace - availableDiskSpace;
+
+        var totalFileSizeOfDirectoryToDelete = totalFileSizeByDirName
             .Values
             .Where(val => val > spaceNeededToBeDeleted)
             .Min();
         
-        return temp;
+        return totalFileSizeOfDirectoryToDelete;
     }
 
     private static Dictionary<string, double> GetTotalFileSizeByDirNameDict(IEnumerable<string> terminalOutput)
@@ -53,10 +54,8 @@ public class Day07Solver : IPuzzleSolver
         const string listContent = "$ ls";
         const string dirPrefix = "dir";
 
-        var directoryStack = new Stack<string>();
+        var dirBranch = new List<string>();
         var totalFileSizeByDirName = new Dictionary<string, double>();
-
-        bool IsFileInfo(string line) => int.TryParse(line[..1], out _);
 
         var terminalLinesOfInterest = terminalOutput
             .Where(line => !line.StartsWith(dirPrefix))
@@ -66,7 +65,7 @@ public class Day07Solver : IPuzzleSolver
         {
             if (line == goToParentDirCommand)
             {
-                directoryStack.Pop();
+                dirBranch.RemoveAt(dirBranch.Count - 1);
                 
                 continue;
             }
@@ -80,29 +79,33 @@ public class Day07Solver : IPuzzleSolver
                     dirName = RootDirName;
                 }
                 
-                directoryStack.Push(dirName);
+                dirBranch.Add(dirName);
 
                 continue;
             }
             
-            if (IsFileInfo(line))
+            // At this point, the only possible line type is a file info line; treat it as such
+            
+            var fileSize = double.Parse(line.Split(' ')[0]);
+
+            var dirPath = string.Empty;
+
+            foreach (var dirName in dirBranch)
             {
-                var fileSize = double.Parse(line.Split(' ')[0]);
-
-                var dirPath = string.Empty;
-
-                foreach (var dir in directoryStack.Reverse())
+                if (dirPath.Length > 0)
                 {
-                    dirPath += "/" + dir;
-                    
-                    if (totalFileSizeByDirName.ContainsKey(dirPath))
-                    {
-                        totalFileSizeByDirName[dirPath] += fileSize;
-                    }
-                    else
-                    {
-                        totalFileSizeByDirName[dirPath] = fileSize;
-                    }
+                    dirPath += "/";
+                }
+                
+                dirPath += dirName;
+                
+                if (totalFileSizeByDirName.ContainsKey(dirPath))
+                {
+                    totalFileSizeByDirName[dirPath] += fileSize;
+                }
+                else
+                {
+                    totalFileSizeByDirName[dirPath] = fileSize;
                 }
             }
         }
