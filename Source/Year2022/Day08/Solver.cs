@@ -11,53 +11,67 @@ public class Day08Solver : IPuzzleSolver
 
     public void SolvePuzzle(string[] input)
     {
-        Part1Solution = SolvePart1(input).ToString();
-        Part2Solution = SolvePart2(input).ToString();
-    }
-
-    private static int SolvePart1(IEnumerable<string> input)
-    {
-        var grid = input
+        var trees = input
             .Select(row => row
                 .AsEnumerable()
                 .Select(item => int.Parse(item.ToString()))
                 .ToArray())
             .ToArray();
+        
+        Part1Solution = SolvePart1(trees).ToString();
+        Part2Solution = SolvePart2(trees).ToString();
+    }
 
+    private static int SolvePart1(int[][] trees)
+    {
+        var rows = trees[0].Length;
+        var cols = trees.Length;
+
+        bool IsEdgeTree(int row, int col)
+        {
+            var isTopEdge = row == 0;
+            var isLeftEdge = col == 0;
+
+            var isBottomEdge = row == rows - 1;
+            var isRightEdge = col == cols - 1;
+
+            return isTopEdge || isLeftEdge || isBottomEdge || isRightEdge;
+        }
+        
         var visibleTrees = 0;
 
-        var rows = grid[0].Length;
-        var cols = grid.Length;
-        
         for (var row = 0; row < rows; row++)
         {
             for (var col = 0; col < cols; col++)
             {
-                if (row == 0 || col == 0 || row == rows - 1 || col == cols - 1)
+                if (IsEdgeTree(row, col))
                 {
                     visibleTrees++;
                     continue;
                 }
 
-                var tree = grid[row][col];
+                var tree = trees[row][col];
 
                 var tallestTreeAbove = Enumerable
                     .Range(0, row)
-                    .Max(i => grid[i][col]);
-                var tallestTreeRightOf = Enumerable
-                    .Range(col + 1, cols - (col + 1))
-                    .Max(i => grid[row][i]);
-                var tallestTreeBelow = Enumerable
-                    .Range(row + 1, rows - (row + 1))
-                    .Max(i => grid[i][col]);
+                    .Max(rowAbove => trees[rowAbove][col]);
+
                 var tallestTreeLeftOf = Enumerable
                     .Range(0, col)
-                    .Max(i => grid[row][i]);
+                    .Max(colLeftOf => trees[row][colLeftOf]);
+
+                var tallestTreeBelow = Enumerable
+                    .Range(row + 1, rows - (row + 1))
+                    .Max(rowBelow => trees[rowBelow][col]);
+
+                var tallestTreeRightOf = Enumerable
+                    .Range(col + 1, cols - (col + 1))
+                    .Max(colRightOf => trees[row][colRightOf]);
 
                 if (tree > tallestTreeAbove ||
-                    tree > tallestTreeRightOf ||
+                    tree > tallestTreeLeftOf ||
                     tree > tallestTreeBelow ||
-                    tree > tallestTreeLeftOf)
+                    tree > tallestTreeRightOf)
                 {
                     visibleTrees++;
                 }
@@ -67,54 +81,50 @@ public class Day08Solver : IPuzzleSolver
         return visibleTrees;
     }
 
-    private static int SolvePart2(IEnumerable<string> input)
+    private static int SolvePart2(int[][] trees)
     {
-        var grid = input
-            .Select(row => row
-                .AsEnumerable()
-                .Select(item => int.Parse(item.ToString()))
-                .ToArray())
-            .ToArray();
-
+        var rows = trees[0].Length;
+        var cols = trees.Length;
+        
         var highestScenicScore = 0;
 
-        var rows = grid[0].Length;
-        var cols = grid.Length;
-        
         for (var row = 1; row < rows - 1; row++)
         {
             for (var col = 1; col < cols - 1; col++)
             {
-                var tree = grid[row][col];
+                var tree = trees[row][col];
 
-                var visibleTreesAbove = Enumerable
+                var visibleTreesAbove = 1 + Enumerable
                     .Range(0, row)
                     .Reverse()
-                    .Select(i => grid[i][col])
+                    .Select(rowAbove => trees[rowAbove][col])
                     .ToList()
                     .FindIndex(treeAbove => treeAbove >= tree);
-                var visibleTreesRightOf = Enumerable
-                    .Range(col + 1, cols - (col + 1))
-                    .Select(i => grid[row][i])
-                    .ToList()
-                    .FindIndex(treeRightOf => treeRightOf >= tree);
-                var visibleTreesBelow = Enumerable
-                    .Range(row + 1, rows - (row + 1))
-                    .Select(i => grid[i][col])
-                    .ToList()
-                    .FindIndex(treeBelow => treeBelow >= tree);
-                var visibleTreesLeftOf = Enumerable
+
+                var visibleTreesLeftOf = 1 + Enumerable
                     .Range(0, col)
                     .Reverse()
-                    .Select(i => grid[row][i])
+                    .Select(colLeftOf => trees[row][colLeftOf])
                     .ToList()
                     .FindIndex(treeLeftOf => treeLeftOf >= tree);
 
+                var visibleTreesBelow = 1 + Enumerable
+                    .Range(row + 1, rows - (row + 1))
+                    .Select(rowBelow => trees[rowBelow][col])
+                    .ToList()
+                    .FindIndex(treeBelow => treeBelow >= tree);
+
+                var visibleTreesRightOf = 1 + Enumerable
+                    .Range(col + 1, cols - (col + 1))
+                    .Select(colRightOf => trees[row][colRightOf])
+                    .ToList()
+                    .FindIndex(treeRightOf => treeRightOf >= tree);
+
                 var scenicScore =
-                    (visibleTreesAbove < 0 ? row : visibleTreesAbove + 1) *
-                    (visibleTreesRightOf < 0 ? cols - (col + 1) : visibleTreesRightOf + 1) *
-                    (visibleTreesBelow < 0 ? rows - (row + 1) : visibleTreesBelow + 1) *
-                    (visibleTreesLeftOf < 0 ? col : visibleTreesLeftOf + 1);
+                    (visibleTreesAbove > 0 ? visibleTreesAbove : row) *
+                    (visibleTreesLeftOf > 0 ? visibleTreesLeftOf : col) *
+                    (visibleTreesBelow > 0 ? visibleTreesBelow : rows - (row + 1)) *
+                    (visibleTreesRightOf > 0 ? visibleTreesRightOf : cols - (col + 1));
 
                 if (scenicScore > highestScenicScore)
                 {
