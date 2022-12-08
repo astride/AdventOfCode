@@ -4,31 +4,58 @@ namespace Year2022;
 
 public class Day07Solver : IPuzzleSolver
 {
-    public string Title => "";
+    public string Title => "No Space Left On Device";
 
     public string Part1Solution { get; set; } = string.Empty;
     public string Part2Solution { get; set; } = string.Empty;
 
+    private const string RootDirSign = "/";
+    private const string RootDirName = "root";
+
     public void SolvePuzzle(string[] input)
     {
-        Part1Solution = SolvePart1(input).ToString();
-        //Part2Solution = SolvePart2(input).ToString();
+        var totalFileSizeByDirNameDict = GetTotalFileSizeByDirNameDict(input);
+        
+        Part1Solution = SolvePart1(totalFileSizeByDirNameDict).ToString();
+        Part2Solution = SolvePart2(totalFileSizeByDirNameDict).ToString();
     }
 
-    private static double SolvePart1(IEnumerable<string> terminalOutput)
+    private static double SolvePart1(Dictionary<string, double> totalFileSizeByDirName)
+    {
+        const double maxSizeOfRelevantDirectories = 100000;
+        
+        var totalFileSizesOfRelevantDirectories = totalFileSizeByDirName
+            .Values
+            .Where(val => val <= maxSizeOfRelevantDirectories);
+
+        return totalFileSizesOfRelevantDirectories.Sum();
+    }
+
+    private static double SolvePart2(Dictionary<string, double> totalFileSizeByDirName)
+    {
+        const double availableDiskSpace = 70000000;
+        const double neededUnusedDiskSpace = 30000000;
+        
+        var spaceNeededToBeDeleted = neededUnusedDiskSpace - (availableDiskSpace - totalFileSizeByDirName["/root"]);
+
+        var temp = totalFileSizeByDirName
+            .Values
+            .Where(val => val > spaceNeededToBeDeleted)
+            .Min();
+        
+        return temp;
+    }
+
+    private static Dictionary<string, double> GetTotalFileSizeByDirNameDict(IEnumerable<string> terminalOutput)
     {
         const string changeDirCommandPrefix = "$ cd";
         const string goToParentDirCommand = changeDirCommandPrefix + " ..";
         const string listContent = "$ ls";
         const string dirPrefix = "dir";
-        
-        const double maxSizeOfRelevantDirectories = 100000;
 
         var directoryStack = new Stack<string>();
         var totalFileSizeByDirName = new Dictionary<string, double>();
 
-        string GetDirPath() => string.Join("/", directoryStack);
-        
         bool IsFileInfo(string line) => int.TryParse(line[..1], out _);
 
         var terminalLinesOfInterest = terminalOutput
@@ -37,14 +64,9 @@ public class Day07Solver : IPuzzleSolver
 
         foreach (var line in terminalLinesOfInterest)
         {
-            Console.WriteLine();
-            Console.WriteLine(line);
-
             if (line == goToParentDirCommand)
             {
                 directoryStack.Pop();
-                
-                Console.WriteLine("Current dir: '" + GetDirPath() + "'");
                 
                 continue;
             }
@@ -53,14 +75,12 @@ public class Day07Solver : IPuzzleSolver
             {
                 var dirName = line.Split(' ')[2];
 
-                if (dirName == "/")
+                if (dirName == RootDirSign)
                 {
-                    dirName = "root";
+                    dirName = RootDirName;
                 }
                 
                 directoryStack.Push(dirName);
-                
-                Console.WriteLine("Change to dir: '" + GetDirPath() + "'");
 
                 continue;
             }
@@ -68,42 +88,25 @@ public class Day07Solver : IPuzzleSolver
             if (IsFileInfo(line))
             {
                 var fileSize = double.Parse(line.Split(' ')[0]);
-                
-                Console.WriteLine("'" + GetDirPath() + "' contains a file of size " + fileSize);
 
-                foreach (var dir in directoryStack)
+                var dirPath = string.Empty;
+
+                foreach (var dir in directoryStack.Reverse())
                 {
-                    if (totalFileSizeByDirName.ContainsKey(dir))
+                    dirPath += "/" + dir;
+                    
+                    if (totalFileSizeByDirName.ContainsKey(dirPath))
                     {
-                        var previousTotalFileSize = totalFileSizeByDirName[dir];
-                        totalFileSizeByDirName[dir] += fileSize;
-                        
-                        Console.WriteLine("--> '" + dir + "' total file size: (" + previousTotalFileSize + " + " + fileSize + " = )" + totalFileSizeByDirName[dir]);
+                        totalFileSizeByDirName[dirPath] += fileSize;
                     }
                     else
                     {
-                        totalFileSizeByDirName[dir] = fileSize;
-                        
-                        Console.WriteLine("--> '" + dir + "' total file size: " + totalFileSizeByDirName[dir]);
+                        totalFileSizeByDirName[dirPath] = fileSize;
                     }
                 }
-
-                continue;
             }
         }
-        
-        var totalFileSizesOfRelevantDirectories = totalFileSizeByDirName
-            .Values
-            .Where(val => val <= maxSizeOfRelevantDirectories);
 
-        var totalRelevantDirectoryFileSize = totalFileSizesOfRelevantDirectories.Sum();
-        
-        // 924098: Too low
-        return totalRelevantDirectoryFileSize;
-    }
-
-    private static int SolvePart2(IEnumerable<string> input)
-    {
-        return 0;
+        return totalFileSizeByDirName;
     }
 }
