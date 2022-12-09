@@ -8,8 +8,8 @@ public class Day12Tests : TestsBase
     protected override string DirectoryName => "Day12";
     protected override string Part1Solution => "5254";
     protected override string Part2Solution => string.Empty; // Not yet solved
-    protected override string Part1ExampleSolution => "10"; // Slightly larger example: 19; Even larger example: 226
-    protected override string Part2ExampleSolution => "36"; // Slightly larger example: 103; Even larger example: 3509
+    protected override string Part1ExampleSolution => "10"; // Medium sized example: 19; Part 2 example: 226
+    protected override string Part2ExampleSolution => "3509"; // Medium sized example: 103; Part 1 example: 36
 
     protected override bool SkipVerificationOfPart2 => true;
 
