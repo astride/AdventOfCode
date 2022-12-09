@@ -6,10 +6,10 @@ namespace Year2022Tests;
 public class Day09Tests : TestsBase
 {
     protected override string DirectoryName => "Day09";
-    protected override string Part1Solution => "";
-    protected override string Part2Solution => "";
-    protected override string Part1ExampleSolution => "";
-    protected override string Part2ExampleSolution => "";
+    protected override string Part1Solution => "5513";
+    protected override string Part2Solution => "2427";
+    protected override string Part1ExampleSolution => "13";
+    protected override string Part2ExampleSolution => "36";
 
     public Day09Tests()
     {
