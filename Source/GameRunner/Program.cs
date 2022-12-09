@@ -32,6 +32,8 @@ public class Program
 	private const string InputWildcardFileName = "Input*.txt";
 	private const string InputFileName = "Input.txt";
 	private const string InputExampleFileName = "InputExample.txt";
+	private const string InputExampleFileNamePart1 = "InputExamplePart1.txt";
+	private const string InputExampleFileNamePart2 = "InputExamplePart2.txt";
 
 	public static void Main(string[] args)
 	{
@@ -47,18 +49,26 @@ public class Program
 
 	private static void PlayPuzzleForSpecificDay()
 	{
-		var puzzleSolver = new Year2022.Day01Solver();
+		IPuzzleSolver puzzleSolver = new Year2022.Day01Solver();
 		var puzzleDate = new DateTime(2022, December, 1);
 
 		// Example input
-		puzzleSolver.SolvePuzzle(GetInput(puzzleDate, true));
+		if (puzzleSolver.UsePartSpecificExampleInputFiles)
+		{
+			puzzleSolver.SolvePart1(GetInput(puzzleDate, InputExampleFileNamePart1));
+			puzzleSolver.SolvePart2(GetInput(puzzleDate, InputExampleFileNamePart2));
+		}
+		else
+		{
+			puzzleSolver.SolvePuzzle(GetInput(puzzleDate, InputExampleFileName));
+		}
 
 		Console.WriteLine("\nSolutions for example input:");
 		Console.WriteLine("Part 1: " + puzzleSolver.Part1Solution);
 		Console.WriteLine("Part 2: " + puzzleSolver.Part2Solution);
 		
 		// Real input
-		puzzleSolver.SolvePuzzle(GetInput(puzzleDate, false));
+		puzzleSolver.SolvePuzzle(GetInput(puzzleDate, InputFileName));
 		
 		Console.WriteLine("\nSolutions:");
 		Console.WriteLine("Part 1: " + puzzleSolver.Part1Solution);
@@ -173,7 +183,7 @@ public class Program
 	private static void RequestModeAndSolve(PuzzleSolverInfo puzzleSolverInfo)
 	{
 		Console.WriteLine("\nTest mode? (leave blank for 'yes')");
-		var testMode = string.IsNullOrEmpty(Console.ReadLine());
+		var isTestMode = string.IsNullOrEmpty(Console.ReadLine());
 
 		var puzzleInstance = Activator.CreateInstance(puzzleSolverInfo.Type);
 
@@ -184,11 +194,24 @@ public class Program
 
 		var puzzleSolver = (IPuzzleSolver)puzzleInstance;
 
-		var input = GetInput(puzzleSolverInfo.Date, testMode);
+		if (isTestMode && puzzleSolver.UsePartSpecificExampleInputFiles)
+		{
+			var inputPart1 = GetInput(puzzleSolverInfo.Date, InputExampleFileNamePart1);
+			var inputPart2 = GetInput(puzzleSolverInfo.Date, InputExampleFileNamePart2);
+				
+			puzzleSolver.SolvePart1(inputPart1);
+			puzzleSolver.SolvePart2(inputPart2);
+		}
+		else
+		{
+			var inputFileName = isTestMode ? InputExampleFileName : InputFileName;
 
-		puzzleSolver.SolvePuzzle(input);
-
-		var additionalInfo = testMode ? " (test data)" : string.Empty;
+			var input = GetInput(puzzleSolverInfo.Date, inputFileName);
+			
+			puzzleSolver.SolvePuzzle(input);
+		}
+		
+		var additionalInfo = isTestMode ? " (test data)" : string.Empty;
 
 		Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		Console.WriteLine($"Let's go! We are playing the {puzzleSolver.Title} puzzle from {puzzleSolverInfo.Date.ToString(DateFormat)}.\n");
@@ -205,11 +228,10 @@ public class Program
 		Console.ReadLine();
 	}
 
-	private static string[] GetInput(DateTime date, bool testMode)
+	private static string[] GetInput(DateTime date, string fileName)
 	{
 		var yearDir = $"{Year}{date.Year}";
 		var dayDir = $"{Day}{date.Day:D2}";
-		var fileName = testMode ? InputExampleFileName : InputFileName;
 
 		var filePath = Path.Combine(GetPuzzleRootLocation(), yearDir, dayDir, fileName);
 
@@ -360,9 +382,20 @@ public class Program
 				var inputFileNames = dayAndPath
 					.Select(path => path.Split(Path.DirectorySeparatorChar).Last())
 					.ToList();
+				
+				var isMissingInputFile = inputFileNames.All(name => name != InputFileName);
 
-				if (inputFileNames.Count(name => name == InputFileName) != 1 ||
-					inputFileNames.Count(name => name == InputExampleFileName) != 1)
+				if (isMissingInputFile)
+				{
+					continue;
+				}
+				
+				var isMissingExampleInputFile = inputFileNames.All(name => name != InputExampleFileName);
+				var isMissingExampleInputPart1File = inputFileNames.All(name => name != InputExampleFileNamePart1);
+				var isMissingExampleInputPart2File = inputFileNames.All(name => name != InputExampleFileNamePart2);
+
+				if (isMissingExampleInputFile && 
+				    (isMissingExampleInputPart1File || isMissingExampleInputPart2File))
 				{
 					continue;
 				}
@@ -370,7 +403,6 @@ public class Program
 				var day = int.Parse(dayAndPath.Key.Without(Day));
 
 				yield return (new DateTime(yearAndPath.Key, December, day));
-
 			}
 		}
 	}
