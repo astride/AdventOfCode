@@ -31,21 +31,17 @@ public abstract class TestsBase
 
     protected void HasCorrectSolutionsWithExampleInput()
     {
-        if (PuzzleSolver.UsePartSpecificInputFiles)
+        if (PuzzleSolver.UsePartSpecificExampleInputFiles)
         {
-            // TODO Need to solve this situation better, so that each part doesn't need to run with the wrong example input when solving the other part...
-            
-            SolvePuzzleWithExampleInput(ExampleInputFileNamePart1);
-            VerifyPart1SolutionAgainstExpectedOutput(Part1ExampleSolution);
-
-            SolvePuzzleWithExampleInput(ExampleInputFileNamePart2);
-            VerifyPart2SolutionAgainstExpectedOutput(Part2ExampleSolution);
-            
-            return;
+            SolvePart1WithExampleInput();
+            SolvePart2WithExampleInput();
+        }
+        else
+        {
+            SolvePuzzleWithExampleInput();
         }
         
-        SolvePuzzleWithExampleInput(ExampleInputFileName);
-        VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
+        VerifySolutionsWithExampleInput();
     }
 
     private void SolvePuzzle()
@@ -55,16 +51,35 @@ public abstract class TestsBase
         PuzzleSolver.SolvePuzzle(input);
     }
 
-    private void SolvePuzzleWithExampleInput(string inputFileName)
+    private void SolvePuzzleWithExampleInput()
     {
-        var exampleInput = GetContentOf(inputFileName);
+        var exampleInput = GetContentOf(ExampleInputFileName);
         
         PuzzleSolver.SolvePuzzle(exampleInput);
+    }
+
+    private void SolvePart1WithExampleInput()
+    {
+        var exampleInput = GetContentOf(ExampleInputFileNamePart1);
+        
+        PuzzleSolver.SolvePart1(exampleInput);
+    }
+
+    private void SolvePart2WithExampleInput()
+    {
+        var exampleInput = GetContentOf(ExampleInputFileNamePart2);
+        
+        PuzzleSolver.SolvePart2(exampleInput);
     }
 
     private void VerifySolutions()
     {
         VerifySolutionsAgainstExpectedOutput(Part1Solution, Part2Solution);
+    }
+
+    private void VerifySolutionsWithExampleInput()
+    {
+        VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
     }
 
     private void VerifySolutionsAgainstExpectedOutput(string expectedOutputPart1, string expectedOutputPart2)

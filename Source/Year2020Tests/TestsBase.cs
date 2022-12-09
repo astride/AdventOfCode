@@ -16,6 +16,8 @@ public abstract class TestsBase
     private const string ProjectName = "Year2020";
     private const string InputFileName = "Input.txt";
     private const string ExampleInputFileName = "InputExample.txt";
+    private const string ExampleInputFileNamePart1 = "InputExamplePart1.txt";
+    private const string ExampleInputFileNamePart2 = "InputExamplePart2.txt";
     
     private static readonly string RootLocation =
         Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent?.FullName ??
@@ -29,7 +31,16 @@ public abstract class TestsBase
 
     protected void HasCorrectSolutionsWithExampleInput()
     {
-        SolvePuzzleWithExampleInput();
+        if (PuzzleSolver.UsePartSpecificExampleInputFiles)
+        {
+            SolvePart1WithExampleInput();
+            SolvePart2WithExampleInput();
+        }
+        else
+        {
+            SolvePuzzleWithExampleInput();
+        }
+        
         VerifySolutionsWithExampleInput();
     }
 
@@ -47,6 +58,20 @@ public abstract class TestsBase
         PuzzleSolver.SolvePuzzle(exampleInput);
     }
 
+    private void SolvePart1WithExampleInput()
+    {
+        var exampleInput = GetContentOf(ExampleInputFileNamePart1);
+        
+        PuzzleSolver.SolvePart1(exampleInput);
+    }
+
+    private void SolvePart2WithExampleInput()
+    {
+        var exampleInput = GetContentOf(ExampleInputFileNamePart2);
+        
+        PuzzleSolver.SolvePart2(exampleInput);
+    }
+
     private void VerifySolutions()
     {
         VerifySolutionsAgainstExpectedOutput(Part1Solution, Part2Solution);
@@ -56,11 +81,21 @@ public abstract class TestsBase
     {
         VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
     }
-    
+
     private void VerifySolutionsAgainstExpectedOutput(string expectedOutputPart1, string expectedOutputPart2)
     {
-        Assert.AreEqual(expectedOutputPart1, PuzzleSolver.Part1Solution, "(Part 1)");
-        Assert.AreEqual(expectedOutputPart2, PuzzleSolver.Part2Solution, "(Part 2)");
+        VerifyPart1SolutionAgainstExpectedOutput(expectedOutputPart1);
+        VerifyPart2SolutionAgainstExpectedOutput(expectedOutputPart2);
+    }
+
+    private void VerifyPart1SolutionAgainstExpectedOutput(string expected)
+    {
+        Assert.AreEqual(expected, PuzzleSolver.Part1Solution, "(Part 1)");
+    }
+
+    private void VerifyPart2SolutionAgainstExpectedOutput(string expected)
+    {
+        Assert.AreEqual(expected, PuzzleSolver.Part2Solution, "(Part 2)");
     }
 
     private string[] GetContentOf(string fileName)
