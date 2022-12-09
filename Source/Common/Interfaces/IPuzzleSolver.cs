@@ -3,6 +3,8 @@ namespace Common.Interfaces;
 public interface IPuzzleSolver
 {
     string Title { get; }
+
+    virtual bool UsePartSpecificInputFiles => false;
     
     string Part1Solution { get; set; }
 

@@ -16,6 +16,8 @@ public abstract class TestsBase
     private const string ProjectName = "Year2022";
     private const string InputFileName = "Input.txt";
     private const string ExampleInputFileName = "InputExample.txt";
+    private const string ExampleInputFileNamePart1 = "InputExamplePart1.txt";
+    private const string ExampleInputFileNamePart2 = "InputExamplePart2.txt";
     
     private static readonly string RootLocation =
         Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent?.FullName ??
@@ -29,8 +31,21 @@ public abstract class TestsBase
 
     protected void HasCorrectSolutionsWithExampleInput()
     {
-        SolvePuzzleWithExampleInput();
-        VerifySolutionsWithExampleInput();
+        if (PuzzleSolver.UsePartSpecificInputFiles)
+        {
+            // TODO Need to solve this situation better, so that each part doesn't need to run with the wrong example input when solving the other part...
+            
+            SolvePuzzleWithExampleInput(ExampleInputFileNamePart1);
+            VerifyPart1SolutionAgainstExpectedOutput(Part1ExampleSolution);
+
+            SolvePuzzleWithExampleInput(ExampleInputFileNamePart2);
+            VerifyPart2SolutionAgainstExpectedOutput(Part2ExampleSolution);
+            
+            return;
+        }
+        
+        SolvePuzzleWithExampleInput(ExampleInputFileName);
+        VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
     }
 
     private void SolvePuzzle()
@@ -40,9 +55,9 @@ public abstract class TestsBase
         PuzzleSolver.SolvePuzzle(input);
     }
 
-    private void SolvePuzzleWithExampleInput()
+    private void SolvePuzzleWithExampleInput(string inputFileName)
     {
-        var exampleInput = GetContentOf(ExampleInputFileName);
+        var exampleInput = GetContentOf(inputFileName);
         
         PuzzleSolver.SolvePuzzle(exampleInput);
     }
@@ -52,15 +67,20 @@ public abstract class TestsBase
         VerifySolutionsAgainstExpectedOutput(Part1Solution, Part2Solution);
     }
 
-    private void VerifySolutionsWithExampleInput()
-    {
-        VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
-    }
-    
     private void VerifySolutionsAgainstExpectedOutput(string expectedOutputPart1, string expectedOutputPart2)
     {
-        Assert.AreEqual(expectedOutputPart1, PuzzleSolver.Part1Solution, "(Part 1)");
-        Assert.AreEqual(expectedOutputPart2, PuzzleSolver.Part2Solution, "(Part 2)");
+        VerifyPart1SolutionAgainstExpectedOutput(expectedOutputPart1);
+        VerifyPart2SolutionAgainstExpectedOutput(expectedOutputPart2);
+    }
+
+    private void VerifyPart1SolutionAgainstExpectedOutput(string expected)
+    {
+        Assert.AreEqual(expected, PuzzleSolver.Part1Solution, "(Part 1)");
+    }
+
+    private void VerifyPart2SolutionAgainstExpectedOutput(string expected)
+    {
+        Assert.AreEqual(expected, PuzzleSolver.Part2Solution, "(Part 2)");
     }
 
     private string[] GetContentOf(string fileName)
