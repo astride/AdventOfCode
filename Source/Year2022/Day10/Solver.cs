@@ -4,7 +4,7 @@ namespace Year2022;
 
 public class Day10Solver : IPuzzleSolver
 {
-    public string Title => "";
+    public string Title => "Cathode-Ray Tube";
 
     public string Part1Solution { get; set; } = string.Empty;
     public string Part2Solution { get; set; } = string.Empty;
