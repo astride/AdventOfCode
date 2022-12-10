@@ -5,19 +5,26 @@ namespace Year2021;
 public class Day12Solver : IPuzzleSolver
 {
 	public string Title => "Passage Pathing";
+	public bool UsePartSpecificExampleInputFiles => true;
+	
 	public string Part1Solution { get; set; } = string.Empty;
 	public string Part2Solution { get; set; } = string.Empty;
 
-	public void SolvePuzzle(string[] rawInput)
+	public void SolvePuzzle(string[] input)
 	{
-		var input = rawInput
+		SolvePart1(input);
+	}
+
+	public void SolvePart1(string[] input)
+	{
+		var connectedCavesMap = input
 			.Where(entry => !string.IsNullOrWhiteSpace(entry))
 			.Select(entry => entry.Split('-'));
 
-		Part1Solution = SolvePart1(input).ToString();
+		Part1Solution = GetPart1Solution(connectedCavesMap).ToString();
 	}
 
-	private static int SolvePart1(IEnumerable<IEnumerable<string>> connectedCavesMap)
+	private static int GetPart1Solution(IEnumerable<IEnumerable<string>> connectedCavesMap)
 	{
 		var pathCount = connectedCavesMap.GetPathCountVisitingSmallCavesOnceOrLess();
 
