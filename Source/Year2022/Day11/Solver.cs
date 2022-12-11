@@ -15,7 +15,7 @@ public class Day11Solver : IPuzzleSolver
         //Part2Solution = SolvePart2(input).ToString();
     }
 
-    private static long SolvePart1(IEnumerable<string> input)
+    private static int SolvePart1(IEnumerable<string> input)
     {
         var monkeys = input.GetMonkeyAttributes<int>();
 
