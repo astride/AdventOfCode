@@ -9,15 +9,20 @@ public class Day11Solver : IPuzzleSolver
     public string Part1Solution { get; set; } = string.Empty;
     public string Part2Solution { get; set; } = string.Empty;
 
+    private static int TotalDivisibleByProduct;
+
     public void SolvePuzzle(string[] input)
     {
-        Part1Solution = SolvePart1(input).ToString();
-        //Part2Solution = SolvePart2(input).ToString();
+        Part1Solution = GetPart1Solution(input).ToString();
+        Part2Solution = GetPart2Solution(input).ToString();
     }
 
-    private static int SolvePart1(IEnumerable<string> input)
+    private static int GetPart1Solution(IEnumerable<string> input)
     {
-        var monkeys = input.GetMonkeyAttributes<int>();
+        // TODO Refactor; almost everything is identical for Part1 and Part2
+        var monkeys = input.GetMonkeyAttributes();
+
+        SetTotalDivisibleByProduct(monkeys);
 
         var inspectionCounter = Enumerable.Repeat(0, monkeys.Count).ToList();
 
@@ -31,11 +36,7 @@ public class Day11Solver : IPuzzleSolver
                 
                 foreach (var _ in Enumerable.Range(1, monkey.Items.Count))
                 {
-                    var item = monkey.Items.Dequeue();
-                    
-                    var worryLevel = GetNewWorryLevel(item, monkey.InspectionInstructions);
-
-                    worryLevel /= 3; // Divided by three and rounded down to the nearest integer
+                    var worryLevel = GetNewWorryLevel(monkey) / 3;
 
                     var throwToMonkeyIndex = worryLevel % monkey.TestIsDivisibleBy == 0
                         ? monkey.IfTrueThrowTo
@@ -59,33 +60,83 @@ public class Day11Solver : IPuzzleSolver
         return levelOfMonkeyBusiness;
     }
 
-    private static int SolvePart2(IEnumerable<string> input)
+    private static long GetPart2Solution(IEnumerable<string> input)
     {
-        return 0;
+        var monkeys = input.GetMonkeyAttributes();
+
+        SetTotalDivisibleByProduct(monkeys);
+
+        var inspectionCounter = Enumerable.Repeat(0, monkeys.Count).ToList();
+
+        const int totalInspections = 10000;
+
+        foreach (var inspection in Enumerable.Range(1, totalInspections))
+        {
+            for (var i = 0; i < monkeys.Count; i++)
+            {
+                var monkey = monkeys[i];
+                
+                foreach (var _ in Enumerable.Range(1, monkey.Items.Count))
+                {
+                    var worryLevel = GetNewWorryLevel(monkey);
+
+                    var throwToMonkeyIndex = worryLevel % monkey.TestIsDivisibleBy == 0
+                        ? monkey.IfTrueThrowTo
+                        : monkey.IfFalseThrowTo;
+                    
+                    monkeys[throwToMonkeyIndex].Items.Enqueue(worryLevel);
+
+                    inspectionCounter[i]++;
+                }
+            }
+        }
+
+        var inspectionCountOfMostActiveMonkeys = inspectionCounter
+            .OrderByDescending(inspectionCount => inspectionCount)
+            .Take(2)
+            .ToList();
+
+        var levelOfMonkeyBusiness =
+            (long)inspectionCountOfMostActiveMonkeys[0] * inspectionCountOfMostActiveMonkeys[1];
+        
+        return levelOfMonkeyBusiness;
     }
 
-    private static int GetNewWorryLevel(int item, (char Sign, string Operand) inspectionInstructions) // Send whole monkey?
+    private static int GetNewWorryLevel(Monkey monkey)
     {
-        var operand = inspectionInstructions.Operand == "old"
-            ? item
-            : int.Parse(inspectionInstructions.Operand);
+        var item = monkey.Items.Dequeue();
+        
+        long operand = monkey.InspectionInstructions.Operand ?? item;
 
-        return inspectionInstructions.Sign switch
+        var newWorryLevel = monkey.InspectionInstructions.Sign switch
         {
             '*' => item * operand,
             '+' => item + operand,
             _ => item,
         };
+
+        var remainder = (int)(newWorryLevel % TotalDivisibleByProduct);
+
+        return remainder == 0
+            ? TotalDivisibleByProduct
+            : remainder;
+    }
+
+    private static void SetTotalDivisibleByProduct(IEnumerable<Monkey> monkeys)
+    {
+        TotalDivisibleByProduct = monkeys
+            .Select(monkey => monkey.TestIsDivisibleBy)
+            .Aggregate(1, (acc, next) => acc * next);
     }
 }
 
 internal static class Day11Helpers
 {
-    public static List<Monkey<T>> GetMonkeyAttributes<T>(this IEnumerable<string> input)
+    public static List<Monkey> GetMonkeyAttributes(this IEnumerable<string> input)
     {
-        var monkeys = new List<Monkey<T>>();
+        var monkeys = new List<Monkey>();
 
-        var monkey = new Monkey<T>();
+        var monkey = new Monkey();
 
         foreach (var line in input)
         {
@@ -98,7 +149,7 @@ internal static class Day11Helpers
             {
                 monkeys.Add(monkey);
 
-                monkey = new Monkey<T>();
+                monkey = new Monkey();
                 
                 continue;
             }
@@ -108,7 +159,7 @@ internal static class Day11Helpers
                 var items = line
                     .Replace("  Starting items: ", string.Empty)
                     .Split(',', StringSplitOptions.TrimEntries)
-                    .Select(item => (T)Convert.ChangeType(item, typeof(T)));
+                    .Select(int.Parse);
 
                 foreach (var item in items)
                 {
@@ -124,7 +175,11 @@ internal static class Day11Helpers
                     .Replace("  Operation: new = old ", string.Empty)
                     .Split(' ');
 
-                monkey.InspectionInstructions = (char.Parse(operation[0]), operation[1]);
+                var sign = char.Parse(operation[0]);
+
+                var operandIsGiven = int.TryParse(operation[1], out var operand);
+                
+                monkey.InspectionInstructions = (sign, operandIsGiven ? operand : null);
                 
                 continue;
             }
@@ -158,10 +213,10 @@ internal static class Day11Helpers
     }
 }
 
-internal class Monkey<T>
+internal class Monkey
 {
-    public Queue<T> Items { get; } = new();
-    public (char Sign, string Operand) InspectionInstructions { get; set; } // Operand can be "old"!
+    public Queue<int> Items { get; } = new();
+    public (char Sign, int? Operand) InspectionInstructions { get; set; }
     public int TestIsDivisibleBy { get; set; }
     public int IfTrueThrowTo { get; set; }
     public int IfFalseThrowTo { get; set; }
