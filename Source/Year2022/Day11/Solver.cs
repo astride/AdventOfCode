@@ -17,7 +17,7 @@ public class Day11Solver : IPuzzleSolver
 
     private static long SolvePart1(IEnumerable<string> input)
     {
-        var monkeys = input.GetMonkeyAttributes();
+        var monkeys = input.GetMonkeyAttributes<int>();
 
         var inspectionCounter = Enumerable.Repeat(0, monkeys.Count).ToList();
 
@@ -81,11 +81,11 @@ public class Day11Solver : IPuzzleSolver
 
 internal static class Day11Helpers
 {
-    public static List<Monkey> GetMonkeyAttributes(this IEnumerable<string> input)
+    public static List<Monkey<T>> GetMonkeyAttributes<T>(this IEnumerable<string> input)
     {
-        var monkeys = new List<Monkey>();
+        var monkeys = new List<Monkey<T>>();
 
-        var monkey = new Monkey();
+        var monkey = new Monkey<T>();
 
         foreach (var line in input)
         {
@@ -98,7 +98,7 @@ internal static class Day11Helpers
             {
                 monkeys.Add(monkey);
 
-                monkey = new Monkey();
+                monkey = new Monkey<T>();
                 
                 continue;
             }
@@ -108,7 +108,7 @@ internal static class Day11Helpers
                 var items = line
                     .Replace("  Starting items: ", string.Empty)
                     .Split(',', StringSplitOptions.TrimEntries)
-                    .Select(int.Parse);
+                    .Select(item => (T)Convert.ChangeType(item, typeof(T)));
 
                 foreach (var item in items)
                 {
@@ -158,9 +158,9 @@ internal static class Day11Helpers
     }
 }
 
-internal class Monkey
+internal class Monkey<T>
 {
-    public Queue<int> Items { get; set; } = new();
+    public Queue<T> Items { get; } = new();
     public (char Sign, string Operand) InspectionInstructions { get; set; } // Operand can be "old"!
     public int TestIsDivisibleBy { get; set; }
     public int IfTrueThrowTo { get; set; }
