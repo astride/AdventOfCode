@@ -8,8 +8,8 @@ public class Day14Tests : TestsBase
     protected override string DirectoryName => "Day14";
     protected override string Part1ExampleSolution => "24";
     protected override string Part1Solution => "799";
-    protected override string Part2ExampleSolution => "";
-    protected override string Part2Solution => "";
+    protected override string Part2ExampleSolution => "93";
+    protected override string Part2Solution => "29076";
 
     public Day14Tests()
     {
