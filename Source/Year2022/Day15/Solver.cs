@@ -15,6 +15,10 @@ public class Day15Solver : IPuzzleSolver
         Part2Solution = GetPart2Solution(input).ToString();
     }
 
+    private static readonly int CharCountBetweenXAndY = ", y=".Length;
+    private static readonly int CharCountPriorToSensor = "Sensor at x=".Length;
+    private static readonly int CharCountBetweenSensorAndBeacon = ": closest beacon is at x=".Length;
+
     private static int GetPart1Solution(IEnumerable<string> input)
     {
         // const int targetRow = 10; // For example input
@@ -24,25 +28,26 @@ public class Day15Solver : IPuzzleSolver
 
         foreach (var line in input)
         {
-            var sensorX = int.Parse(new string(line
-                .Skip("Sensor at x=".Length)
-                .TakeWhile(ch => ch == 45 || ch > 47 && ch < 58)
-                .ToArray()));
+            var charsToSkip = CharCountPriorToSensor;
 
-            var sensorY = int.Parse(new string(line
-                .Skip("Sensor at x=".Length + sensorX.ToString().Length + ", y=".Length)
-                .TakeWhile(ch => ch == 45 || ch > 47 && ch < 58)
-                .ToArray()));
+            var sensorXAsString = GetNextNumberAsString(line, charsToSkip);
 
-            var beaconX = int.Parse(new string(line
-                .Skip("Sensor at x=".Length + sensorX.ToString().Length + ", y=".Length + sensorY.ToString().Length + ": closest beacon is at x=".Length)
-                .TakeWhile(ch => ch == 45 || ch > 47 && ch < 58)
-                .ToArray()));
+            charsToSkip += sensorXAsString.Length + CharCountBetweenXAndY;
 
-            var beaconY = int.Parse(new string(line
-                .Skip("Sensor at x=".Length + sensorX.ToString().Length + ", y=".Length + sensorY.ToString().Length +  ": closest beacon is at x=".Length + beaconX.ToString().Length + ", y=".Length)
-                .TakeWhile(ch => ch == 45 || ch > 47 && ch < 58)
-                .ToArray()));
+            var sensorYAsString = GetNextNumberAsString(line, charsToSkip);
+
+            charsToSkip += sensorYAsString.Length + CharCountBetweenSensorAndBeacon;
+
+            var beaconXAsString = GetNextNumberAsString(line, charsToSkip);
+
+            charsToSkip += beaconXAsString.Length + CharCountBetweenXAndY;
+
+            var beaconYAsString = GetNextNumberAsString(line, charsToSkip);
+            
+            var sensorX = int.Parse(sensorXAsString);
+            var sensorY = int.Parse(sensorYAsString);
+            var beaconX = int.Parse(beaconXAsString);
+            var beaconY = int.Parse(beaconYAsString);
 
             var proxyDelta = Math.Min(sensorY, beaconY); // want to shift the diamond shape on Y axis to work with smaller numbers
 
@@ -50,9 +55,9 @@ public class Day15Solver : IPuzzleSolver
             var beaconYProxy = beaconY - proxyDelta;
             var targetRowProxy = targetRow - proxyDelta;
 
+            // If applicable: Add beacon to beacon presence dict
             if (beaconYProxy == targetRowProxy)
             {
-                // Add beacon to dict, or update current value
                 beaconPresenceByColAtTargetRow[beaconX] = true;
             }
 
@@ -68,7 +73,7 @@ public class Day15Solver : IPuzzleSolver
                 continue;
             }
 
-            // Add sensor to dict (if applicable)
+            // If applicable: Add sensor to beacon presence dict
             if (sensorYProxy == targetRowProxy &&
                 !beaconPresenceByColAtTargetRow.ContainsKey(sensorX))
             {
@@ -78,20 +83,19 @@ public class Day15Solver : IPuzzleSolver
             var verticalDistanceBetweenSensorAndTargetRow = Math.Abs(targetRowProxy - sensorYProxy);
             var horizontalDistanceFromTheSensor = manhattanOutreach - verticalDistanceBetweenSensorAndTargetRow;
 
-            foreach (var col in Enumerable
-                         .Range(sensorX - horizontalDistanceFromTheSensor, (2 * horizontalDistanceFromTheSensor + 1)))
-            {
-                if (beaconPresenceByColAtTargetRow.TryGetValue(col, out _))
-                {
-                    continue; // Do not overwrite value
-                }
+            var targetRowOutreachMinX = sensorX - horizontalDistanceFromTheSensor;
+            var targetRowOutreach = 2 * horizontalDistanceFromTheSensor + 1; // 1 is sensor; 2 * h is outreach
 
-                beaconPresenceByColAtTargetRow.Add(col, false);
+            foreach (var col in Enumerable.Range(targetRowOutreachMinX, targetRowOutreach))
+            {
+                if (!beaconPresenceByColAtTargetRow.ContainsKey(col))
+                {
+                    beaconPresenceByColAtTargetRow.Add(col, false);
+                }
             }
         }
 
-        return beaconPresenceByColAtTargetRow
-            .Values
+        return beaconPresenceByColAtTargetRow.Values
             .Count(beaconIsPresent => !beaconIsPresent);
     }
 
@@ -99,4 +103,16 @@ public class Day15Solver : IPuzzleSolver
     {
         return 0;
     }
+
+    private static string GetNextNumberAsString(string line, int charsToSkip)
+    {
+        return new string(line
+            .Skip(charsToSkip)
+            .TakeWhile(CharIsPartOfNumber)
+            .ToArray());
+    }
+
+    private static bool CharIsPartOfNumber(char ch) => CharIsDigit(ch) || CharIsMinusSign(ch);
+    private static bool CharIsDigit(char ch) => ch > 47 && ch < 58;
+    private static bool CharIsMinusSign(char ch) => ch == 45;
 }
