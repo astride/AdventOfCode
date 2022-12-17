@@ -1,3 +1,4 @@
+using System.Numerics;
 using Common.Interfaces;
 
 namespace Year2022;
@@ -21,8 +22,8 @@ public class Day15Solver : IPuzzleSolver
 
     private static int GetPart1Solution(IEnumerable<string> input)
     {
-        // const int targetRow = 10; // For example input
-        const int targetRow = 2000000; // For real input
+        const int targetRow = 10; // For example input
+        // const int targetRow = 2000000; // For real input
 
         var beaconPresenceByColAtTargetRow = new Dictionary<int, bool>();
 
@@ -99,9 +100,96 @@ public class Day15Solver : IPuzzleSolver
             .Count(beaconIsPresent => !beaconIsPresent);
     }
 
-    private static int GetPart2Solution(IEnumerable<string> input)
+    private static BigInteger GetPart2Solution(IEnumerable<string> input)
     {
-        return 0;
+        const int posMin = 0;
+        const int posMax = 20; // For example input
+        // const int posMax = 4000000; // For real input
+        
+        const int posCount = 1 + posMax - posMin;
+        
+        const int tuningFrequencyConstant = 4000000;
+
+        var relevantPos = Enumerable.Range(posMin, posCount).ToHashSet();
+
+        var sensorPositionAndManhattanOutreachPairs = new List<((int X, int Y) Sensor, int Outreach)>();
+
+        foreach (var line in input)
+        {
+            var charsToSkip = CharCountPriorToSensor;
+
+            var sensorXAsString = GetNextNumberAsString(line, charsToSkip);
+
+            charsToSkip += sensorXAsString.Length + CharCountBetweenXAndY;
+
+            var sensorYAsString = GetNextNumberAsString(line, charsToSkip);
+
+            charsToSkip += sensorYAsString.Length + CharCountBetweenSensorAndBeacon;
+
+            var beaconXAsString = GetNextNumberAsString(line, charsToSkip);
+
+            charsToSkip += beaconXAsString.Length + CharCountBetweenXAndY;
+
+            var beaconYAsString = GetNextNumberAsString(line, charsToSkip);
+
+            var sensorX = int.Parse(sensorXAsString);
+            var sensorY = int.Parse(sensorYAsString);
+            var beaconX = int.Parse(beaconXAsString);
+            var beaconY = int.Parse(beaconYAsString);
+
+            var manhattanOutreach = Math.Abs(beaconX - sensorX) + Math.Abs(beaconY - sensorY);
+
+            if (sensorY - manhattanOutreach > posMax || sensorY + manhattanOutreach < posMin)
+            {
+                continue;
+            }
+            
+            sensorPositionAndManhattanOutreachPairs.Add(((sensorX, sensorY), manhattanOutreach));
+        }
+
+        var targetCol = 0;
+        var targetRow = 0;
+
+        foreach (var row in relevantPos)
+        {
+            // Create full hashset for row (possible cols)
+            var possibleColsInRow = relevantPos.ToHashSet();
+
+            // Loop through all items in the pairs list
+            foreach (var pair in sensorPositionAndManhattanOutreachPairs)
+            {
+                var yDelta = Math.Abs(pair.Sensor.Y - row);
+                
+                if (yDelta > pair.Outreach)
+                {
+                    // Sensor outreach does not cover current row
+                    continue;
+                }
+                
+                // We now know verticalDistance <= pair.Outreach
+                // Find all cols that are scanned for given row, and remove them from hashset
+                var horizontalOutreachForRelevantRow = pair.Outreach - yDelta;
+
+                var xMin = pair.Sensor.X - horizontalOutreachForRelevantRow;
+                var xCount = 1 + 2 * horizontalOutreachForRelevantRow;
+
+                foreach (var col in Enumerable.Range(xMin, xCount))
+                {
+                    possibleColsInRow.Remove(col);
+                }
+            }
+
+            if (possibleColsInRow.Any()) // If any; should be single item
+            {
+                targetRow = row;
+                targetCol = possibleColsInRow.Single();
+                break;
+            }
+        }
+
+        var tuningFrequency = new BigInteger(tuningFrequencyConstant * targetCol + targetRow);
+        
+        return tuningFrequency;
     }
 
     private static string GetNextNumberAsString(string line, int charsToSkip)
