@@ -44,6 +44,8 @@ public class Day18Solver : IPuzzleSolver
 
             assessedCubes.Add(cube);
         }
+
+        PrintSlicewise(cubes);
         
         return 2 * (3 * cubes.Count - sharedSideCount);
     }
@@ -51,5 +53,43 @@ public class Day18Solver : IPuzzleSolver
     private static int GetPart2Solution(IEnumerable<string> input)
     {
         return 0;
+    }
+
+    private static void PrintSlicewise(IReadOnlyList<XYZ> cubes)
+    {
+        var xCoors = cubes.Select(cube => cube.X).Distinct().OrderBy(x => x).ToList();
+        var yCoors = cubes.Select(cube => cube.Y).Distinct().OrderBy(y => y).ToList();
+        var zCoors = cubes.Select(cube => cube.Z).Distinct().OrderBy(z => z).ToList();
+
+        var xMin = xCoors.Min();
+        var xMax = xCoors.Max();
+
+        var yMin = yCoors.Min();
+        var yMax = yCoors.Max();
+
+        var zMin = zCoors.Min();
+        var zMax = zCoors.Max();
+
+        Console.WriteLine("Slices in the Z plane:\r\n");
+
+        for (var z = zMin; z <= zMax; z++)
+        {
+            Console.WriteLine("Z = " + z + "\r\n");
+            
+            for (var x = xMin; x <= xMax; x++)
+            {
+                for (var y = yMin; y <= yMax; y++)
+                {
+                    var ch = cubes.Contains(new XYZ(x, y, z))
+                        ? '#'
+                        : '.';
+                    
+                    Console.Write(ch);
+                }
+                Console.Write("\r\n");
+            }
+
+            Console.WriteLine();
+        }
     }
 }
