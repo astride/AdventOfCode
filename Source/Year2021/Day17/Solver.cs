@@ -6,26 +6,13 @@ namespace Year2021;
 public class Day17Solver : IPuzzleSolver
 {
 	public string Title => "Trick Shot";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var input = rawInput
-			.Single(entry => !string.IsNullOrWhiteSpace(entry))
-			.Substring("target area: ".Length)
-			.Split(',')
-			.Select(entry => entry.Trim())
-			.ToList();
-
-		var targetArea = input.GetTargetArea();
-
-		Part1Solution = SolvePart1(targetArea).ToString();
-		Part2Solution = SolvePart2(targetArea).ToString();
-	}
-
-	private static int SolvePart1(Area target)
-	{
+		var target = GetTargetArea(input);
+		
 		var yMax = 0;
 
 		var positionsOnPath = new List<Coordinate>();
@@ -64,8 +51,10 @@ public class Day17Solver : IPuzzleSolver
 		return yMax;
 	}
 
-	private static int SolvePart2(Area target)
-    {
+	public object GetPart2Solution(string[] input)
+	{
+		var target = GetTargetArea(input);
+		
 		var possibleInitialVelocities = new List<Velocity>();
 
 		foreach (var velocityX in Enumerable.Range(1, target.Max.X))
@@ -91,6 +80,18 @@ public class Day17Solver : IPuzzleSolver
 		}
 
 		return possibleInitialVelocities.Count;
+	}
+
+	private static Area GetTargetArea(string[] input)
+	{
+		var targetRanges = input
+			.Single(entry => !string.IsNullOrWhiteSpace(entry))
+			.Substring("target area: ".Length)
+			.Split(',')
+			.Select(entry => entry.Trim())
+			.ToList();
+
+		return targetRanges.GetTargetArea();
 	}
 }
 
