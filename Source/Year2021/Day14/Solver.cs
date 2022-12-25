@@ -5,27 +5,15 @@ namespace Year2021;
 public class Day14Solver : IPuzzleSolver
 {
 	public string Title => "Extended Polymerization";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var polymerTemplate = rawInput.First();
-
-		IDictionary<string, char> charToAddForPair = rawInput
-			.Skip(2)
-			.Select(entry => entry.Split(' '))
-			.ToDictionary(
-				rule => rule.First(), 
-				rule => rule.Last().Single());
-
-		Part1Solution = SolvePart1(polymerTemplate, charToAddForPair).ToString();
-		Part2Solution = SolvePart2(polymerTemplate, charToAddForPair).ToString();
-	}
-
-	private static int SolvePart1(string polymerTemplate, IDictionary<string, char> charToAddForPair)
-	{
-		var resultForPair = charToAddForPair.GetResultForPairDict();
+		var polymerTemplate = GetPolymerTemplate(input);
+		var charByAddForPair = GetCharByAddForPairDictionary(input);
+		
+		var resultForPair = charByAddForPair.GetResultForPairDict();
 
 		foreach (var _ in Enumerable.Range(0, 10))
 		{
@@ -34,14 +22,18 @@ public class Day14Solver : IPuzzleSolver
 
 		var countPerElement = polymerTemplate
 			.GroupBy(ch => ch)
-			.Select(gr => gr.Count());
+			.Select(gr => gr.Count())
+			.ToList();
 
 		return countPerElement.Max() - countPerElement.Min();
 	}
 
-	private static double SolvePart2(string polymerTemplate, IDictionary<string, char> charToAddForPair)
+	public object GetPart2Solution(string[] input)
 	{
-		charToAddForPair.PrepareDictionaries();
+		var polymerTemplate = GetPolymerTemplate(input);
+		var charByAddForPair = GetCharByAddForPairDictionary(input);
+		
+		charByAddForPair.PrepareDictionaries();
 
 		var polymerConfig = polymerTemplate.PreparePolymer();
 
@@ -50,13 +42,25 @@ public class Day14Solver : IPuzzleSolver
 			polymerConfig = polymerConfig.InsertPairs();
 		}
 
-		var elementCount = polymerConfig.GetElementCount();
+		var elementCount = polymerConfig.GetElementCount().ToList();
 
 		return elementCount.Max() - elementCount.Min();
 	}
+
+	private string GetPolymerTemplate(string[] input) => input.First();
+
+	private IDictionary<string, char> GetCharByAddForPairDictionary(string[] input)
+	{
+		return input
+			.Skip(2)
+			.Select(entry => entry.Split(' '))
+			.ToDictionary(
+				rule => rule.First(), 
+				rule => rule.Last().Single());
+	}
 }
 
-public static class Day14Helpers
+internal static class Day14Helpers
 {
 	static IDictionary<string, (string Pair1, string Pair2)> ResultOfPair;
 	static IEnumerable<char> Chars;

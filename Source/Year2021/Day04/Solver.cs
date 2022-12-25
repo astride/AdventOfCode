@@ -5,46 +5,14 @@ namespace Year2021;
 public class Day04Solver : IPuzzleSolver
 {
 	public string Title => "Giant Squid";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var drawStack = rawInput
-			.First()
-			.Split(',')
-			.Select(int.Parse)
-			.ToList();
-
-		var input = rawInput
-			.Skip(1)
-			.SkipWhile(string.IsNullOrWhiteSpace);
-
-		var boards = new List<List<int>>();
-
-		while (input.Any())
-		{
-			var board = input
-				.TakeWhile(line => !string.IsNullOrWhiteSpace(line))
-				.SelectMany(row => row
-					.Split(' ')
-					.Where(entry => !string.IsNullOrWhiteSpace(entry))
-					.Select(int.Parse))
-				.ToList();
-
-			boards.Add(board);
-
-			input = input
-				.SkipWhile(line => !string.IsNullOrWhiteSpace(line))
-				.SkipWhile(string.IsNullOrWhiteSpace);
-		}
-
-		Part1Solution = SolvePart1(boards, drawStack).ToString();
-		Part2Solution = SolvePart2(boards, drawStack).ToString();
-	}
-
-	private static int SolvePart1(List<List<int>> boards, List<int> drawStack)
-	{
+		var drawStack = GetDrawStack(input);
+		var boards = GetBoards(input);
+		
 		var playingBoards = boards
 			.Select(board => board
 				.Select(entry => (int?)entry)
@@ -63,8 +31,11 @@ public class Day04Solver : IPuzzleSolver
 		return finalScore ?? -1;
 	}
 
-	private static int SolvePart2(List<List<int>> boards, List<int> drawStack)
+	public object GetPart2Solution(string[] input)
 	{
+		var drawStack = GetDrawStack(input);
+		var boards = GetBoards(input);
+		
 		var remainingBoards = boards
 			.Select(board => board
 				.Select(entry => (int?)entry)
@@ -94,6 +65,45 @@ public class Day04Solver : IPuzzleSolver
 		}
 
 		return -1;
+	}
+
+	private static List<int> GetDrawStack(string[] input)
+	{
+		return input
+			.First()
+			.Split(',')
+			.Select(int.Parse)
+			.ToList();
+	}
+
+	private static List<List<int>> GetBoards(string[] input)
+	{
+		var boardInput = input
+			.Skip(1)
+			.SkipWhile(string.IsNullOrWhiteSpace)
+			.ToList();
+
+		var boards = new List<List<int>>();
+
+		while (boardInput.Any())
+		{
+			var board = boardInput
+				.TakeWhile(line => !string.IsNullOrWhiteSpace(line))
+				.SelectMany(row => row
+					.Split(' ')
+					.Where(entry => !string.IsNullOrWhiteSpace(entry))
+					.Select(int.Parse))
+				.ToList();
+
+			boards.Add(board);
+
+			boardInput = boardInput
+				.SkipWhile(line => !string.IsNullOrWhiteSpace(line))
+				.SkipWhile(string.IsNullOrWhiteSpace)
+				.ToList();
+		}
+
+		return boards;
 	}
 }
 

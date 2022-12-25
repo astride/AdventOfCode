@@ -6,21 +6,13 @@ public class Day04Solver : IPuzzleSolver
 {
     public string Title => "Camp Cleanup";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input)
     {
-        var pairs = input
-            .Select(GetPair)
-            .ToList();
+        var pairs = GetPairs(input);
         
-        Part1Solution = SolvePart1(pairs).ToString();
-        Part2Solution = SolvePart2(pairs).ToString();
-    }
-
-    private static int SolvePart1(IEnumerable<ElfPair> pairs)
-    {
         var fullyOverlappingPairs = pairs
             .Where(IsFullyOverlappingPair)
             .Count();
@@ -28,13 +20,22 @@ public class Day04Solver : IPuzzleSolver
         return fullyOverlappingPairs;
     }
 
-    private static int SolvePart2(IEnumerable<ElfPair> input)
+    public object GetPart2Solution(string[] input)
     {
-        var overlappingPairs = input
+        var pairs = GetPairs(input);
+        
+        var overlappingPairs = pairs
             .Where(IsOverlappingPair)
             .Count();
         
         return overlappingPairs;
+    }
+
+    private static IEnumerable<ElfPair> GetPairs(string[] input)
+    {
+        return input
+            .Select(GetPair)
+            .ToList();
     }
 
     private static bool IsFullyOverlappingPair(ElfPair pair)
