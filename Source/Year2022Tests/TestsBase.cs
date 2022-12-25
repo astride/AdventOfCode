@@ -90,12 +90,12 @@ public abstract class TestsBase
 
     private void VerifyPart1SolutionAgainstExpectedOutput(string expected)
     {
-        Assert.AreEqual(expected, PuzzleSolver.Part1Solution, "(Part 1)");
+        Assert.AreEqual(expected, PuzzleSolver.Part1Solution?.ToString(), "(Part 1)");
     }
 
     private void VerifyPart2SolutionAgainstExpectedOutput(string expected)
     {
-        Assert.AreEqual(expected, PuzzleSolver.Part2Solution, "(Part 2)");
+        Assert.AreEqual(expected, PuzzleSolver.Part2Solution?.ToString(), "(Part 2)");
     }
 
     private string[] GetContentOf(string fileName)
