@@ -75,12 +75,12 @@ public abstract class TestsBase
         SolvePart2AndLogExecutionTime(exampleInput);
     }
 
-    private void SolvePart1AndLogExecutionTime(IReadOnlyList<string> input)
+    private void SolvePart1AndLogExecutionTime(string[] input)
     {
         ExecuteAndLogExecutionTime("Part 1", () => PuzzleSolver.SolvePart1(input));
     }
 
-    private void SolvePart2AndLogExecutionTime(IReadOnlyList<string> input)
+    private void SolvePart2AndLogExecutionTime(string[] input)
     {
         ExecuteAndLogExecutionTime("Part 2", () => PuzzleSolver.SolvePart2(input));
     }
