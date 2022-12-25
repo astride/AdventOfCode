@@ -49,6 +49,8 @@ public class Day25Solver : IPuzzleSolver
 
         var snafuSum = CalculateSnafuNumber(decimalSum);
         
+        Console.WriteLine("Part 1");
+        Console.WriteLine("------");
         Console.WriteLine("Decimal sum is: " + decimalSum);
         Console.WriteLine("SNAFU sum is: " + snafuSum);
         
@@ -63,31 +65,19 @@ public class Day25Solver : IPuzzleSolver
         var highestDigitIndex = highestNeededPotence + 1;
         
         const int lowestDigitIndex = 0;
-        const int maxValue = 2;
 
-        var multiplePerDigitIndex = new int[highestDigitIndex + 1];
+        var multiples = GetMultiples(decimalNumber, lowestDigitIndex, highestDigitIndex);
 
-        var remainder = decimalNumber;
-
-        // Populate multiplePerDigitIndex
-        for (var i = highestDigitIndex; i >= lowestDigitIndex; i--)
-        {
-            var baseNumberForIndex = Math.Pow(NumberSystemBase, i);
-            var multipleForIndex = (int)(remainder / baseNumberForIndex);
-            
-            multiplePerDigitIndex[i] = multipleForIndex;
-
-            remainder -= multipleForIndex * baseNumberForIndex;
-        }
+        var maxMultipleValue = DecimalDigitBySnafuDigit.Values.Max();
 
         // If necessary: Recalculate items of multiplePerDigitIndex (starting with i = 0)
-        while (multiplePerDigitIndex.Any(mul => mul > maxValue))
+        while (multiples.Any(mul => mul > maxMultipleValue))
         {
             var addendForNextDigitIndex = 0;
 
             for (var i = lowestDigitIndex; i <= highestDigitIndex; i++)
             {
-                var currentMultiple = multiplePerDigitIndex[i];
+                var currentMultiple = multiples[i];
 
                 var multipleIsThree = currentMultiple == 3;
                 var multipleIsFour = currentMultiple == 4;
@@ -102,26 +92,14 @@ public class Day25Solver : IPuzzleSolver
 
                 if (newMultiple != currentMultiple)
                 {
-                    multiplePerDigitIndex[i] = newMultiple;
+                    multiples[i] = newMultiple;
                 }
 
                 addendForNextDigitIndex = multipleIsThree || multipleIsFour ? 1 : 0;
             }
         }
 
-        var snafuDigitByDecimalDigit = DecimalDigitBySnafuDigit
-            .ToDictionary(
-                kvp => kvp.Value,
-                kvp => kvp.Key);
-
-        var snafuNumber = new string(multiplePerDigitIndex
-            // Order multiples by descending index order
-            .Reverse()
-            // Trim away the redundant multiples for the upper potences
-            .SkipWhile(multiple => multiple == 0)
-            // Map to SNAFU digits
-            .Select(multiple => snafuDigitByDecimalDigit[multiple])
-            .ToArray());
+        var snafuNumber = GetSnafuNumber(multiples);
 
         return snafuNumber;
     }
@@ -144,8 +122,47 @@ public class Day25Solver : IPuzzleSolver
         }
     }
 
-    private static int GetPart2Solution(IEnumerable<string> input)
+    private static int[] GetMultiples(double decimalNumber, int lowestDigitIndex, int highestDigitIndex)
     {
-        return 0;
+        var multiples = new int[highestDigitIndex + 1];
+
+        var remainder = decimalNumber;
+
+        // Populate multiples
+        for (var i = highestDigitIndex; i >= lowestDigitIndex; i--)
+        {
+            var baseNumberForIndex = Math.Pow(NumberSystemBase, i);
+            var multipleForIndex = (int)(remainder / baseNumberForIndex);
+            
+            multiples[i] = multipleForIndex;
+
+            remainder -= multipleForIndex * baseNumberForIndex;
+        }
+
+        return multiples;
+    }
+
+    private static string GetSnafuNumber(int[] multiples)
+    {
+        var snafuDigitByDecimalDigit = DecimalDigitBySnafuDigit
+            .ToDictionary(
+                kvp => kvp.Value,
+                kvp => kvp.Key);
+
+        var snafuDigits = multiples
+            // Order multiples by descending index order
+            .Reverse()
+            // Trim away the redundant multiples for the upper potences
+            .SkipWhile(multiple => multiple == 0)
+            // Map to SNAFU digits
+            .Select(multiple => snafuDigitByDecimalDigit[multiple])
+            .ToArray();
+
+        return new string(snafuDigits);
+    }
+
+    private static string GetPart2Solution(IEnumerable<string> input)
+    {
+        return string.Empty;
     }
 }
