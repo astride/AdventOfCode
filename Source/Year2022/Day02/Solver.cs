@@ -6,25 +6,19 @@ public class Day02Solver : IPuzzleSolver
 {
     public string Title => "Rock Paper Scissors";
     
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] encryptedStrategyGuide)
+    public object GetPart1Solution(string[] input)
     {
-        Part1Solution = SolvePart1(encryptedStrategyGuide).ToString();
-        Part2Solution = SolvePart2(encryptedStrategyGuide).ToString();
-    }
-
-    private static int SolvePart1(IEnumerable<string> encryptedStrategyGuide)
-    {
-        var rounds = encryptedStrategyGuide.GetRoundsForPart1();
+        var rounds = input.GetRoundsForPart1();
         
         return rounds.GetScore();
     }
 
-    private static int SolvePart2(IEnumerable<string> encryptedStrategyGuide)
+    public object GetPart2Solution(string[] input)
     {
-        var rounds = encryptedStrategyGuide.GetRoundsForPart2();
+        var rounds = input.GetRoundsForPart2();
 
         return rounds.GetScore();
     }
