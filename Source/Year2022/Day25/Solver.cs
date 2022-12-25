@@ -6,8 +6,8 @@ public class Day25Solver : IPuzzleSolver
 {
     public string Title => "Full of Hot Air";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private const int NumberSystemBase = 5;
     
@@ -20,15 +20,9 @@ public class Day25Solver : IPuzzleSolver
         ['='] = -2,
     }; 
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input)
     {
-        Part1Solution = GetPart1Solution(input).ToString();
-        Part2Solution = GetPart2Solution(input).ToString();
-    }
-
-    private static string GetPart1Solution(IEnumerable<string> input)
-    {
-        var fuelNeededPerHotAirBalloon = new List<double>(input.Count());
+        var fuelNeededPerHotAirBalloon = new List<double>(input.Length);
 
         foreach (var line in input)
         {
@@ -56,6 +50,8 @@ public class Day25Solver : IPuzzleSolver
         
         return snafuSum;
     }
+
+    public object GetPart2Solution(string[] input) => "Not solved";
 
     private static string CalculateSnafuNumber(double decimalNumber)
     {
@@ -159,10 +155,5 @@ public class Day25Solver : IPuzzleSolver
             .ToArray();
 
         return new string(snafuDigits);
-    }
-
-    private static string GetPart2Solution(IEnumerable<string> input)
-    {
-        return string.Empty;
     }
 }
