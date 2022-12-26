@@ -8,31 +8,15 @@ public class Day09Solver : IPuzzleSolver
 
     public bool UsePartSpecificExampleInputFiles => true;
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private const string Right = "R";
     private const string Left = "L";
     private const string Up = "U";
     private const string Down = "D";
 
-    public void SolvePuzzle(string[] input)
-    {
-        SolvePart1(input);
-        SolvePart2(input);
-    }
-
-    public void SolvePart1(string[] input)
-    {
-        Part1Solution = GetPart1Solution(input).ToString();
-    }
-
-    public void SolvePart2(string[] input)
-    {
-        Part2Solution = GetPart2Solution(input).ToString();
-    }
-
-    private static int GetPart1Solution(IEnumerable<string> input)
+    public object GetPart1Solution(string[] input)
     {
         var head = (Row: 0, Col: 0);
         var tail = (Row: 0, Col: 0);
@@ -195,7 +179,7 @@ public class Day09Solver : IPuzzleSolver
         return tailVisitLocations.Count;
     }
     
-    private static int GetPart2Solution(IEnumerable<string> input)
+    public object GetPart2Solution(string[] input)
     {
         const int knots = 10;
         
