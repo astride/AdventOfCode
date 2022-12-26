@@ -21,10 +21,6 @@ public class Day09Solver : IPuzzleSolver
         var head = (Row: 0, Col: 0);
         var tail = (Row: 0, Col: 0);
 
-        var tailVisitLocations = new HashSet<(int Row, int Col)> { tail };
-
-        bool AreOverlapping() => head.Row == tail.Row && head.Col == tail.Col;
-        
         bool HeadIsDirectlyToTheRight() => head.Row == tail.Row && head.Col == tail.Col + 1;
         bool HeadIsDirectlyToTheLeft() => head.Row == tail.Row && head.Col == tail.Col - 1;
         bool HeadIsDirectlyAbove() => head.Row == tail.Row + 1 && head.Col == tail.Col;
@@ -51,6 +47,8 @@ public class Day09Solver : IPuzzleSolver
             if (direction == Left) tail.Col--;
         }
 
+        var tailVisitLocations = new HashSet<(int Row, int Col)> { tail };
+
         var instructions = input
             .Select(item => item.Split(' '))
             .Select(parts => (Direction: parts[0], Steps: int.Parse(parts[1])))
@@ -58,121 +56,32 @@ public class Day09Solver : IPuzzleSolver
 
         foreach (var line in instructions)
         {
-            foreach (var step in Enumerable.Range(1, line.Steps))
+            for (var i = 0; i < line.Steps; i++)
             {
-                if (AreOverlapping())
+                var directionsForTailToMove = line.Direction switch
                 {
-                    MoveHead(line.Direction);
-                    // Tail does not move, no matter where head moves
+                    // Straight movement
+                    Up when HeadIsDirectlyAbove() => new[] { Up },
+                    Down when HeadIsDirectlyBelow() => new[] { Down },
+                    Left when HeadIsDirectlyToTheLeft() => new[] { Left },
+                    Right when HeadIsDirectlyToTheRight() => new[] { Right },
+                    // Diagonal movement
+                    Up or Left when HeadIsDirectlyAboveToTheLeft() => new[] { Up, Left },
+                    Up or Right when HeadIsDirectlyAboveToTheRight() => new[] { Up, Right },
+                    Down or Left when HeadIsDirectlyBelowToTheLeft() => new[] { Down, Left },
+                    Down or Right when HeadIsDirectlyBelowToTheRight() => new[] { Down, Right },
+                    // No movement (head and tail are overlapping)
+                    _ => Array.Empty<string>(),
+                };
+                
+                MoveHead(line.Direction);
 
-                    continue;
-                }
-
-                if (HeadIsDirectlyAbove())
+                foreach (var direction in directionsForTailToMove)
                 {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves upwards
-                    if (line.Direction == Up)
-                    {
-                        MoveTail(Up);
-                        tailVisitLocations.Add(tail);
-                    }
-
-                    continue;
+                    MoveTail(direction);
                 }
-
-                if (HeadIsDirectlyBelow())
-                {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves downwards
-                    if (line.Direction == Down)
-                    {
-                        MoveTail(Down);
-                        tailVisitLocations.Add(tail);
-                    }
-                    
-                    continue;
-                }
-
-                if (HeadIsDirectlyToTheRight())
-                {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves rightwards
-                    if (line.Direction == Right)
-                    {
-                        MoveTail(Right);
-                        tailVisitLocations.Add(tail);
-                    }
-
-                    continue;
-                }
-
-                if (HeadIsDirectlyToTheLeft())
-                {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves leftwards
-                    if (line.Direction == Left)
-                    {
-                        MoveTail(Left);
-                        tailVisitLocations.Add(tail);
-                    }
-                    
-                    continue;
-                }
-
-                if (HeadIsDirectlyAboveToTheRight())
-                {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves upwards or rightwards
-                    if (line.Direction == Up || line.Direction == Right)
-                    {
-                        MoveTail(Up);
-                        MoveTail(Right);
-                        tailVisitLocations.Add(tail);
-                    }
-                    
-                    continue;
-                }
-
-                if (HeadIsDirectlyAboveToTheLeft())
-                {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves upwards or leftwards
-                    if (line.Direction == Up || line.Direction == Left)
-                    {
-                        MoveTail(Up);
-                        MoveTail(Left);
-                        tailVisitLocations.Add(tail);
-                    }
-
-                    continue;
-                }
-
-                if (HeadIsDirectlyBelowToTheRight())
-                {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves downwards or rightwards
-                    if (line.Direction == Down || line.Direction == Right)
-                    {
-                        MoveTail(Down);
-                        MoveTail(Right);
-                        tailVisitLocations.Add(tail);
-                    }
-                    
-                    continue;
-                }
-
-                if (HeadIsDirectlyBelowToTheLeft())
-                {
-                    MoveHead(line.Direction);
-                    // Tail only moves if head moves downwards or leftwards
-                    if (line.Direction == Down || line.Direction == Left)
-                    {
-                        MoveTail(Down);
-                        MoveTail(Left);
-                        tailVisitLocations.Add(tail);
-                    }
-                }
+                
+                tailVisitLocations.Add(tail);
             }
         }
         
