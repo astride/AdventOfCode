@@ -94,10 +94,11 @@ public class Day09Solver : IPuzzleSolver
         
         var rope = Enumerable.Repeat((Row: 0, Col: 0), knots).ToList();
 
-        var tailVisitLocations = new HashSet<(int Row, int Col)>();
+        var tailVisitLocations = new HashSet<(int Row, int Col)>
+        {
+            rope.Last()
+        };
 
-        tailVisitLocations.Add(rope.Last());
-        
         bool AreAdjacent((int Row, int Col) firstKnot, (int Row, int Col) secondKnot)
         {
             var rowOffset = Math.Abs(firstKnot.Row - secondKnot.Row);
@@ -115,20 +116,47 @@ public class Day09Solver : IPuzzleSolver
         {
             var rowOffset = currentKnotInFrontPosition.Row - currentKnotPosition.Row;
             var colOffset = currentKnotInFrontPosition.Col - currentKnotPosition.Col;
-            
-            var needsToMoveUp = rowOffset > 1 || (rowOffset == 1 && Math.Abs(colOffset) > 1);
-            var needsToMoveDown = rowOffset < -1 || (rowOffset == -1 && Math.Abs(colOffset) > 1);
-            var needsToMoveRight = colOffset > 1 || (colOffset == 1 && Math.Abs(rowOffset) > 1);
-            var needsToMoveLeft = colOffset < -1 || (colOffset == -1 && Math.Abs(rowOffset) > 1);
 
-            if (needsToMoveUp && needsToMoveRight) return (currentKnotPosition.Row + 1, currentKnotPosition.Col + 1);
-            if (needsToMoveUp && needsToMoveLeft) return (currentKnotPosition.Row + 1, currentKnotPosition.Col - 1);
-            if (needsToMoveUp) return (currentKnotPosition.Row + 1, currentKnotPosition.Col);
-            if (needsToMoveDown && needsToMoveRight) return (currentKnotPosition.Row - 1, currentKnotPosition.Col + 1);
-            if (needsToMoveDown && needsToMoveLeft) return (currentKnotPosition.Row - 1, currentKnotPosition.Col - 1);
-            if (needsToMoveDown) return (currentKnotPosition.Row - 1, currentKnotPosition.Col);
-            if (needsToMoveRight) return (currentKnotPosition.Row, currentKnotPosition.Col + 1);
-            if (needsToMoveLeft) return (currentKnotPosition.Row, currentKnotPosition.Col - 1);
+            var knotInFrontIsMoreThanOneColumnAway = Math.Abs(colOffset) > 1;
+            var knotInFrontIsMoreThanOneRowAway = Math.Abs(rowOffset) > 1;
+            
+            var needsToMoveUp = rowOffset > 1 || (rowOffset == 1 && knotInFrontIsMoreThanOneColumnAway);
+            var needsToMoveDown = rowOffset < -1 || (rowOffset == -1 && knotInFrontIsMoreThanOneColumnAway);
+            var needsToMoveRight = colOffset > 1 || (colOffset == 1 && knotInFrontIsMoreThanOneRowAway);
+            var needsToMoveLeft = colOffset < -1 || (colOffset == -1 && knotInFrontIsMoreThanOneRowAway);
+
+            if (needsToMoveUp && needsToMoveRight)
+            {
+                return (currentKnotPosition.Row + 1, currentKnotPosition.Col + 1);
+            }
+            if (needsToMoveUp && needsToMoveLeft)
+            {
+                return (currentKnotPosition.Row + 1, currentKnotPosition.Col - 1);
+            }
+            if (needsToMoveUp)
+            {
+                return (currentKnotPosition.Row + 1, currentKnotPosition.Col);
+            }
+            if (needsToMoveDown && needsToMoveRight)
+            {
+                return (currentKnotPosition.Row - 1, currentKnotPosition.Col + 1);
+            }
+            if (needsToMoveDown && needsToMoveLeft)
+            {
+                return (currentKnotPosition.Row - 1, currentKnotPosition.Col - 1);
+            }
+            if (needsToMoveDown)
+            {
+                return (currentKnotPosition.Row - 1, currentKnotPosition.Col);
+            }
+            if (needsToMoveRight)
+            {
+                return (currentKnotPosition.Row, currentKnotPosition.Col + 1);
+            }
+            if (needsToMoveLeft)
+            {
+                return (currentKnotPosition.Row, currentKnotPosition.Col - 1);
+            }
 
             // Should never occur, but...
             return currentKnotPosition;
@@ -141,37 +169,37 @@ public class Day09Solver : IPuzzleSolver
 
         foreach (var line in instructions)
         {
-            foreach (var step in Enumerable.Range(1, line.Steps))
+            for (var step = 0; step < line.Steps; step++)
             {
-                for (var i = 0; i < knots; i++)
+                for (var knotIndex = 0; knotIndex < knots; knotIndex++)
                 {
                     // If head: Move head --> continue
-                    if (i == 0)
+                    if (knotIndex == 0)
                     {
-                        var currentHeadPosition = rope[i];
+                        var currentHeadPosition = rope[knotIndex];
                         
                         if (line.Direction == Up)
                         {
-                            rope[i] = (currentHeadPosition.Row + 1, currentHeadPosition.Col);
+                            rope[knotIndex] = (currentHeadPosition.Row + 1, currentHeadPosition.Col);
                         }
                         else if (line.Direction == Down)
                         {
-                            rope[i] = (currentHeadPosition.Row - 1, currentHeadPosition.Col);
+                            rope[knotIndex] = (currentHeadPosition.Row - 1, currentHeadPosition.Col);
                         }
                         else if (line.Direction == Right)
                         {
-                            rope[i] = (currentHeadPosition.Row, currentHeadPosition.Col + 1);
+                            rope[knotIndex] = (currentHeadPosition.Row, currentHeadPosition.Col + 1);
                         }
                         else if (line.Direction == Left)
                         {
-                            rope[i] = (currentHeadPosition.Row, currentHeadPosition.Col - 1);
+                            rope[knotIndex] = (currentHeadPosition.Row, currentHeadPosition.Col - 1);
                         }
 
                         continue;
                     }
 
-                    var knot = rope[i];
-                    var knotInFront = rope[i - 1];
+                    var knot = rope[knotIndex];
+                    var knotInFront = rope[knotIndex - 1];
 
                     // If knot is adjacent to knot in front: no further knot moves
                     if (AreAdjacent(knotInFront, knot))
@@ -180,12 +208,12 @@ public class Day09Solver : IPuzzleSolver
                     }
 
                     // Move knot correctly, relative to knot in front of it
-                    rope[i] = GetNewKnotLocation(knot, knotInFront);
+                    rope[knotIndex] = GetNewKnotLocation(knot, knotInFront);
 
                     // If last knot (tail): Add visited location
-                    if (i == knots - 1)
+                    if (knotIndex == knots - 1)
                     {
-                        tailVisitLocations.Add(rope[i]);
+                        tailVisitLocations.Add(rope[knotIndex]);
                     }
                 }
             }
