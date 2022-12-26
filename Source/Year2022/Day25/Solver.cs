@@ -51,13 +51,13 @@ public class Day25Solver : IPuzzleSolver
         return snafuSum;
     }
 
-    public object GetPart2Solution(string[] input) => "Not solved";
+    public object GetPart2Solution(string[] input) => "Need 49 stars for this one!";
 
     private static string CalculateSnafuNumber(double decimalNumber)
     {
         var highestNeededPotence = GetHighestNeededPotence(decimalNumber);
 
-        // Account for the possibility that one higher potence needs to be used
+        // Account for the possibility that one higher potence may need to be used
         var highestDigitIndex = highestNeededPotence + 1;
         
         const int lowestDigitIndex = 0;
@@ -67,31 +67,59 @@ public class Day25Solver : IPuzzleSolver
         var maxMultipleValue = DecimalDigitBySnafuDigit.Values.Max();
 
         // If necessary: Recalculate items of multiplePerDigitIndex (starting with i = 0)
-        while (multiples.Any(mul => mul > maxMultipleValue))
+        if (multiples.Any(mul => mul > maxMultipleValue))
         {
-            var addendForNextDigitIndex = 0;
+            var addendFromPreviousDigitIndex = 0;
 
             for (var i = lowestDigitIndex; i <= highestDigitIndex; i++)
             {
-                var currentMultiple = multiples[i];
+                var originalMultiple = multiples[i];
 
-                var multipleIsThree = currentMultiple == 3;
-                var multipleIsFour = currentMultiple == 4;
+                var multiple = originalMultiple;
 
-                var locallyUpdatedMultiple = multipleIsFour
-                    ? -1
-                    : multipleIsThree
-                        ? -2
-                        : currentMultiple;
+                bool multipleIsOverloadedByOne;
+                bool multipleIsOverloadedByTwo;
+                bool multipleIsOverloaded;
 
-                var newMultiple = addendForNextDigitIndex + locallyUpdatedMultiple;
-
-                if (newMultiple != currentMultiple)
+                void CalculateIsOverloadedVariables()
                 {
-                    multiples[i] = newMultiple;
+                    multipleIsOverloadedByOne = multiple == 3;
+                    multipleIsOverloadedByTwo = multiple == 4;
+                    
+                    multipleIsOverloaded = multipleIsOverloadedByOne || multipleIsOverloadedByTwo;
                 }
 
-                addendForNextDigitIndex = multipleIsThree || multipleIsFour ? 1 : 0;
+                void ResetMultipleIfOverloaded()
+                {
+                    if (multipleIsOverloadedByOne)
+                    {
+                        multiple = -2;
+                    }
+                    else if (multipleIsOverloadedByTwo)
+                    {
+                        multiple = -1;
+                    }
+                }
+                
+                CalculateIsOverloadedVariables();
+                ResetMultipleIfOverloaded();
+
+                multiple += addendFromPreviousDigitIndex;
+
+                addendFromPreviousDigitIndex = multipleIsOverloaded ? 1 : 0;
+                
+                CalculateIsOverloadedVariables();
+                ResetMultipleIfOverloaded();
+
+                if (multipleIsOverloaded)
+                {
+                    addendFromPreviousDigitIndex += 1;
+                }
+
+                if (multiple != originalMultiple)
+                {
+                    multiples[i] = multiple;
+                }
             }
         }
 
