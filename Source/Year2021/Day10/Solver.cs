@@ -1,26 +1,17 @@
-﻿using System.Globalization;
-using Common.Interfaces;
+﻿using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day10Solver : IPuzzleSolver
 {
 	public string Title => "Syntax Scoring";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var input = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.ToArray();
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString(CultureInfo.InvariantCulture);
-	}
-
-	private static int SolvePart1(IEnumerable<string> navigationSystem)
-	{
+		var navigationSystem = GetNavigationSystem(input);
+		
 		var totalSyntaxErrorScore = navigationSystem
 			.Select(line => line.GetSyntaxErrorScore())
 			.Sum();
@@ -28,17 +19,26 @@ public class Day10Solver : IPuzzleSolver
 		return totalSyntaxErrorScore;
 	}
 
-	private static double SolvePart2(IEnumerable<string> navigationSystem)
+	public object GetPart2Solution(string[] input)
 	{
+		var navigationSystem = GetNavigationSystem(input);
+		
 		var completionScores = navigationSystem
 			.Where(line => !line.IsCorrupted())
 			.Select(line => line.GetCompletionScore());
 
 		return completionScores.ToList().GetMiddleScore();
 	}
+
+	private IEnumerable<string> GetNavigationSystem(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.ToArray();
+	}
 }
 
-public static class Day10Helpers
+internal static class Day10Helpers
 {
 	private static readonly IEnumerable<char> OpeningChars = new List<char> { '(', '[', '{', '<' };
 
