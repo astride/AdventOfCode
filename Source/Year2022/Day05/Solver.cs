@@ -6,29 +6,27 @@ public class Day05Solver : IPuzzleSolver
 {
     public string Title => "Supply Stacks";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
-    {
-        Part1Solution = SolvePart1(input);
-        Part2Solution = SolvePart2(input);
-    }
+    private const int DistanceBetweenStacks = 4;
+    private const int OffsetToFirstStack = 1;
+    private const char EmptyStackItem = ' ';
 
-    private static string SolvePart1(IReadOnlyList<string> input)
+    public object GetPart1Solution(string[] input)
     {
         return GetResultingTopItems(input, false);
     }
 
-    private static string SolvePart2(IEnumerable<string> input)
+    public object GetPart2Solution(string[] input)
     {
         return GetResultingTopItems(input, true);
     }
 
-    private static string GetResultingTopItems(IEnumerable<string> input, bool moveMultipleCrates)
+    private static string GetResultingTopItems(string[] input, bool moveMultipleCrates)
     {
         var crateCount = input
-            .Single(line => line.StartsWith(" 1"))
+            .Single(IsStackIndexLine)
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .Select(int.Parse)
             .Max();
@@ -40,23 +38,23 @@ public class Day05Solver : IPuzzleSolver
             inputStacks.Add(new Stack<char>());
         }
 
-        foreach (var startingStackLine in input.TakeWhile(line => !line.StartsWith(" 1")))
+        foreach (var startingStackLine in input.TakeWhile(line => !IsStackIndexLine(line)))
         {
             for (var i = 0; i < crateCount; i++)
             {
-                var charIndex = 1 + i * 4;
-                var ch = startingStackLine[charIndex];
+                var itemIndex = i * DistanceBetweenStacks + OffsetToFirstStack;
+                var item = startingStackLine[itemIndex];
 
-                if (ch != ' ')
+                if (item != EmptyStackItem)
                 {
-                    inputStacks[i].Push(ch);
+                    inputStacks[i].Push(item);
                 }
             }
         }
         
         var rearrangements = new List<int[]>();
 
-        foreach (var rearrangement in input.SkipWhile(line => !line.StartsWith("move")))
+        foreach (var rearrangement in input.SkipWhile(line => !IsRearrangementProcedure(line)))
         {
             rearrangements.Add(rearrangement
                 .Split(' ')
@@ -71,47 +69,55 @@ public class Day05Solver : IPuzzleSolver
         {
             stacks.Add(new Stack<char>());
 
-            foreach (var item in inputStacks[i])
+            foreach (var crate in inputStacks[i])
             {
-                stacks[i].Push(item);
+                stacks[i].Push(crate);
             }
         }
 
         foreach (var rearrangement in rearrangements)
         {
+            var crateCountToMove = rearrangement[0];
+            var sourceStackIndex = rearrangement[1] - 1;
+            var targetStackIndex = rearrangement[2] - 1;
+            
             if (moveMultipleCrates)
             {
-                var temp = new Stack<char>();
+                var temporaryStack = new Stack<char>();
 
-                for (var i = 0; i < rearrangement[0]; i++)
+                for (var i = 0; i < crateCountToMove; i++)
                 {
-                    temp.Push(stacks[rearrangement[1] - 1].Pop());
+                    var crateToMove = stacks[sourceStackIndex].Pop();
+                    
+                    temporaryStack.Push(crateToMove);
                 }
 
-                foreach (var tempItem in temp)
+                foreach (var crate in temporaryStack)
                 {
-                    stacks[rearrangement[2] - 1].Push(tempItem);
+                    var targetStack = stacks[targetStackIndex];
+                    
+                    targetStack.Push(crate);
                 }
             }
             else
             {
-                for (var i = 0; i < rearrangement[0]; i++)
+                for (var i = 0; i < crateCountToMove; i++)
                 {
-                    var crateToMove = stacks[rearrangement[1] - 1].Pop();
-                    var targetStack = stacks[rearrangement[2] - 1];
+                    var crateToMove = stacks[sourceStackIndex].Pop();
+                    var targetStack = stacks[targetStackIndex];
             
                     targetStack.Push(crateToMove);
                 }
             }
         }
 
-        var topItems = new char[crateCount];
+        var topCrates = stacks
+            .Select(stack => stack.Peek())
+            .ToArray();
 
-        for (var i = 0; i < crateCount; i++)
-        {
-            topItems[i] = stacks[i].Peek();
-        }
-        
-        return new string(topItems);
+        return new string(topCrates);
     }
+
+    private static bool IsStackIndexLine(string line) => line.StartsWith(" 1");
+    private static bool IsRearrangementProcedure(string line) => line.StartsWith("move");
 }
