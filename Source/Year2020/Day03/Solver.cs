@@ -6,25 +6,14 @@ namespace Year2020;
 public class Day03Solver : IPuzzleSolver
 {
     public string Title => "Toboggan Trajectory";
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private const char TreeChar = '#';
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input)
     {
-        var treeMap = input
-            .Select(line => line
-                .Select(ch => ch == TreeChar)
-                .ToList())
-            .ToList();
-        
-        Part1Solution = SolvePart1(treeMap).ToString();
-        Part2Solution = SolvePart2(treeMap).ToString();
-    }
-
-    private static int SolvePart1(IReadOnlyList<IReadOnlyList<bool>> treeMap)
-    {
+        var treeMap = GetTreeMap(input);
         var slope = new Coordinate(3, 1);
 
         var treeCount = treeMap.GetTreeCountFor(slope);
@@ -32,8 +21,10 @@ public class Day03Solver : IPuzzleSolver
         return treeCount;
     }
 
-    private static long SolvePart2(IReadOnlyList<IReadOnlyList<bool>> treeMap)
+    public object GetPart2Solution(string[] input)
     {
+        var treeMap = GetTreeMap(input);
+        
         var slopes = new Coordinate[]
         {
             new(1, 1),
@@ -48,6 +39,15 @@ public class Day03Solver : IPuzzleSolver
             (acc, slope) => acc * treeMap.GetTreeCountFor(slope));
 
         return treeCountsMultiplied;
+    }
+
+    private static IReadOnlyList<IReadOnlyList<bool>> GetTreeMap(string[] input)
+    {
+        return input
+            .Select(line => line
+                .Select(ch => ch == TreeChar)
+                .ToList())
+            .ToList();
     }
 }
 
