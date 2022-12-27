@@ -9,7 +9,7 @@ public class Day10Tests : TestsBase
     protected override string Part1Solution => "14760";
     protected override string Part2Solution => "Look at the RCT display in the terminal (should read: EFGERURE)";
     protected override string Part1ExampleSolution => "13140";
-    protected override string Part2ExampleSolution => "Look at the RCT display in the terminal";
+    protected override string Part2ExampleSolution => "Look at the RCT display in the terminal (should be an image)";
     
     // Part2ExampleSolution:
     // ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  

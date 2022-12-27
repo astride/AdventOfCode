@@ -51,8 +51,7 @@ public class Day10Solver : IPuzzleSolver
         }
 
         var signalStrength = interestingData
-            .Select(data => data.Key * data.Value)
-            .Sum();
+            .Sum(data => data.Key * data.Value);
 
         return signalStrength;
     }
@@ -70,9 +69,11 @@ public class Day10Solver : IPuzzleSolver
 
         var decoded = instruction
             .Replace(wordToReplace, InputReplacements[wordToReplace])
-            .Split(' ');
+            .Split(' ')
+            .Select(int.Parse)
+            .ToArray();
         
-        return (int.Parse(decoded[0]), int.Parse(decoded[1]));
+        return (decoded[0], decoded[1]);
     }
 
     private static void DrawRctDisplayForPart2(IEnumerable<string> input)
@@ -90,7 +91,7 @@ public class Day10Solver : IPuzzleSolver
 
         foreach (var instruction in input.Select(GetDecodedInstruction))
         {
-            foreach (var _ in Enumerable.Range(1, instruction.CycleDiff))
+            for (var i = 0; i < instruction.CycleDiff; i++)
             {
                 var relativeRctIndex = GetRelativeRctIndex();
 
@@ -105,14 +106,16 @@ public class Day10Solver : IPuzzleSolver
             x += instruction.XDiff;
         }
 
-        // Using ' ' rather than '.' to make it easier to read the displayed letters
+        // Using ' ' rather than '.' for not-lit pixels to make it easier to read the displayed letters
         var rctDisplay = rctInput
             .Chunk(crtWidth)
-            .Select(chunk => chunk.Select(lit => lit ? '#' : ' '));
-
-        foreach (var row in rctDisplay)
+            .Select(rctRow => rctRow
+                .Select(isLitPixel => isLitPixel ? '#' : ' ')
+                .ToArray());
+        
+        foreach (var rctRow in rctDisplay)
         {
-            Console.WriteLine(string.Join(string.Empty, row));
+            Console.WriteLine(new string(rctRow));
         }
     }
 }
