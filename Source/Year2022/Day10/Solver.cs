@@ -6,8 +6,8 @@ public class Day10Solver : IPuzzleSolver
 {
     public string Title => "Cathode-Ray Tube";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
     
     private static readonly Dictionary<string, string> InputReplacements = new()
     {
@@ -15,14 +15,7 @@ public class Day10Solver : IPuzzleSolver
         ["noop"] = "1 0",
     };
 
-    public void SolvePuzzle(string[] input)
-    {
-        Part1Solution = GetPart1Solution(input).ToString();
-
-        DrawRctDisplayForPart2(input);
-    }
-
-    private static int GetPart1Solution(IEnumerable<string> input)
+    public object GetPart1Solution(string[] input)
     {
         var interestingCycles = new[] { 20, 60, 100, 140, 180, 220 };
 
@@ -62,6 +55,13 @@ public class Day10Solver : IPuzzleSolver
             .Sum();
 
         return signalStrength;
+    }
+
+    public object GetPart2Solution(string[] input)
+    {
+        DrawRctDisplayForPart2(input);
+
+        return "Look at the RCT display output";
     }
 
     private static (int CycleDiff, int XDiff) GetDecodedInstruction(string instruction)
