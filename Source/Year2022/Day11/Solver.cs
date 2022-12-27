@@ -47,7 +47,7 @@ public class Day11Solver : IPuzzleSolver
             {
                 var monkey = monkeys[i];
                 
-                foreach (var _ in Enumerable.Range(1, monkey.Items.Count))
+                foreach (var item in Enumerable.Range(1, monkey.Items.Count))
                 {
                     var worryLevel = GetNewWorryLevel(monkey) / worryLevelReductionFactor;
 
@@ -75,22 +75,25 @@ public class Day11Solver : IPuzzleSolver
 
     private static int GetNewWorryLevel(Monkey monkey)
     {
-        var item = monkey.Items.Dequeue();
+        var itemWorryLevel = monkey.Items.Dequeue();
         
-        long operand = monkey.InspectionInstructions.Operand ?? item;
+        long operand = monkey.InspectionInstructions.Operand ?? itemWorryLevel;
 
         var newWorryLevel = monkey.InspectionInstructions.Sign switch
         {
-            '*' => item * operand,
-            '+' => item + operand,
-            _ => item,
+            '*' => itemWorryLevel * operand,
+            '+' => itemWorryLevel + operand,
+            _ => itemWorryLevel,
         };
 
         var remainder = (int)(newWorryLevel % TotalDivisibleByProduct);
 
-        return remainder == 0
-            ? TotalDivisibleByProduct
-            : remainder;
+        if (remainder == 0)
+        {
+            return TotalDivisibleByProduct;
+        }
+
+        return remainder;
     }
 
     private static void SetTotalDivisibleByProduct(IEnumerable<Monkey> monkeys)
@@ -111,12 +114,12 @@ internal static class Day11Helpers
 
         foreach (var line in input)
         {
-            if (line.StartsWith("M"))
+            if (IsMonkeyIntroductionLine(line))
             {
                 continue;
             }
             
-            if (string.IsNullOrEmpty(line))
+            if (IsMonkeySeparationLine(line))
             {
                 monkeys.Add(monkey);
 
@@ -125,7 +128,7 @@ internal static class Day11Helpers
                 continue;
             }
 
-            if (line.StartsWith("  S"))
+            if (IsStartingItemsLine(line))
             {
                 var items = line
                     .Replace("  Starting items: ", string.Empty)
@@ -140,7 +143,7 @@ internal static class Day11Helpers
                 continue;
             }
 
-            if (line.StartsWith("  O"))
+            if (IsOperationLine(line))
             {
                 var operation = line
                     .Replace("  Operation: new = old ", string.Empty)
@@ -155,7 +158,7 @@ internal static class Day11Helpers
                 continue;
             }
 
-            if (line.StartsWith("  T"))
+            if (IsTestLine(line))
             {
                 monkey.TestIsDivisibleBy = int.Parse(line
                     .Replace("  Test: divisible by ", string.Empty));
@@ -163,7 +166,7 @@ internal static class Day11Helpers
                 continue;
             }
 
-            if (line.StartsWith("    If t"))
+            if (IsPassingTestActionLine(line))
             {
                 monkey.IfTrueThrowTo = int.Parse(line
                     .Replace("    If true: throw to monkey ", string.Empty));
@@ -171,7 +174,7 @@ internal static class Day11Helpers
                 continue;
             }
 
-            if (line.StartsWith("    If f"))
+            if (IsFailingTestActionLine(line))
             {
                 monkey.IfFalseThrowTo = int.Parse(line
                     .Replace("    If false: throw to monkey ", string.Empty));
@@ -182,6 +185,14 @@ internal static class Day11Helpers
 
         return monkeys;
     }
+
+    private static bool IsMonkeyIntroductionLine(string line) => line.StartsWith("M");
+    private static bool IsMonkeySeparationLine(string line) => string.IsNullOrEmpty(line);
+    private static bool IsStartingItemsLine(string line) => line.StartsWith("  S");
+    private static bool IsOperationLine(string line) => line.StartsWith("  O");
+    private static bool IsTestLine(string line) => line.StartsWith("  T");
+    private static bool IsPassingTestActionLine(string line) => line.StartsWith("    If t");
+    private static bool IsFailingTestActionLine(string line) => line.StartsWith("    If f");
 }
 
 internal class Monkey
