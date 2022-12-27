@@ -13,48 +13,27 @@ public class Day11Solver : IPuzzleSolver
 
     public object GetPart1Solution(string[] input)
     {
-        // TODO Refactor; almost everything is identical for Part1 and Part2
-        var monkeys = input.GetMonkeyAttributes();
-
-        SetTotalDivisibleByProduct(monkeys);
-
-        var inspectionCounter = Enumerable.Repeat(0, monkeys.Count).ToList();
-
         const int totalInspections = 20;
+        const int worryLevelReductionFactor = 3;
 
-        foreach (var inspection in Enumerable.Range(1, totalInspections))
-        {
-            for (var i = 0; i < monkeys.Count; i++)
-            {
-                var monkey = monkeys[i];
-                
-                foreach (var _ in Enumerable.Range(1, monkey.Items.Count))
-                {
-                    var worryLevel = GetNewWorryLevel(monkey) / 3;
+        var levelOfMonkeyBusiness = GetLevelOfMonkeyBusiness(input, totalInspections, worryLevelReductionFactor);
 
-                    var throwToMonkeyIndex = worryLevel % monkey.TestIsDivisibleBy == 0
-                        ? monkey.IfTrueThrowTo
-                        : monkey.IfFalseThrowTo;
-                    
-                    monkeys[throwToMonkeyIndex].Items.Enqueue(worryLevel);
-
-                    inspectionCounter[i]++;
-                }
-            }
-        }
-
-        var inspectionCountOfMostActiveMonkeys = inspectionCounter
-            .OrderByDescending(inspectionCount => inspectionCount)
-            .Take(2)
-            .ToList();
-
-        var levelOfMonkeyBusiness =
-            inspectionCountOfMostActiveMonkeys[0] * inspectionCountOfMostActiveMonkeys[1];
-        
         return levelOfMonkeyBusiness;
     }
 
     public object GetPart2Solution(string[] input)
+    {
+        const int totalInspections = 10000;
+
+        var levelOfMonkeyBusiness = GetLevelOfMonkeyBusiness(input, totalInspections);
+
+        return levelOfMonkeyBusiness;
+    }
+
+    private static long GetLevelOfMonkeyBusiness(
+        IEnumerable<string> input,
+        int totalInspections,
+        int worryLevelReductionFactor = 1)
     {
         var monkeys = input.GetMonkeyAttributes();
 
@@ -62,8 +41,6 @@ public class Day11Solver : IPuzzleSolver
 
         var inspectionCounter = Enumerable.Repeat(0, monkeys.Count).ToList();
 
-        const int totalInspections = 10000;
-
         foreach (var inspection in Enumerable.Range(1, totalInspections))
         {
             for (var i = 0; i < monkeys.Count; i++)
@@ -72,7 +49,7 @@ public class Day11Solver : IPuzzleSolver
                 
                 foreach (var _ in Enumerable.Range(1, monkey.Items.Count))
                 {
-                    var worryLevel = GetNewWorryLevel(monkey);
+                    var worryLevel = GetNewWorryLevel(monkey) / worryLevelReductionFactor;
 
                     var throwToMonkeyIndex = worryLevel % monkey.TestIsDivisibleBy == 0
                         ? monkey.IfTrueThrowTo
