@@ -9,135 +9,53 @@ public class Day14Solver : IPuzzleSolver
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
 
+    private const int SandStartingPointX = 500;
+    private const int SandStartingPointY = 0;
+
     public object GetPart1Solution(string[] input)
     {
-        var rockFormations = input
+        var rockFormations = GetRockFormations(input);
+        var blockedCoordinates = GetRockCoordinates(rockFormations);
+
+        var rockCount = blockedCoordinates.Count;
+
+        var spotIsAvailable = GetSpotIsAvailableFunc(blockedCoordinates);
+        var sandWillFallIntoTheEndlessVoid = GetSandWillFallIntoTheEndlessVoidFunc(rockFormations);
+
+        blockedCoordinates = PourSand(
+            blockedCoordinates,
+            sandCanMoveToSpot: spotIsAvailable,
+            stopPouringSand: sandWillFallIntoTheEndlessVoid);
+
+        return blockedCoordinates.Count - rockCount;
+    }
+
+    public object GetPart2Solution(string[] input)
+    {
+        var rockFormations = GetRockFormations(input);
+        var blockedCoordinates = GetRockCoordinates(rockFormations);
+
+        var rockCount = blockedCoordinates.Count;
+
+        var spotIsAvailableAndNotOnFloor = GetSpotIsAvailableAndNotOnFloorFunc(rockFormations, blockedCoordinates);
+        var sandIsBlockingTheSource = GetSandHasReachedOutletFunc();
+
+        blockedCoordinates = PourSand(
+            blockedCoordinates,
+            sandCanMoveToSpot: spotIsAvailableAndNotOnFloor,
+            stopPouringSand: sandIsBlockingTheSource);
+
+        return blockedCoordinates.Count - rockCount;
+    }
+
+    private static List<List<(int X, int Y)>> GetRockFormations(string[] input)
+    {
+        return input
             .Select(line => line
                 .Split(" -> ")
                 .Select(AsCoordinate)
                 .ToList())
             .ToList();
-
-        var allCoors = rockFormations
-            .SelectMany(line => line)
-            .ToList();
-
-        var allX = allCoors
-            .Select(coors => coors.X)
-            .ToList();
-
-        var xMin = allX.Min();
-        var xMax = allX.Max();
-
-        var yMax = allCoors
-            .Select(coors => coors.Y)
-            .Max();
-
-        var blockedCoors = new HashSet<(int, int)>();
-        
-        // Populate blockedCoors with rocks
-        foreach (var line in rockFormations)
-        {
-            for (var i = 1; i < line.Count; i++)
-            {
-                var sourceCoor = line[i - 1];
-                var targetCoor = line[i];
-
-                var blockedCoor = (sourceCoor.X, sourceCoor.Y);
-
-                blockedCoors.Add((blockedCoor.X, blockedCoor.Y));
-                
-                (int X, int Y) coorDiff = (targetCoor.X - sourceCoor.X, targetCoor.Y - sourceCoor.Y);
-
-                var diffSpan = Math.Max(Math.Abs(coorDiff.X), Math.Abs(coorDiff.Y));
-                
-                (int X, int Y) movementPerIndex = (coorDiff.X / diffSpan, coorDiff.Y / diffSpan);
-
-                foreach (var diff in Enumerable.Range(0, diffSpan))
-                {
-                    blockedCoor = (blockedCoor.X + movementPerIndex.X, blockedCoor.Y + movementPerIndex.Y);
-                    blockedCoors.Add((blockedCoor.X, blockedCoor.Y));
-                }
-            }
-        }
-
-        var coorsBlockedByRock = blockedCoors.Count;
-
-        bool IsAvailable(int x, int y) => !blockedCoors.Contains((x, y));
-
-        bool SandWillFallIntoTheEndlessVoid(int xSimulated, int ySimulated) => xSimulated < xMin || xSimulated > xMax || ySimulated > yMax;
-        
-        // Pour sand
-        
-        const int sandStartingPointX = 500;
-        const int sandStartingPointY = 0;
-
-        var sandUnitCoorX = sandStartingPointX;
-        var sandUnitCoorY = sandStartingPointY;
-
-        while (true)
-        {
-            // Simulate falling down
-            var simulatedSandCoorX = sandUnitCoorX;
-            var simulatedSandCoorY = sandUnitCoorY + 1;
-
-            if (SandWillFallIntoTheEndlessVoid(simulatedSandCoorX, simulatedSandCoorY))
-            {
-                break;
-            }
-            
-            if (IsAvailable(simulatedSandCoorX, simulatedSandCoorY))
-            {
-                sandUnitCoorX = simulatedSandCoorX;
-                sandUnitCoorY = simulatedSandCoorY;
-                continue;
-            }
-
-            // Simulate falling down to the left
-            simulatedSandCoorX = sandUnitCoorX - 1;
-            simulatedSandCoorY = sandUnitCoorY + 1;
-
-            if (SandWillFallIntoTheEndlessVoid(simulatedSandCoorX, simulatedSandCoorY))
-            {
-                break;
-            }
-            
-            if (IsAvailable(simulatedSandCoorX, simulatedSandCoorY))
-            {
-                sandUnitCoorX = simulatedSandCoorX;
-                sandUnitCoorY = simulatedSandCoorY;
-                
-                continue;
-            }
-
-            // Simulate falling down to the right
-            simulatedSandCoorX = sandUnitCoorX + 1;
-            simulatedSandCoorY = sandUnitCoorY + 1;
-
-            if (SandWillFallIntoTheEndlessVoid(simulatedSandCoorX, simulatedSandCoorY))
-            {
-                break;
-            }
-
-            if (IsAvailable(simulatedSandCoorX, simulatedSandCoorY))
-            {
-                sandUnitCoorX = simulatedSandCoorX;
-                sandUnitCoorY = simulatedSandCoorY;
-                
-                continue;
-            }
-
-            // Let unit of sand lie
-            blockedCoors.Add((sandUnitCoorX, sandUnitCoorY));
-            
-            // Start with next unit of sand
-            sandUnitCoorX = sandStartingPointX;
-            sandUnitCoorY = sandStartingPointY;
-        }
-
-        var coorsBlocked = blockedCoors.Count;
-        
-        return coorsBlocked - coorsBlockedByRock;
     }
 
     private static (int X, int Y) AsCoordinate(string coorString)
@@ -150,35 +68,21 @@ public class Day14Solver : IPuzzleSolver
         return (split[0], split[1]);
     }
 
-    public object GetPart2Solution(string[] input)
+    private static HashSet<(int, int)> GetRockCoordinates(List<List<(int X, int Y)>> formations)
     {
-        var rockFormations = input
-            .Select(line => line
-                .Split(" -> ")
-                .Select(AsCoordinate)
-                .ToList())
-            .ToList();
-
-        var yMax = rockFormations
-            .SelectMany(line => line)
-            .Select(coors => coors.Y)
-            .Max();
-
-        var yFloor = yMax + 2;
-
-        var blockedCoors = new HashSet<(int, int)>();
+        var rockCoordinates = new HashSet<(int, int)>();
         
-        // Populate blockedCoors with rocks
-        foreach (var line in rockFormations)
+        // Populate with rocks
+        foreach (var line in formations)
         {
             for (var i = 1; i < line.Count; i++)
             {
                 var sourceCoor = line[i - 1];
                 var targetCoor = line[i];
 
-                var blockedCoor = (sourceCoor.X, sourceCoor.Y);
+                var rockCoordinate = (sourceCoor.X, sourceCoor.Y);
 
-                blockedCoors.Add((blockedCoor.X, blockedCoor.Y));
+                rockCoordinates.Add((rockCoordinate.X, rockCoordinate.Y));
                 
                 (int X, int Y) coorDiff = (targetCoor.X - sourceCoor.X, targetCoor.Y - sourceCoor.Y);
 
@@ -188,78 +92,138 @@ public class Day14Solver : IPuzzleSolver
 
                 foreach (var diff in Enumerable.Range(0, diffSpan))
                 {
-                    blockedCoor = (blockedCoor.X + movementPerIndex.X, blockedCoor.Y + movementPerIndex.Y);
-                    blockedCoors.Add((blockedCoor.X, blockedCoor.Y));
+                    rockCoordinate = (rockCoordinate.X + movementPerIndex.X, rockCoordinate.Y + movementPerIndex.Y);
+                    rockCoordinates.Add((rockCoordinate.X, rockCoordinate.Y));
                 }
             }
         }
 
-        var coorsBlockedByRock = blockedCoors.Count;
+        return rockCoordinates;
+    }
 
-        bool IsAvailable(int x, int y) =>
-            !blockedCoors.Contains((x, y)) &&
+    private static Func<int, int, bool> GetSpotIsAvailableFunc(IReadOnlySet<(int X, int Y)> blockedCoordinates)
+    {
+        return (x, y) => !blockedCoordinates.Contains((x, y));
+    }
+
+    private static Func<int, int, bool> GetSpotIsAvailableAndNotOnFloorFunc(
+        List<List<(int X, int Y)>> formations,
+        IReadOnlySet<(int X, int Y)> blockedCoordinates)
+    {
+        var allCoors = GetAllCoordinates(formations);
+        var yMax = GetYMax(allCoors);
+
+        var yFloor = yMax + 2;
+
+        return (x, y) =>
+            !blockedCoordinates.Contains((x, y)) &&
             y < yFloor;
-        
-        // Pour sand
-        
-        const int sandStartingPointX = 500;
-        const int sandStartingPointY = 0;
+    }
 
-        var sandUnitCoorX = sandStartingPointX;
-        var sandUnitCoorY = sandStartingPointY;
+    private static Func<int, int, bool> GetSandWillFallIntoTheEndlessVoidFunc(List<List<(int X, int Y)>> formations)
+    {
+        var allCoordinates = GetAllCoordinates(formations);
+
+        var xAll = allCoordinates.Select(coordinate => coordinate.X).ToList();
+
+        var xMin = xAll.Min();
+        var xMax = xAll.Max();
+        
+        var yMax = GetYMax(allCoordinates);
+
+        return (x, y) => x < xMin || x > xMax || y > yMax;
+    }
+
+    private static Func<int, int, bool> GetSandHasReachedOutletFunc()
+    {
+        return (_, y) => y == SandStartingPointY;
+    }
+
+    private static List<(int X, int Y)> GetAllCoordinates(List<List<(int X, int Y)>> formations)
+    {
+        return formations
+            .SelectMany(line => line)
+            .ToList();
+    }
+
+    private static int GetYMax(List<(int X, int Y)> coordinates)
+    {
+        return coordinates.Select(coors => coors.Y).Max();
+    }
+
+    private static HashSet<(int, int)> PourSand(
+        HashSet<(int X, int Y)> blockedCoordinates,
+        Func<int, int, bool> sandCanMoveToSpot,
+        Func<int, int, bool> stopPouringSand)
+    {
+        var sandUnitX = SandStartingPointX;
+        var sandUnitY = SandStartingPointY;
 
         while (true)
         {
             // Simulate falling down
-            var simulatedSandCoorX = sandUnitCoorX;
-            var simulatedSandCoorY = sandUnitCoorY + 1;
+            var simulatedSandUnitX = sandUnitX;
+            var simulatedSandUnitY = sandUnitY + 1;
 
-            if (IsAvailable(simulatedSandCoorX, simulatedSandCoorY))
+            if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
             {
-                sandUnitCoorX = simulatedSandCoorX;
-                sandUnitCoorY = simulatedSandCoorY;
+                break;
+            }
+            
+            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
+            {
+                sandUnitX = simulatedSandUnitX;
+                sandUnitY = simulatedSandUnitY;
                 continue;
             }
 
             // Simulate falling down to the left
-            simulatedSandCoorX = sandUnitCoorX - 1;
-            simulatedSandCoorY = sandUnitCoorY + 1;
+            simulatedSandUnitX = sandUnitX - 1;
+            simulatedSandUnitY = sandUnitY + 1;
 
-            if (IsAvailable(simulatedSandCoorX, simulatedSandCoorY))
+            if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
             {
-                sandUnitCoorX = simulatedSandCoorX;
-                sandUnitCoorY = simulatedSandCoorY;
+                break;
+            }
+            
+            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
+            {
+                sandUnitX = simulatedSandUnitX;
+                sandUnitY = simulatedSandUnitY;
                 
                 continue;
             }
 
             // Simulate falling down to the right
-            simulatedSandCoorX = sandUnitCoorX + 1;
-            simulatedSandCoorY = sandUnitCoorY + 1;
+            simulatedSandUnitX = sandUnitX + 1;
+            simulatedSandUnitY = sandUnitY + 1;
 
-            if (IsAvailable(simulatedSandCoorX, simulatedSandCoorY))
+            if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
             {
-                sandUnitCoorX = simulatedSandCoorX;
-                sandUnitCoorY = simulatedSandCoorY;
+                break;
+            }
+
+            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
+            {
+                sandUnitX = simulatedSandUnitX;
+                sandUnitY = simulatedSandUnitY;
                 
                 continue;
             }
 
             // Let unit of sand lie
-            blockedCoors.Add((sandUnitCoorX, sandUnitCoorY));
+            blockedCoordinates.Add((sandUnitX, sandUnitY));
 
-            if (sandUnitCoorY == sandStartingPointY)
+            if (stopPouringSand(sandUnitX, sandUnitY))
             {
                 break;
             }
             
             // Start with next unit of sand
-            sandUnitCoorX = sandStartingPointX;
-            sandUnitCoorY = sandStartingPointY;
+            sandUnitX = SandStartingPointX;
+            sandUnitY = SandStartingPointY;
         }
 
-        var coorsBlocked = blockedCoors.Count;
-        
-        return coorsBlocked - coorsBlockedByRock;
+        return blockedCoordinates;
     }
 }
