@@ -5,38 +5,44 @@ namespace Year2021;
 public class Day20Solver : IPuzzleSolver
 {
 	public string Title => "Trench Map";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var enhancementAlgorithm = rawInput.First();
-
-		var basicImage = rawInput
-			.Skip(1)
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.ToList();
-
-		Part1Solution = SolvePart1(basicImage, enhancementAlgorithm).ToString();
-		Part2Solution = SolvePart2(basicImage, enhancementAlgorithm).ToString();
-	}
-
-	private static int SolvePart1(List<string> imageInput, string algorithm)
-	{
+		var algorithm = GetEnhancementAlgorithm(input);
+		var imageInput = GetBasicImage(input);
+		
 		var lightPixelCount = imageInput.GetFinalLightPixelCount(algorithm, 2);
 
 		return lightPixelCount;
 	}
 
-	private static int SolvePart2(List<string> imageInput, string algorithm)
+	public object GetPart2Solution(string[] input)
 	{
+		var algorithm = GetEnhancementAlgorithm(input);
+		var imageInput = GetBasicImage(input);
+		
 		var lightPixelCount = imageInput.GetFinalLightPixelCount(algorithm, 50);
 
 		return lightPixelCount;
 	}
+
+	private static string GetEnhancementAlgorithm(string[] input)
+	{
+		return input.First();
+	}
+
+	private static List<string> GetBasicImage(string[] input)
+	{
+		return input
+			.Skip(1)
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.ToList();
+	}
 }
 
-public static class Day20Helpers
+internal static class Day20Helpers
 {
 	private const char DarkPixel = '.';
 	private const char LightPixel = '#';

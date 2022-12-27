@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using Common.Interfaces;
 
@@ -54,21 +55,23 @@ public abstract class TestsBase
     {
         var input = GetContentOf(InputFileName);
         
-        PuzzleSolver.SolvePuzzle(input);
+        SolvePart1AndLogExecutionTime(input);
+        SolvePart2AndLogExecutionTime(input);
     }
 
     private void SolvePuzzleWithExampleInput()
     {
         var exampleInput = GetContentOf(ExampleInputFileName);
         
-        PuzzleSolver.SolvePuzzle(exampleInput);
+        SolvePart1AndLogExecutionTime(exampleInput);
+        SolvePart2AndLogExecutionTime(exampleInput);
     }
 
     private void SolvePart1WithExampleInput()
     {
         var exampleInput = GetContentOf(ExampleInputFileNamePart1);
         
-        PuzzleSolver.SolvePart1(exampleInput);
+        SolvePart1AndLogExecutionTime(exampleInput);
     }
 
     private void SolvePart2WithExampleInput()
@@ -80,7 +83,27 @@ public abstract class TestsBase
         
         var exampleInput = GetContentOf(ExampleInputFileNamePart2);
         
-        PuzzleSolver.SolvePart2(exampleInput);
+        SolvePart2AndLogExecutionTime(exampleInput);
+    }
+
+    private void SolvePart1AndLogExecutionTime(string[] input)
+    {
+        ExecuteAndLogExecutionTime("Part 1", () => PuzzleSolver.SolvePart1(input));
+    }
+
+    private void SolvePart2AndLogExecutionTime(string[] input)
+    {
+        ExecuteAndLogExecutionTime("Part 2", () => PuzzleSolver.SolvePart2(input));
+    }
+
+    private static void ExecuteAndLogExecutionTime(string actionName, Action action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        action();
+        stopwatch.Stop();
+
+        Console.WriteLine($"{actionName} needed {stopwatch.ElapsedMilliseconds} ms to execute.");
     }
 
     private void VerifySolutions()
@@ -108,12 +131,12 @@ public abstract class TestsBase
 
     private void VerifyPart1SolutionAgainstExpectedOutput(string expected)
     {
-        Assert.AreEqual(expected, PuzzleSolver.Part1Solution, "(Part 1)");
+        Assert.AreEqual(expected, PuzzleSolver.Part1Solution?.ToString(), "(Part 1)");
     }
 
     private void VerifyPart2SolutionAgainstExpectedOutput(string expected)
     {
-        Assert.AreEqual(expected, PuzzleSolver.Part2Solution, "(Part 2)");
+        Assert.AreEqual(expected, PuzzleSolver.Part2Solution?.ToString(), "(Part 2)");
     }
 
     private static void InformUserThatVerificationOfPart2WasSkipped()

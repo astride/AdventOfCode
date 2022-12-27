@@ -5,22 +5,13 @@ namespace Year2021;
 public class Day01Solver : IPuzzleSolver
 {
 	public string Title => "Sonar Sweep";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var input = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.Select(int.Parse)
-			.ToArray();
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
-	}
-
-	private static int SolvePart1(IReadOnlyList<int> sonarSweepReport)
-	{
+		var sonarSweepReport = GetSonarSweepReport(input);
+		
 		var prevDepth = sonarSweepReport[0];
 		var increaseCount = 0;
 
@@ -37,8 +28,10 @@ public class Day01Solver : IPuzzleSolver
 		return increaseCount;
 	}
 
-	private static int SolvePart2(IReadOnlyList<int> sonarSweepReport)
+	public object GetPart2Solution(string[] input)
 	{
+		var sonarSweepReport = GetSonarSweepReport(input);
+		
 		var prevDepthSum = sonarSweepReport.GetDepthSumForWindowAt(0);
 		var increaseCount = 0;
 
@@ -55,6 +48,14 @@ public class Day01Solver : IPuzzleSolver
 		}
 
 		return increaseCount;
+	}
+
+	private static IReadOnlyList<int> GetSonarSweepReport(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.Select(int.Parse)
+			.ToArray();
 	}
 }
 
