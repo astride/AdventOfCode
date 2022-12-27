@@ -6,18 +6,12 @@ public class Day11Solver : IPuzzleSolver
 {
     public string Title => "Monkey in the Middle";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private static int TotalDivisibleByProduct;
 
-    public void SolvePuzzle(string[] input)
-    {
-        Part1Solution = GetPart1Solution(input).ToString();
-        Part2Solution = GetPart2Solution(input).ToString();
-    }
-
-    private static int GetPart1Solution(IEnumerable<string> input)
+    public object GetPart1Solution(string[] input)
     {
         // TODO Refactor; almost everything is identical for Part1 and Part2
         var monkeys = input.GetMonkeyAttributes();
@@ -60,7 +54,7 @@ public class Day11Solver : IPuzzleSolver
         return levelOfMonkeyBusiness;
     }
 
-    private static long GetPart2Solution(IEnumerable<string> input)
+    public object GetPart2Solution(string[] input)
     {
         var monkeys = input.GetMonkeyAttributes();
 
