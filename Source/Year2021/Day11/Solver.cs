@@ -5,37 +5,38 @@ namespace Year2021;
 public class Day11Solver : IPuzzleSolver
 {
 	public string Title => "Dumbo Octopus";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var input = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.ToArray();
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
-	}
-
-	private static int SolvePart1(string[] octopusEnergyLevels)
-	{
+		var octopusEnergyLevels = GetOctopusEnergyLevels(input);
+		
 		var energyLevelsFlattened = octopusEnergyLevels.ToFlattened();
 		var flashCounts = energyLevelsFlattened.Simulate(100);
 
 		return flashCounts.Sum();
 	}
 
-	private static int SolvePart2(string[] octopusEnergyLevels)
+	public object GetPart2Solution(string[] input)
 	{
+		var octopusEnergyLevels = GetOctopusEnergyLevels(input);
+		
 		var energyLevelsFlattened = octopusEnergyLevels.ToFlattened();
 		var simultaneousStep = energyLevelsFlattened.SimulateUntilSynchronized();
 
 		return simultaneousStep;
 	}
+
+	private static string[] GetOctopusEnergyLevels(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.ToArray();
+	}
 }
 
-public static class Day11Helpers
+internal static class Day11Helpers
 {
 	private const int EnergyLevelAfterFlash = 0;
 	private const int EnergyLevelFlash = 10;

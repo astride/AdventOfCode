@@ -1,26 +1,17 @@
-﻿using System.Globalization;
-using Common.Interfaces;
+﻿using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day03Solver : IPuzzleSolver
 {
 	public string Title => "Binary Diagnostic";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var input = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.ToArray();
-
-		Part1Solution = SolvePart1(input).ToString(CultureInfo.InvariantCulture);
-		Part2Solution = SolvePart2(input).ToString(CultureInfo.InvariantCulture);
-	}
-
-	private static decimal SolvePart1(string[] diagnosticReport)
-	{
+		var diagnosticReport = GetDiagnosticReport(input);
+		
 		var bitCount = diagnosticReport.First().Length;
 		
 		var gammaRateBinary = new List<int>();
@@ -40,14 +31,23 @@ public class Day03Solver : IPuzzleSolver
 		return powerConsumption;
 	}
 
-	private static decimal SolvePart2(string[] diagnosticReport)
+	public object GetPart2Solution(string[] input)
 	{
+		var diagnosticReport = GetDiagnosticReport(input);
+		
 		var binaryOxygenGeneratorRating = diagnosticReport.BinaryRating(OxygenCriteriaValidator);
 		var binaryCo2ScrubberRating = diagnosticReport.BinaryRating(Co2CriteriaValidator);
 
 		decimal lifeSupportRating = binaryOxygenGeneratorRating.ToDecimal() * binaryCo2ScrubberRating.ToDecimal();
 
 		return lifeSupportRating;
+	}
+
+	private string[] GetDiagnosticReport(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.ToArray();
 	}
 
 	private static bool OxygenCriteriaValidator(int bit, IEnumerable<int> bits) => bit == bits.MostCommonBitOr1();
