@@ -14,41 +14,41 @@ public class Day14Solver : IPuzzleSolver
 
     public object GetPart1Solution(string[] input)
     {
-        var rockFormations = GetRockFormations(input);
-        var berockedSpots = GetRockCoordinates(rockFormations);
+        var rockPathPoints = GetRockPathPoints(input);
+        var berockedCoordinates = GetBerockedCoordinates(rockPathPoints);
 
-        var rockCount = berockedSpots.Count;
+        var rockCount = berockedCoordinates.Count;
 
-        var spotIsAvailable = GetSpotIsAvailableFunc(berockedSpots);
-        var sandWillFallIntoTheEndlessVoid = GetSandWillFallIntoTheEndlessVoidFunc(rockFormations);
+        var coordinateIsAvailable = GetCoordinateIsAvailableFunc();
+        var sandWillFallIntoTheEndlessVoid = GetSandWillFallIntoTheEndlessVoidFunc(rockPathPoints);
 
-        var occupiedSpacesCount = PourSandAndGetOccupiedSpotsCount(
-            berockedSpots,
-            sandCanMoveToSpot: spotIsAvailable,
+        var occupiedCoordinatesCount = PourSandAndGetOccupiedCoordinatesCount(
+            berockedCoordinates,
+            sandCanMoveToCoordinate: coordinateIsAvailable,
             stopPouringSand: sandWillFallIntoTheEndlessVoid);
 
-        return occupiedSpacesCount - rockCount;
+        return occupiedCoordinatesCount - rockCount;
     }
 
     public object GetPart2Solution(string[] input)
     {
-        var rockFormations = GetRockFormations(input);
-        var berockedSpots = GetRockCoordinates(rockFormations);
+        var rockPathPoints = GetRockPathPoints(input);
+        var berockedCoordinates = GetBerockedCoordinates(rockPathPoints);
 
-        var rockCount = berockedSpots.Count;
+        var rockCount = berockedCoordinates.Count;
 
-        var spotIsAvailableAndNotOnFloor = GetSpotIsAvailableAndNotOnFloorFunc(rockFormations, berockedSpots);
+        var coordinateIsAvailableAndNotOnFloor = GetCoordinateIsAvailableAndNotOnFloorFunc(rockPathPoints);
         var sandIsBlockingTheSource = GetSandIsBlockingTheSourceFunc();
 
-        var occupiedSpacesCount = PourSandAndGetOccupiedSpotsCount(
-            berockedSpots,
-            sandCanMoveToSpot: spotIsAvailableAndNotOnFloor,
+        var occupiedCoordinatesCount = PourSandAndGetOccupiedCoordinatesCount(
+            berockedCoordinates,
+            sandCanMoveToCoordinate: coordinateIsAvailableAndNotOnFloor,
             stopPouringSand: sandIsBlockingTheSource);
 
-        return occupiedSpacesCount - rockCount;
+        return occupiedCoordinatesCount - rockCount;
     }
 
-    private static List<List<(int X, int Y)>> GetRockFormations(IEnumerable<string> input)
+    private static List<List<(int X, int Y)>> GetRockPathPoints(IEnumerable<string> input)
     {
         return input
             .Select(line => line
@@ -68,21 +68,21 @@ public class Day14Solver : IPuzzleSolver
         return (split[0], split[1]);
     }
 
-    private static HashSet<(int, int)> GetRockCoordinates(List<List<(int X, int Y)>> rockPaths)
+    private static HashSet<(int, int)> GetBerockedCoordinates(List<List<(int X, int Y)>> rockPathPoints)
     {
-        var berockedSpots = new HashSet<(int, int)>();
+        var berockedCoordinates = new HashSet<(int, int)>();
         
         // Populate with rocks
-        foreach (var rockPath in rockPaths)
+        foreach (var rockPathPoint in rockPathPoints)
         {
-            for (var pathPointIndex = 1; pathPointIndex < rockPath.Count; pathPointIndex++)
+            for (var pathPointIndex = 1; pathPointIndex < rockPathPoint.Count; pathPointIndex++)
             {
-                var sourcePoint = rockPath[pathPointIndex - 1];
-                var targetPoint = rockPath[pathPointIndex];
+                var sourcePoint = rockPathPoint[pathPointIndex - 1];
+                var targetPoint = rockPathPoint[pathPointIndex];
 
                 var rockSegmentPoint = (sourcePoint.X, sourcePoint.Y);
 
-                berockedSpots.Add((rockSegmentPoint.X, rockSegmentPoint.Y));
+                berockedCoordinates.Add((rockSegmentPoint.X, rockSegmentPoint.Y));
                 
                 (int X, int Y) rockSegmentLengthXY = (targetPoint.X - sourcePoint.X, targetPoint.Y - sourcePoint.Y);
 
@@ -93,36 +93,34 @@ public class Day14Solver : IPuzzleSolver
                 foreach (var segmentPoint in Enumerable.Range(0, rockSegmentLength))
                 {
                     rockSegmentPoint = (rockSegmentPoint.X + pathIncrease.X, rockSegmentPoint.Y + pathIncrease.Y);
-                    berockedSpots.Add((rockSegmentPoint.X, rockSegmentPoint.Y));
+                    berockedCoordinates.Add((rockSegmentPoint.X, rockSegmentPoint.Y));
                 }
             }
         }
 
-        return berockedSpots;
+        return berockedCoordinates;
     }
 
-    private static Func<int, int, bool> GetSpotIsAvailableFunc(IReadOnlySet<(int X, int Y)> blockedCoordinates)
+    private static Func<HashSet<(int, int)>, int, int, bool> GetCoordinateIsAvailableFunc()
     {
-        return (x, y) => !blockedCoordinates.Contains((x, y));
+        return (occupiedSpots, x, y) => !occupiedSpots.Contains((x, y));
     }
 
-    private static Func<int, int, bool> GetSpotIsAvailableAndNotOnFloorFunc(
-        List<List<(int X, int Y)>> formations,
-        IReadOnlySet<(int X, int Y)> blockedCoordinates)
+    private static Func<HashSet<(int, int)>, int, int, bool> GetCoordinateIsAvailableAndNotOnFloorFunc(
+        List<List<(int X, int Y)>> formations)
     {
-        var allCoors = GetAllCoordinates(formations);
+        var allCoors = GetAllRockPathPoints(formations);
         var yMax = GetYMax(allCoors);
 
         var yFloor = yMax + 2;
 
-        return (x, y) =>
-            !blockedCoordinates.Contains((x, y)) &&
-            y < yFloor;
+        return (occupiedSpots, x, y) => !occupiedSpots.Contains((x, y)) &&
+                                        y < yFloor;
     }
 
     private static Func<int, int, bool> GetSandWillFallIntoTheEndlessVoidFunc(List<List<(int X, int Y)>> formations)
     {
-        var allCoordinates = GetAllCoordinates(formations);
+        var allCoordinates = GetAllRockPathPoints(formations);
 
         var xAll = allCoordinates.Select(coordinate => coordinate.X).ToList();
 
@@ -139,9 +137,9 @@ public class Day14Solver : IPuzzleSolver
         return (_, y) => y == SandStartingPointY;
     }
 
-    private static List<(int X, int Y)> GetAllCoordinates(List<List<(int X, int Y)>> formations)
+    private static List<(int X, int Y)> GetAllRockPathPoints(List<List<(int X, int Y)>> rockPaths)
     {
-        return formations
+        return rockPaths
             .SelectMany(line => line)
             .ToList();
     }
@@ -151,9 +149,9 @@ public class Day14Solver : IPuzzleSolver
         return coordinates.Select(coors => coors.Y).Max();
     }
 
-    private static int PourSandAndGetOccupiedSpotsCount(
-        HashSet<(int X, int Y)> occupiedSpots,
-        Func<int, int, bool> sandCanMoveToSpot,
+    private static int PourSandAndGetOccupiedCoordinatesCount(
+        HashSet<(int X, int Y)> occupiedCoordinates,
+        Func<HashSet<(int X, int Y)>, int, int, bool> sandCanMoveToCoordinate,
         Func<int, int, bool> stopPouringSand)
     {
         (int X, int Y) shiftDownwards = (0, 1);
@@ -178,7 +176,7 @@ public class Day14Solver : IPuzzleSolver
                 return true;
             }
 
-            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
+            if (sandCanMoveToCoordinate(occupiedCoordinates, simulatedSandUnitX, simulatedSandUnitY))
             {
                 sandUnitX = simulatedSandUnitX;
                 sandUnitY = simulatedSandUnitY;
@@ -214,7 +212,7 @@ public class Day14Solver : IPuzzleSolver
             }
 
             // Let unit of sand lie
-            occupiedSpots.Add((sandUnitX, sandUnitY));
+            occupiedCoordinates.Add((sandUnitX, sandUnitY));
 
             if (stopPouringSand(sandUnitX, sandUnitY))
             {
@@ -226,6 +224,6 @@ public class Day14Solver : IPuzzleSolver
             sandUnitY = SandStartingPointY;
         }
 
-        return occupiedSpots.Count;
+        return occupiedCoordinates.Count;
     }
 }
