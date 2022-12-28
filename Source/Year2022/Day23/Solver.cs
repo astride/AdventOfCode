@@ -48,32 +48,17 @@ public class Day23Solver : IPuzzleSolver
     {
         const int rounds = 10;
 
-        var elfGrid = input
-            .Select(line => line
-                .Select(cell => cell == Elf)
-                .ToList())
-            .ToList();
+        var elves = GetElfPositions(input);
         
-        var elfPositions = elfGrid
-            .Select((line, row) => line
-                .Select((isElf, col) => (IsElf: isElf, Row: row, Col: col)))
-            .SelectMany(_ => _)
-            .Where(coordinate => coordinate.IsElf)
-            .Select(coordinate => new ElfCoor(coordinate.Row, coordinate.Col))
-            .ToHashSet();
-        
-        var elfCount = elfPositions.Count;
+        var elfCount = elves.Count;
 
         var considerationIndices = Enumerable.Range(0, ConsiderationCount).ToArray();
 
         for (var round = 0; round < rounds; round++)
         {
-            var elvesThatConsiderMoving = elfPositions
-                .Where(elf => AdjacentCells
-                    .Any(cellShift => elfPositions
-                        .Contains(new ElfCoor(elf.X + cellShift.X, elf.Y + cellShift.Y))))
-                .ToList();
+            var elvesThatConsiderMoving = GetElvesThatConsiderMoving(elves);
 
+            // TODO
             var orderedConsiderations = considerationIndices
                 .Select(i => (round + i) % ConsiderationCount)
                 .Select(iOrdered => Considerations[iOrdered])
@@ -84,37 +69,29 @@ public class Day23Solver : IPuzzleSolver
             // First half of round: Figure out where elves consider moving to
             foreach (var elf in elvesThatConsiderMoving)
             {
-                var firstFreeDirection = orderedConsiderations
-                    .FirstOrDefault(direction => direction
-                        .All(cellShift => !elfPositions
-                            .Contains(new ElfCoor(elf.X + cellShift.X, elf.Y + cellShift.Y))));
+                var consideredMovement = GetConsideredMovementIfExists(orderedConsiderations, elves, elf);
 
-                if (firstFreeDirection == default)
+                if (consideredMovement == null)
                 {
                     // Elf cannot move
                     continue;
                 }
 
-                var consideredMovement = firstFreeDirection.First();
-
                 consideredNewPosByCurrentPos[elf] = new ElfCoor(elf.X + consideredMovement.X, elf.Y + consideredMovement.Y);
             }
 
-            var elvesThatConsiderMovingThatActuallyCanMove = consideredNewPosByCurrentPos
-                .GroupBy(kvp => kvp.Value)
-                .Where(gr => !gr.Skip(1).Any())
-                .ToDictionary(gr => gr.Single().Key, gr => gr.Key);
+            var newPosByOldPosOfMovingElves = GetNewPosByOldPosOfElvesThatCanActuallyMove(consideredNewPosByCurrentPos);
 
             // Second half of round: Move the elves that actually can move
-            foreach (var movingElf in elvesThatConsiderMovingThatActuallyCanMove)
+            foreach (var (oldPos, newPos) in newPosByOldPosOfMovingElves)
             {
-                elfPositions.Remove(movingElf.Key);
-                elfPositions.Add(movingElf.Value);
+                elves.Remove(oldPos);
+                elves.Add(newPos);
             }
         }
         
-        var xPositions = elfPositions.Select(pos => pos.X).Distinct().ToArray();
-        var yPositions = elfPositions.Select(pos => pos.Y).Distinct().ToArray();
+        var xPositions = elves.Select(pos => pos.X).Distinct().ToArray();
+        var yPositions = elves.Select(pos => pos.Y).Distinct().ToArray();
 
         var width = 1 + xPositions.Max() - xPositions.Min();
         var height = 1 + yPositions.Max() - yPositions.Min();
@@ -126,7 +103,7 @@ public class Day23Solver : IPuzzleSolver
         return emptyGroundTileCount;
     }
 
-    public object GetPart2Solution(string[] input)
+    private static HashSet<ElfCoor> GetElfPositions(string[] input)
     {
         var elfGrid = input
             .Select(line => line
@@ -141,6 +118,44 @@ public class Day23Solver : IPuzzleSolver
             .Where(coordinate => coordinate.IsElf)
             .Select(coordinate => new ElfCoor(coordinate.Row, coordinate.Col))
             .ToHashSet();
+
+        return elfPositions;
+    }
+
+    private List<ElfCoor> GetElvesThatConsiderMoving(HashSet<ElfCoor> elves)
+    {
+        var elvesThatConsiderMoving = elves
+            .Where(elf => AdjacentCells
+                .Any(cellShift => elves
+                    .Contains(new ElfCoor(elf.X + cellShift.X, elf.Y + cellShift.Y))))
+            .ToList();
+
+        return elvesThatConsiderMoving;
+    }
+
+    private ElfCoor? GetConsideredMovementIfExists(List<ElfCoor[]> orderedConsiderations, HashSet<ElfCoor> elves, ElfCoor elf)
+    {
+        var firstFreeDirection = orderedConsiderations
+            .FirstOrDefault(direction => direction
+                .All(cellShift => !elves
+                    .Contains(new ElfCoor(elf.X + cellShift.X, elf.Y + cellShift.Y))));
+
+        return firstFreeDirection?.FirstOrDefault();
+    }
+
+    private static Dictionary<ElfCoor, ElfCoor> GetNewPosByOldPosOfElvesThatCanActuallyMove(Dictionary<ElfCoor, ElfCoor> consideredNewPosByCurrentPos)
+    {
+        var elves = consideredNewPosByCurrentPos
+            .GroupBy(kvp => kvp.Value)
+            .Where(gr => !gr.Skip(1).Any())
+            .ToDictionary(gr => gr.Single().Key, gr => gr.Key);
+
+        return elves;
+    }
+
+    public object GetPart2Solution(string[] input)
+    {
+        var elves = GetElfPositions(input);
         
         var considerationIndices = Enumerable.Range(0, ConsiderationCount).ToArray();
 
@@ -149,12 +164,8 @@ public class Day23Solver : IPuzzleSolver
         while (true)
         {
             round++;
-            
-            var elvesThatConsiderMoving = elfPositions
-                .Where(elf => AdjacentCells
-                    .Any(cellShift => elfPositions
-                        .Contains(new ElfCoor(elf.X + cellShift.X, elf.Y + cellShift.Y))))
-                .ToHashSet();
+
+            var elvesThatConsiderMoving = GetElvesThatConsiderMoving(elves);
 
             if (!elvesThatConsiderMoving.Any())
             {
@@ -168,37 +179,29 @@ public class Day23Solver : IPuzzleSolver
                 .Select(iOrdered => Considerations[iOrdered])
                 .ToList();
 
-            var consideredNewPosByElfPos = new Dictionary<ElfCoor, ElfCoor>();
+            var consideredNewPosByCurrentPos = new Dictionary<ElfCoor, ElfCoor>();
 
             // First half of round: Figure out where elves consider moving to
             foreach (var elf in elvesThatConsiderMoving)
             {
-                var firstFreeDirection = orderedConsiderations
-                    .FirstOrDefault(direction => direction
-                        .All(cellShift => !elfPositions
-                            .Contains(new ElfCoor(elf.X + cellShift.X, elf.Y + cellShift.Y))));
+                var consideredMovement = GetConsideredMovementIfExists(orderedConsiderations, elves, elf);
 
-                if (firstFreeDirection == default)
+                if (consideredMovement == null)
                 {
                     // Elf cannot move
                     continue;
                 }
 
-                var consideredMovement = firstFreeDirection.First();
-
-                consideredNewPosByElfPos[elf] = new ElfCoor(elf.X + consideredMovement.X, elf.Y + consideredMovement.Y);
+                consideredNewPosByCurrentPos[elf] = new ElfCoor(elf.X + consideredMovement.X, elf.Y + consideredMovement.Y);
             }
 
-            var elvesThatConsiderMovingThatActuallyCanMove = consideredNewPosByElfPos
-                .GroupBy(kvp => kvp.Value)
-                .Where(gr => !gr.Skip(1).Any())
-                .ToDictionary(gr => gr.Single().Key, gr => gr.Key);
+            var newPosByOldPosOfMovingElves = GetNewPosByOldPosOfElvesThatCanActuallyMove(consideredNewPosByCurrentPos);
 
             // Second half of round: Move the elves that actually can move
-            foreach (var movingElf in elvesThatConsiderMovingThatActuallyCanMove)
+            foreach (var (oldPos, newPos) in newPosByOldPosOfMovingElves)
             {
-                elfPositions.Remove(movingElf.Key);
-                elfPositions.Add(movingElf.Value);
+                elves.Remove(oldPos);
+                elves.Add(newPos);
             }
         }
     }
