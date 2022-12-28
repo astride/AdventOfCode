@@ -165,60 +165,51 @@ public class Day14Solver : IPuzzleSolver
         var sandUnitX = SandStartingPointX;
         var sandUnitY = SandStartingPointY;
 
-        var pourSand = true;
+        var stopPouring = false;
 
-        while (pourSand)
+        bool TryMovingSandUnitAndGetShouldStopShifting((int X, int Y) shift)
         {
-            // Simulate falling down
-            var simulatedSandUnitX = sandUnitX + shiftsToTryForEachCoordinate[0].X;
-            var simulatedSandUnitY = sandUnitY + shiftsToTryForEachCoordinate[0].Y;
+            var simulatedSandUnitX = sandUnitX + shift.X;
+            var simulatedSandUnitY = sandUnitY + shift.Y;
 
             if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
             {
-                pourSand = false;
-                break;
+                stopPouring = true;
+                return true;
             }
+
+            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
+            {
+                sandUnitX = simulatedSandUnitX;
+                sandUnitY = simulatedSandUnitY;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        while (!stopPouring)
+        {
+            var stopShifting = false;
             
-            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
+            foreach (var shift in shiftsToTryForEachCoordinate)
             {
-                sandUnitX = simulatedSandUnitX;
-                sandUnitY = simulatedSandUnitY;
-                continue;
+                stopShifting = TryMovingSandUnitAndGetShouldStopShifting(shift);
+
+                if (stopShifting)
+                {
+                    break;
+                }
             }
 
-            // Simulate falling down to the left
-            simulatedSandUnitX = sandUnitX + shiftsToTryForEachCoordinate[1].X;
-            simulatedSandUnitY = sandUnitY + shiftsToTryForEachCoordinate[1].Y;
-
-            if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
+            if (stopPouring)
             {
-                pourSand = false;
-                break;
-            }
-            
-            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
-            {
-                sandUnitX = simulatedSandUnitX;
-                sandUnitY = simulatedSandUnitY;
-                
-                continue;
-            }
-
-            // Simulate falling down to the right
-            simulatedSandUnitX = sandUnitX + shiftsToTryForEachCoordinate[2].X;
-            simulatedSandUnitY = sandUnitY + shiftsToTryForEachCoordinate[2].Y;
-
-            if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
-            {
-                pourSand = false;
                 break;
             }
 
-            if (sandCanMoveToSpot(simulatedSandUnitX, simulatedSandUnitY))
+            if (stopShifting)
             {
-                sandUnitX = simulatedSandUnitX;
-                sandUnitY = simulatedSandUnitY;
-                
                 continue;
             }
 
@@ -227,7 +218,6 @@ public class Day14Solver : IPuzzleSolver
 
             if (stopPouringSand(sandUnitX, sandUnitY))
             {
-                pourSand = false;
                 break;
             }
             
