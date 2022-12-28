@@ -4,7 +4,7 @@ namespace Year2022;
 
 public class Day14Solver : IPuzzleSolver
 {
-    public string Title => "";
+    public string Title => "Regolith Reservoir";
 
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
@@ -15,37 +15,37 @@ public class Day14Solver : IPuzzleSolver
     public object GetPart1Solution(string[] input)
     {
         var rockFormations = GetRockFormations(input);
-        var blockedCoordinates = GetRockCoordinates(rockFormations);
+        var berockedSpots = GetRockCoordinates(rockFormations);
 
-        var rockCount = blockedCoordinates.Count;
+        var rockCount = berockedSpots.Count;
 
-        var spotIsAvailable = GetSpotIsAvailableFunc(blockedCoordinates);
+        var spotIsAvailable = GetSpotIsAvailableFunc(berockedSpots);
         var sandWillFallIntoTheEndlessVoid = GetSandWillFallIntoTheEndlessVoidFunc(rockFormations);
 
-        blockedCoordinates = PourSand(
-            blockedCoordinates,
+        var occupiedSpacesCount = PourSandAndGetOccupiedSpotsCount(
+            berockedSpots,
             sandCanMoveToSpot: spotIsAvailable,
             stopPouringSand: sandWillFallIntoTheEndlessVoid);
 
-        return blockedCoordinates.Count - rockCount;
+        return occupiedSpacesCount - rockCount;
     }
 
     public object GetPart2Solution(string[] input)
     {
         var rockFormations = GetRockFormations(input);
-        var blockedCoordinates = GetRockCoordinates(rockFormations);
+        var berockedSpots = GetRockCoordinates(rockFormations);
 
-        var rockCount = blockedCoordinates.Count;
+        var rockCount = berockedSpots.Count;
 
-        var spotIsAvailableAndNotOnFloor = GetSpotIsAvailableAndNotOnFloorFunc(rockFormations, blockedCoordinates);
-        var sandIsBlockingTheSource = GetSandHasReachedOutletFunc();
+        var spotIsAvailableAndNotOnFloor = GetSpotIsAvailableAndNotOnFloorFunc(rockFormations, berockedSpots);
+        var sandIsBlockingTheSource = GetSandIsBlockingTheSourceFunc();
 
-        blockedCoordinates = PourSand(
-            blockedCoordinates,
+        var occupiedSpacesCount = PourSandAndGetOccupiedSpotsCount(
+            berockedSpots,
             sandCanMoveToSpot: spotIsAvailableAndNotOnFloor,
             stopPouringSand: sandIsBlockingTheSource);
 
-        return blockedCoordinates.Count - rockCount;
+        return occupiedSpacesCount - rockCount;
     }
 
     private static List<List<(int X, int Y)>> GetRockFormations(string[] input)
@@ -134,7 +134,7 @@ public class Day14Solver : IPuzzleSolver
         return (x, y) => x < xMin || x > xMax || y > yMax;
     }
 
-    private static Func<int, int, bool> GetSandHasReachedOutletFunc()
+    private static Func<int, int, bool> GetSandIsBlockingTheSourceFunc()
     {
         return (_, y) => y == SandStartingPointY;
     }
@@ -151,22 +151,31 @@ public class Day14Solver : IPuzzleSolver
         return coordinates.Select(coors => coors.Y).Max();
     }
 
-    private static HashSet<(int, int)> PourSand(
-        HashSet<(int X, int Y)> blockedCoordinates,
+    private static int PourSandAndGetOccupiedSpotsCount(
+        HashSet<(int X, int Y)> occupiedSpots,
         Func<int, int, bool> sandCanMoveToSpot,
         Func<int, int, bool> stopPouringSand)
     {
+        (int X, int Y) shiftDownwards = (0, 1);
+        (int X, int Y) shiftLeftwards = (-1, 1);
+        (int X, int Y) shiftRightwards = (1, 1);
+        
+        var shiftsToTryForEachCoordinate = new[] { shiftDownwards, shiftLeftwards, shiftRightwards };
+        
         var sandUnitX = SandStartingPointX;
         var sandUnitY = SandStartingPointY;
 
-        while (true)
+        var pourSand = true;
+
+        while (pourSand)
         {
             // Simulate falling down
-            var simulatedSandUnitX = sandUnitX;
-            var simulatedSandUnitY = sandUnitY + 1;
+            var simulatedSandUnitX = sandUnitX + shiftsToTryForEachCoordinate[0].X;
+            var simulatedSandUnitY = sandUnitY + shiftsToTryForEachCoordinate[0].Y;
 
             if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
             {
+                pourSand = false;
                 break;
             }
             
@@ -178,11 +187,12 @@ public class Day14Solver : IPuzzleSolver
             }
 
             // Simulate falling down to the left
-            simulatedSandUnitX = sandUnitX - 1;
-            simulatedSandUnitY = sandUnitY + 1;
+            simulatedSandUnitX = sandUnitX + shiftsToTryForEachCoordinate[1].X;
+            simulatedSandUnitY = sandUnitY + shiftsToTryForEachCoordinate[1].Y;
 
             if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
             {
+                pourSand = false;
                 break;
             }
             
@@ -195,11 +205,12 @@ public class Day14Solver : IPuzzleSolver
             }
 
             // Simulate falling down to the right
-            simulatedSandUnitX = sandUnitX + 1;
-            simulatedSandUnitY = sandUnitY + 1;
+            simulatedSandUnitX = sandUnitX + shiftsToTryForEachCoordinate[2].X;
+            simulatedSandUnitY = sandUnitY + shiftsToTryForEachCoordinate[2].Y;
 
             if (stopPouringSand(simulatedSandUnitX, simulatedSandUnitY))
             {
+                pourSand = false;
                 break;
             }
 
@@ -212,10 +223,11 @@ public class Day14Solver : IPuzzleSolver
             }
 
             // Let unit of sand lie
-            blockedCoordinates.Add((sandUnitX, sandUnitY));
+            occupiedSpots.Add((sandUnitX, sandUnitY));
 
             if (stopPouringSand(sandUnitX, sandUnitY))
             {
+                pourSand = false;
                 break;
             }
             
@@ -224,6 +236,6 @@ public class Day14Solver : IPuzzleSolver
             sandUnitY = SandStartingPointY;
         }
 
-        return blockedCoordinates;
+        return occupiedSpots.Count;
     }
 }
