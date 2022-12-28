@@ -48,7 +48,7 @@ public class Day14Solver : IPuzzleSolver
         return occupiedSpacesCount - rockCount;
     }
 
-    private static List<List<(int X, int Y)>> GetRockFormations(string[] input)
+    private static List<List<(int X, int Y)>> GetRockFormations(IEnumerable<string> input)
     {
         return input
             .Select(line => line
@@ -68,37 +68,37 @@ public class Day14Solver : IPuzzleSolver
         return (split[0], split[1]);
     }
 
-    private static HashSet<(int, int)> GetRockCoordinates(List<List<(int X, int Y)>> formations)
+    private static HashSet<(int, int)> GetRockCoordinates(List<List<(int X, int Y)>> rockPaths)
     {
-        var rockCoordinates = new HashSet<(int, int)>();
+        var berockedSpots = new HashSet<(int, int)>();
         
         // Populate with rocks
-        foreach (var line in formations)
+        foreach (var rockPath in rockPaths)
         {
-            for (var i = 1; i < line.Count; i++)
+            for (var pathPointIndex = 1; pathPointIndex < rockPath.Count; pathPointIndex++)
             {
-                var sourceCoor = line[i - 1];
-                var targetCoor = line[i];
+                var sourcePoint = rockPath[pathPointIndex - 1];
+                var targetPoint = rockPath[pathPointIndex];
 
-                var rockCoordinate = (sourceCoor.X, sourceCoor.Y);
+                var rockSegmentPoint = (sourcePoint.X, sourcePoint.Y);
 
-                rockCoordinates.Add((rockCoordinate.X, rockCoordinate.Y));
+                berockedSpots.Add((rockSegmentPoint.X, rockSegmentPoint.Y));
                 
-                (int X, int Y) coorDiff = (targetCoor.X - sourceCoor.X, targetCoor.Y - sourceCoor.Y);
+                (int X, int Y) rockSegmentLengthXY = (targetPoint.X - sourcePoint.X, targetPoint.Y - sourcePoint.Y);
 
-                var diffSpan = Math.Max(Math.Abs(coorDiff.X), Math.Abs(coorDiff.Y));
+                var rockSegmentLength = Math.Max(Math.Abs(rockSegmentLengthXY.X), Math.Abs(rockSegmentLengthXY.Y));
                 
-                (int X, int Y) movementPerIndex = (coorDiff.X / diffSpan, coorDiff.Y / diffSpan);
+                (int X, int Y) pathIncrease = (rockSegmentLengthXY.X / rockSegmentLength, rockSegmentLengthXY.Y / rockSegmentLength);
 
-                foreach (var diff in Enumerable.Range(0, diffSpan))
+                foreach (var segmentPoint in Enumerable.Range(0, rockSegmentLength))
                 {
-                    rockCoordinate = (rockCoordinate.X + movementPerIndex.X, rockCoordinate.Y + movementPerIndex.Y);
-                    rockCoordinates.Add((rockCoordinate.X, rockCoordinate.Y));
+                    rockSegmentPoint = (rockSegmentPoint.X + pathIncrease.X, rockSegmentPoint.Y + pathIncrease.Y);
+                    berockedSpots.Add((rockSegmentPoint.X, rockSegmentPoint.Y));
                 }
             }
         }
 
-        return rockCoordinates;
+        return berockedSpots;
     }
 
     private static Func<int, int, bool> GetSpotIsAvailableFunc(IReadOnlySet<(int X, int Y)> blockedCoordinates)
