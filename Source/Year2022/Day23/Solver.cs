@@ -6,8 +6,8 @@ public class Day23Solver : IPuzzleSolver
 {
     public string Title => "Unstable Diffusion";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private const char Elf = '#';
     
@@ -44,13 +44,7 @@ public class Day23Solver : IPuzzleSolver
         North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest
     };
     
-    public void SolvePuzzle(string[] input)
-    {
-        Part1Solution = GetPart1Solution(input).ToString();
-        Part2Solution = GetPart2Solution(input).ToString();
-    }
-
-    private static int GetPart1Solution(IEnumerable<string> input)
+    public object GetPart1Solution(string[] input)
     {
         const int rounds = 10;
 
@@ -132,7 +126,7 @@ public class Day23Solver : IPuzzleSolver
         return emptyGroundTileCount;
     }
 
-    private static int GetPart2Solution(IEnumerable<string> input)
+    public object GetPart2Solution(string[] input)
     {
         var elfGrid = input
             .Select(line => line
