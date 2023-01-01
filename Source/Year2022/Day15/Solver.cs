@@ -7,20 +7,14 @@ public class Day15Solver : IPuzzleSolver
 {
     public string Title => "Beacon Exclusion Zone";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
-
-    public void SolvePuzzle(string[] input)
-    {
-        Part1Solution = GetPart1Solution(input).ToString();
-        Part2Solution = GetPart2Solution(input).ToString();
-    }
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private static readonly int CharCountBetweenXAndY = ", y=".Length;
     private static readonly int CharCountPriorToSensor = "Sensor at x=".Length;
     private static readonly int CharCountBetweenSensorAndBeacon = ": closest beacon is at x=".Length;
 
-    private static int GetPart1Solution(IEnumerable<string> input)
+    public object GetPart1Solution(string[] input)
     {
         const int targetRow = 10; // For example input
         // const int targetRow = 2000000; // For real input
@@ -100,7 +94,7 @@ public class Day15Solver : IPuzzleSolver
             .Count(beaconIsPresent => !beaconIsPresent);
     }
 
-    private static BigInteger GetPart2Solution(IEnumerable<string> input)
+    public object GetPart2Solution(string[] input)
     {
         const int posMin = 0;
         const int posMax = 20; // For example input
