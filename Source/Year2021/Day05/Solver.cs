@@ -5,41 +5,53 @@ namespace Year2021;
 public class Day05Solver : IPuzzleSolver
 {
 	public string Title => "Hydrothermal Venture";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var input = rawInput
+		var segments = GetSegments(input);
+		var maxRowIndex = GetMaxRowIndex(segments);
+		var maxColIndex = GetMaxColIndex(segments);
+		
+		return Solve(segments, maxRowIndex, maxColIndex);
+	}
+
+	public object GetPart2Solution(string[] input, bool isExampleInput)
+	{
+		var segments = GetSegments(input);
+		var maxRowIndex = GetMaxRowIndex(segments);
+		var maxColIndex = GetMaxColIndex(segments);
+		
+		return Solve(segments, maxRowIndex, maxColIndex, true);
+	}
+
+	private static List<Segment> GetSegments(string[] input)
+	{
+		return input
 			.Where(line => !string.IsNullOrEmpty(line))
 			.Select(line => line.Split(' '))
-			.Select(coordinate => new Segment(coordinate[0], coordinate[2]));
+			.Select(coordinate => new Segment(coordinate[0], coordinate[2]))
+			.ToList();
+	}
 
-		var xMax = input
+	private static int GetMaxRowIndex(IEnumerable<Segment> segments)
+	{
+		return segments
 			.Select(segment => Math.Max(segment.X1, segment.X2))
 			.Distinct()
 			.Max();
+	}
 
-		var yMax = input
+	private static int GetMaxColIndex(IEnumerable<Segment> segments)
+	{
+		return segments
 			.Select(segment => Math.Max(segment.Y1, segment.Y2))
 			.Distinct()
 			.Max();
-
-		Part1Solution = SolvePart1(input, xMax, yMax).ToString();
-		Part2Solution = SolvePart2(input, xMax, yMax).ToString();
 	}
 
-	private static int SolvePart1(IEnumerable<Segment> linesOfVents, int maxRowIndex, int maxColIndex)
-	{
-		return Solve(linesOfVents, maxRowIndex, maxColIndex);
-	}
-
-	private static int SolvePart2(IEnumerable<Segment> linesOfVents, int maxRowIndex, int maxColIndex)
-	{
-		return Solve(linesOfVents, maxRowIndex, maxColIndex, true);
-	}
-
-	private static int Solve(IEnumerable<Segment> linesOfVents, int maxRowIndex, int maxColIndex, bool includeDiagonalLines = false)
+	private static int Solve(IReadOnlyList<Segment> linesOfVents, int maxRowIndex, int maxColIndex, bool includeDiagonalLines = false)
 	{
 		var overlapMap = new int[maxRowIndex + 1, maxColIndex + 1];
 
@@ -70,7 +82,7 @@ public class Day05Solver : IPuzzleSolver
 	}
 }
 
-static class Day05Helpers
+internal static class Day05Helpers
 {
 	public static IEnumerable<HorizontalSegment> HorizontalSegments(this IEnumerable<Segment> segments)
 	{
@@ -162,7 +174,7 @@ static class Day05Helpers
 	}
 }
 
-public class HorizontalSegment
+internal class HorizontalSegment
 {
 	public HorizontalSegment(int x1, int x2, int y) 
 	{
@@ -176,7 +188,7 @@ public class HorizontalSegment
 	public int Y { get; }
 }
 
-public class VerticalSegment
+internal class VerticalSegment
 {
 	public VerticalSegment(int x, int y1, int y2)
 	{
@@ -190,7 +202,7 @@ public class VerticalSegment
 	public int Y2 { get; }
 }
 
-public class DiagonalSegment
+internal class DiagonalSegment
 {
 	public DiagonalSegment(int xStart, int yStart, int length, bool isPointingUpwards)
 	{
@@ -206,7 +218,7 @@ public class DiagonalSegment
 	public bool IsPointingUpwards { get; }
 }
 
-public class Segment
+internal class Segment
 {
 	public Segment(string startPoint, string endPoint)
 	{

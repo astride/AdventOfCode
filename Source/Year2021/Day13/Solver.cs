@@ -5,42 +5,25 @@ namespace Year2021;
 public class Day13Solver : IPuzzleSolver
 {
 	public string Title => "Transparent Origami";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		List<(int X, int Y)> markedPoints = rawInput
-			.TakeWhile(entry => !string.IsNullOrWhiteSpace(entry))
-			.Select(entry => entry.Split(','))
-			.Select(coordinate => (int.Parse(coordinate[0]), int.Parse(coordinate[1])))
-			.ToList();
-
-		List<(char AlongPlane, int Coor)> foldingInstructions = rawInput
-			.SkipWhile(entry => !entry.Contains("fold along"))
-			.Select(entry => entry.Split(' '))
-			.Select(instruction => instruction.Last().Split('='))
-			.Select(foldingInstruction => (foldingInstruction[0].Single(), int.Parse(foldingInstruction[1])))
-			.ToList();
-
-		Part1Solution = SolvePart1(markedPoints, foldingInstructions).ToString();
-		Part2Solution = SolvePart2(markedPoints, foldingInstructions);
-	}
-
-	private static int SolvePart1(
-		IReadOnlyCollection<(int X, int Y)> markedPoints,
-		IEnumerable<(char Plane, int Coor)> foldingInstructions)
-	{
+		var markedPoints = GetMarkedPoints(input);
+		var foldingInstructions = GetFoldingInstructions(input);
+		
 		var markedPaper = markedPoints.CreateAndMarkPaper();
 		markedPaper.Fold(foldingInstructions.First());
 
 		return markedPaper.CountMarks();
 	}
 
-	private static string SolvePart2(
-		IReadOnlyCollection<(int X, int Y)> markedPoints,
-		List<(char Plane, int Coor)> foldingInstructions)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		var markedPoints = GetMarkedPoints(input);
+		var foldingInstructions = GetFoldingInstructions(input);
+		
 		var markedPaper = markedPoints.CreateAndMarkPaper();
 		
 		foreach (var instruction in foldingInstructions)
@@ -49,12 +32,12 @@ public class Day13Solver : IPuzzleSolver
 		}
 
 		var maxX = foldingInstructions
-			.Where(instruction => instruction.Plane == 'x')
+			.Where(instruction => instruction.AlongPlane == 'x')
 			.Select(instruction => instruction.Coor)
 			.Min();
 
 		var maxY = foldingInstructions
-			.Where(instruction => instruction.Plane == 'y')
+			.Where(instruction => instruction.AlongPlane == 'y')
 			.Select(instruction => instruction.Coor)
 			.Min();
 
@@ -70,9 +53,28 @@ public class Day13Solver : IPuzzleSolver
 
 		return "Read the note yourself --^";
 	}
+
+	private List<(int X, int Y)> GetMarkedPoints(string[] input)
+	{
+		return input
+			.TakeWhile(entry => !string.IsNullOrWhiteSpace(entry))
+			.Select(entry => entry.Split(','))
+			.Select(coordinate => (int.Parse(coordinate[0]), int.Parse(coordinate[1])))
+			.ToList();
+	}
+
+	private List<(char AlongPlane, int Coor)> GetFoldingInstructions(string[] input)
+	{
+		return input
+			.SkipWhile(entry => !entry.Contains("fold along"))
+			.Select(entry => entry.Split(' '))
+			.Select(instruction => instruction.Last().Split('='))
+			.Select(foldingInstruction => (foldingInstruction[0].Single(), int.Parse(foldingInstruction[1])))
+			.ToList();
+	}
 }
 
-public static class Day13Helpers
+internal static class Day13Helpers
 {
 	private static int SizeX;
 	private static int SizeY;

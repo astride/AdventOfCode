@@ -5,27 +5,17 @@ namespace Year2021;
 public class Day02Solver : IPuzzleSolver
 {
 	public string Title => "Dive!";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
-
-	public void SolvePuzzle(string[] rawInput)
-	{
-		var input = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.Select(entry => entry.Split(' '))
-			.Select(entry => (entry[0], int.Parse(entry[1])))
-			.ToList();
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
-	}
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
 	private const string Forward = "forward";
 	private const string Down = "down";
 	private const string Up = "up";
 
-	private static int SolvePart1(List<(string Action, int Units)> commands)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
+		var commands = GetCommands(input);
+		
 		var pos = 0;
 		var depth = 0;
 
@@ -38,8 +28,10 @@ public class Day02Solver : IPuzzleSolver
 		return pos * depth;
 	}
 
-	private static int SolvePart2(List<(string Action, int Units)> commands)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		var commands = GetCommands(input);
+		
 		var pos = 0;
 		var aim = 0;
 		var depth = 0;
@@ -56,6 +48,15 @@ public class Day02Solver : IPuzzleSolver
 		}
 
 		return pos * depth;
+	}
+
+	private static List<(string Action, int Units)> GetCommands(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.Select(entry => entry.Split(' '))
+			.Select(entry => (entry[0], int.Parse(entry[1])))
+			.ToList();
 	}
 
 	private static int GetHorizontalChange(string action, int value) => action switch

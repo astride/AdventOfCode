@@ -5,22 +5,13 @@ namespace Year2021;
 public class Day18Solver : IPuzzleSolver
 {
 	public string Title => "Snailfish";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var assignment = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.Select(entry => entry.AsSnailFishNumber())
-			.ToList();
-
-		Part1Solution = SolvePart1(assignment).ToString();
-		Part2Solution = SolvePart2(assignment).ToString();
-	}
-
-	private static int SolvePart1(IReadOnlyList<List<object>> numbers)
-	{
+		var numbers = GetAssignment(input);
+		
 		var param = new List<object>(numbers[0]);
 
 		foreach (var i in Enumerable.Range(1, numbers.Count - 1))
@@ -32,17 +23,27 @@ public class Day18Solver : IPuzzleSolver
 		return param.GetMagnitude();
 	}
 
-	private static int SolvePart2(List<List<object>> numbers)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		var numbers = GetAssignment(input);
+		
 		var firstAddends = numbers
 			.Select(number => number.ToFirstAddend())
 			.ToList();
 
 		return Day18Helpers.FindLargestMagnitude(firstAddends, numbers);
 	}
+
+	private static List<List<object>> GetAssignment(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.Select(entry => entry.AsSnailFishNumber())
+			.ToList();
+	}
 }
 
-public static class Day18Helpers
+internal static class Day18Helpers
 {
 	private const int DeepestNestingLevel = 4;
 	private const int ThresholdValue = 9;

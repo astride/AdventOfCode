@@ -1,46 +1,53 @@
-﻿using System.Globalization;
-using Common.Interfaces;
+﻿using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day21Solver : IPuzzleSolver
 {
 	public string Title => "Dirac Dice";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var startingPosition1 = 
-			int.Parse(rawInput
-				.Single(entry => entry.Contains("Player 1"))
-				.Split(' ')
-				.Last());
-
-		var startingPosition2 =
-			int.Parse(rawInput
-				.Single(entry => entry.Contains("Player 2"))
-				.Split(' ')
-				.Last());
-
-		Part1Solution = SolvePart1(startingPosition1, startingPosition2).ToString();
-		Part2Solution = SolvePart2(startingPosition1, startingPosition2).ToString(CultureInfo.InvariantCulture);
-	}
-
-	private static int SolvePart1(int startingPosition1, int startingPosition2)
-	{
+		var startingPosition1 = GetStartingPositionForPlayer1(input);
+		var startingPosition2 = GetStartingPositionForPlayer2(input);
+		
 		var totalDieRolls = Day21Helpers.PlayDeterministicDice(startingPosition1, startingPosition2, out var losingScore);
 
 		return totalDieRolls * losingScore;
 	}
 
-	private static double SolvePart2(int startingPosition1, int startingPosition2)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		var startingPosition1 = GetStartingPositionForPlayer1(input);
+		var startingPosition2 = GetStartingPositionForPlayer2(input);
+		
 		return Day21Helpers.PlayDiracDie(startingPosition1, startingPosition2);
+	}
+
+	private static int GetStartingPositionForPlayer1(string[] input)
+	{
+		return GetStartingPosition(input, "Player 1");
+	}
+
+	private static int GetStartingPositionForPlayer2(string[] input)
+	{
+		return GetStartingPosition(input, "Player 2");
+	}
+
+	private static int GetStartingPosition(string[] input, string playerReference)
+	{
+		var position = input
+			.Single(entry => entry.Contains(playerReference))
+			.Split(' ')
+			.Last();
+		
+		return int.Parse(position);
 	}
 }
 
-public static class Day21Helpers
+internal static class Day21Helpers
 {
 	private const int DeterministicDieGoal = 1000;
 	private const int DeterministicDieMax = 100;

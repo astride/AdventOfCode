@@ -6,24 +6,13 @@ public class Day08Solver : IPuzzleSolver
 {
     public string Title => "Treetop Tree House";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
-        var trees = input
-            .Select(row => row
-                .AsEnumerable()
-                .Select(item => int.Parse(item.ToString()))
-                .ToArray())
-            .ToArray();
+        var trees = GetTrees(input);
         
-        Part1Solution = SolvePart1(trees).ToString();
-        Part2Solution = SolvePart2(trees).ToString();
-    }
-
-    private static int SolvePart1(int[][] trees)
-    {
         var rows = trees[0].Length;
         var cols = trees.Length;
 
@@ -81,8 +70,10 @@ public class Day08Solver : IPuzzleSolver
         return visibleTrees;
     }
 
-    private static int SolvePart2(int[][] trees)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
+        var trees = GetTrees(input);
+        
         var rows = trees[0].Length;
         var cols = trees.Length;
         
@@ -134,5 +125,15 @@ public class Day08Solver : IPuzzleSolver
         }
 
         return highestScenicScore;
+    }
+
+    private int[][] GetTrees(string[] input)
+    {
+        return input
+            .Select(row => row
+                .AsEnumerable()
+                .Select(item => int.Parse(item.ToString()))
+                .ToArray())
+            .ToArray();
     }
 }

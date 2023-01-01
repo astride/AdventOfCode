@@ -1,28 +1,17 @@
-﻿using System.Globalization;
-using Common.Interfaces;
+﻿using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day07Solver : IPuzzleSolver
 {
 	public string Title => "The Treachery of Whales";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var input = rawInput
-			.Single(entry => !string.IsNullOrWhiteSpace(entry))
-			.Split(',')
-			.Select(int.Parse)
-			.ToArray();
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString(CultureInfo.InvariantCulture);
-	}
-
-	private static int SolvePart1(IReadOnlyCollection<int> crabPositions)
-	{
+		var crabPositions = GetCrabPositions(input);
+		
 		var minPos = crabPositions.Min();
 		var maxPos = crabPositions.Max();
 
@@ -34,8 +23,10 @@ public class Day07Solver : IPuzzleSolver
 		return cheapestFuel;
 	}
 
-	private static double SolvePart2(int[] crabPositions)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		var crabPositions = GetCrabPositions(input);
+		
 		List<(int Position, int Count)> positionAndCrabCount = crabPositions
 			.GroupBy(pos => pos)
 			.Select(gr => (gr.Key, gr.Count()))
@@ -67,6 +58,15 @@ public class Day07Solver : IPuzzleSolver
 		}
 
 		return cheapestFuel;
+	}
+
+	private static IReadOnlyCollection<int> GetCrabPositions(string[] input)
+	{
+		return input
+			.Single(entry => !string.IsNullOrWhiteSpace(entry))
+			.Split(',')
+			.Select(int.Parse)
+			.ToArray();
 	}
 }
 

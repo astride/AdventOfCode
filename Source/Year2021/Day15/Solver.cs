@@ -5,34 +5,36 @@ namespace Year2021;
 public class Day15Solver : IPuzzleSolver
 {
 	public string Title => "Chiton";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		//Info: The shape of the cavern resembles a square
-		var map = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.ToArray();
-
-		Part1Solution = SolvePart1(map).ToString();
-		Part2Solution = SolvePart2(map).ToString(); // Implementation is not finished at all
-	}
-
-	private static double SolvePart1(string[] map)
-	{
+		var map = GetMap(input);
+		
 		var riskLevelMap = map.AsRiskLevelMap();
 		var lowestTotalRisk = riskLevelMap.GetLowestTotalRiskOfSouthEastFacingPath();
 
 		return lowestTotalRisk;
 	}
 
-	private static double SolvePart2(string[] map)
+	// TODO Implementation is not finished at all
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		var map = GetMap(input);
+		
 		var riskLevelMap = map.AsRiskLevelMap();
 		var lowestTotalRisk = riskLevelMap.GetLowestTotalRiskOfSouthEastFacingPath(5);
 
 		return lowestTotalRisk;
+	}
+
+	private static string[] GetMap(string[] input)
+	{
+		//Info: The shape of the cavern resembles a square
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.ToArray();
 	}
 }
 

@@ -1,29 +1,17 @@
-﻿using System.Globalization;
-using Common.Interfaces;
+﻿using Common.Interfaces;
 
 namespace Year2021;
 
 public class Day06Solver : IPuzzleSolver
 {
 	public string Title => "Lanternfish";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var input = rawInput
-			.Single(entry => !string.IsNullOrWhiteSpace(entry))
-			.Split(',')
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.Select(int.Parse)
-			.ToArray();
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString(CultureInfo.InvariantCulture);
-	}
-
-	private static int SolvePart1(IEnumerable<int> timerValues)
-	{
+		var timerValues = GetTimerValues(input);
+		
 		var shoal = timerValues.ToList();
 
 		foreach (var _ in Enumerable.Range(0, 80))
@@ -34,8 +22,10 @@ public class Day06Solver : IPuzzleSolver
 		return shoal.Count;
 	}
 
-	private static decimal SolvePart2(IEnumerable<int> timerValues)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		var timerValues = GetTimerValues(input);
+		
 		var fishCountPerTimerValue =
 			Enumerable.Repeat((decimal)0, Day06Helpers.TimerValueForSpawn + 1).ToList();
 
@@ -51,9 +41,19 @@ public class Day06Solver : IPuzzleSolver
 
 		return fishCountPerTimerValue.Sum();
 	}
+
+	private IEnumerable<int> GetTimerValues(string[] input)
+	{
+		return input
+			.Single(entry => !string.IsNullOrWhiteSpace(entry))
+			.Split(',')
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.Select(int.Parse)
+			.ToArray();
+	}
 }
 
-public static class Day06Helpers
+internal static class Day06Helpers
 {
 	public const int TimerValueForSpawn = 8;
 	private const int TimerValuePreSpawning = 0;

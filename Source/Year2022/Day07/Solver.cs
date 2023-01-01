@@ -6,22 +6,16 @@ public class Day07Solver : IPuzzleSolver
 {
     public string Title => "No Space Left On Device";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private const string RootDirSign = "/";
     private const string RootDirName = "root";
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
-        var totalFileSizeByDirNameDict = GetTotalFileSizeByDirNameDict(input);
+        var totalFileSizeByDirName = GetTotalFileSizeByDirNameDict(input);
         
-        Part1Solution = SolvePart1(totalFileSizeByDirNameDict).ToString();
-        Part2Solution = SolvePart2(totalFileSizeByDirNameDict).ToString();
-    }
-
-    private static double SolvePart1(Dictionary<string, double> totalFileSizeByDirName)
-    {
         const double maxSizeOfRelevantDirectories = 100000;
         
         var totalFileSizesOfRelevantDirectories = totalFileSizeByDirName
@@ -31,8 +25,10 @@ public class Day07Solver : IPuzzleSolver
         return totalFileSizesOfRelevantDirectories.Sum();
     }
 
-    private static double SolvePart2(Dictionary<string, double> totalFileSizeByDirName)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
+        var totalFileSizeByDirName = GetTotalFileSizeByDirNameDict(input);
+        
         const double totalDiskSpace = 70000000;
         const double neededUnusedDiskSpace = 30000000;
 

@@ -6,26 +6,24 @@ public class Day06Solver : IPuzzleSolver
 {
     public string Title => "Tuning Trouble";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
-        var datastreamBuffer = input.Single();
+        var datastreamBuffer = GetDatastreamBuffer(input);
         
-        Part1Solution = SolvePart1(datastreamBuffer).ToString();
-        Part2Solution = SolvePart2(datastreamBuffer).ToString();
-    }
-
-    private static int SolvePart1(string datastreamBuffer)
-    {
         return DetectStartOfPacketMarkerEndIndex(datastreamBuffer);
     }
 
-    private static int SolvePart2(string datastreamBuffer)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
+        var datastreamBuffer = GetDatastreamBuffer(input);
+        
         return DetectStartOfMessageMarkerEndIndex(datastreamBuffer);
     }
+    
+    private static string GetDatastreamBuffer(string[] input) => input.Single();
 
     private static int DetectStartOfPacketMarkerEndIndex(string datastreamBuffer)
     {

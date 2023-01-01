@@ -55,12 +55,12 @@ public class Program
 		// Example input
 		if (puzzleSolver.UsePartSpecificExampleInputFiles)
 		{
-			puzzleSolver.SolvePart1(GetInput(puzzleDate, InputExampleFileNamePart1));
-			puzzleSolver.SolvePart2(GetInput(puzzleDate, InputExampleFileNamePart2));
+			puzzleSolver.SolvePart1(GetInput(puzzleDate, InputExampleFileNamePart1), true);
+			puzzleSolver.SolvePart2(GetInput(puzzleDate, InputExampleFileNamePart2), true);
 		}
 		else
 		{
-			puzzleSolver.SolvePuzzle(GetInput(puzzleDate, InputExampleFileName));
+			puzzleSolver.SolvePuzzle(GetInput(puzzleDate, InputExampleFileName), true);
 		}
 
 		Console.WriteLine("\nSolutions for example input:");
@@ -68,7 +68,7 @@ public class Program
 		Console.WriteLine("Part 2: " + puzzleSolver.Part2Solution);
 		
 		// Real input
-		puzzleSolver.SolvePuzzle(GetInput(puzzleDate, InputFileName));
+		puzzleSolver.SolvePuzzle(GetInput(puzzleDate, InputFileName), false);
 		
 		Console.WriteLine("\nSolutions:");
 		Console.WriteLine("Part 1: " + puzzleSolver.Part1Solution);
@@ -199,8 +199,8 @@ public class Program
 			var inputPart1 = GetInput(puzzleSolverInfo.Date, InputExampleFileNamePart1);
 			var inputPart2 = GetInput(puzzleSolverInfo.Date, InputExampleFileNamePart2);
 				
-			puzzleSolver.SolvePart1(inputPart1);
-			puzzleSolver.SolvePart2(inputPart2);
+			puzzleSolver.SolvePart1(inputPart1, true);
+			puzzleSolver.SolvePart2(inputPart2, true);
 		}
 		else
 		{
@@ -208,7 +208,7 @@ public class Program
 
 			var input = GetInput(puzzleSolverInfo.Date, inputFileName);
 			
-			puzzleSolver.SolvePuzzle(input);
+			puzzleSolver.SolvePuzzle(input, isTestMode);
 		}
 		
 		var additionalInfo = isTestMode ? " (test data)" : string.Empty;

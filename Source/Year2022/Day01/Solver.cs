@@ -5,29 +5,30 @@ namespace Year2022;
 public class Day01Solver : IPuzzleSolver
 {
     public string Title => "Calorie Counting";
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
-        var puzzleInput = input.GetCaloriesPerElf().ToArray();
-
-        Part1Solution = SolvePart1(puzzleInput).ToString();
-        Part2Solution = SolvePart2(puzzleInput).ToString();
-    }
-
-    private static int SolvePart1(IEnumerable<int> caloriesPerElf)
-    {
+        var caloriesPerElf = GetCaloriesPerElf(input);
+        
         return caloriesPerElf.Max();
     }
 
-    private static int SolvePart2(IEnumerable<int> caloriesPerElf)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
+        var caloriesPerElf = GetCaloriesPerElf(input);
+        
         var topThreeWithMaxCalories = caloriesPerElf
             .OrderByDescending(cal => cal)
             .Take(3);
         
         return topThreeWithMaxCalories.Sum();
+    }
+
+    private static IEnumerable<int> GetCaloriesPerElf(string[] input)
+    {
+        return input.GetCaloriesPerElf().ToArray();
     }
 }
 
