@@ -14,10 +14,12 @@ public class Day15Solver : IPuzzleSolver
     private static readonly int CharCountPriorToSensor = "Sensor at x=".Length;
     private static readonly int CharCountBetweenSensorAndBeacon = ": closest beacon is at x=".Length;
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
-        const int targetRow = 10; // For example input
-        // const int targetRow = 2000000; // For real input
+        const int targetRowForExampleInput = 10;
+        const int targetRowForRealInput = 2000000;
+
+        var targetRow = isExampleInput ? targetRowForExampleInput : targetRowForRealInput;
 
         var beaconPresenceByColAtTargetRow = new Dictionary<int, bool>();
 
@@ -94,15 +96,16 @@ public class Day15Solver : IPuzzleSolver
             .Count(beaconIsPresent => !beaconIsPresent);
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
-        const int posMin = 0;
-        const int posMax = 20; // For example input
-        // const int posMax = 4000000; // For real input
-        
-        const int posCount = 1 + posMax - posMin;
-        
         const int tuningFrequencyConstant = 4000000;
+        const int posMin = 0;
+        const int posMaxForExampleInput = 20;
+        const int posMaxForRealInput = 4000000;
+
+        var posMax = isExampleInput ? posMaxForExampleInput : posMaxForRealInput;
+        
+        var posCount = 1 + posMax - posMin;
 
         var relevantPos = Enumerable.Range(posMin, posCount).ToHashSet();
 
