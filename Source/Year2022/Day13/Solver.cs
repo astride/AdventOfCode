@@ -6,16 +6,10 @@ public class Day13Solver : IPuzzleSolver
 {
     public string Title => "Distress Signal";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
-    {
-        Part1Solution = GetPart1Solution(input).ToString();
-        Part2Solution = GetPart2Solution(input).ToString();
-    }
-
-    private static int GetPart1Solution(IEnumerable<string> input)
+    public object GetPart1Solution(string[] input)
     {
         var packetPairs = input
             .Where(line => !string.IsNullOrEmpty(line))
@@ -125,7 +119,7 @@ public class Day13Solver : IPuzzleSolver
         return packetPairIndicesInRightOrder.Sum();
     }
 
-    private static int GetPart2Solution(IEnumerable<string> input)
+    public object GetPart2Solution(string[] input)
     {
         return 0;
     }
