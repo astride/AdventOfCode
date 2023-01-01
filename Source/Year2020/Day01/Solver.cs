@@ -5,23 +5,15 @@ namespace Year2020;
 public class Day01Solver : IPuzzleSolver
 {
     public string Title => "Report Repair";
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
-
-    public void SolvePuzzle(string[] input)
-    {
-        var report = input
-            .Select(int.Parse)
-            .ToArray();
-
-        Part1Solution = SolvePart1(report).ToString();
-        Part2Solution = SolvePart2(report).ToString();
-    }
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
     private const int Sum = 2020;
 
-    private static int SolvePart1(IReadOnlyList<int> report)
+    public object GetPart1Solution(string[] input)
     {
+        var report = GetReport(input);
+
         var differences = new HashSet<int>();
 
         foreach (var expense in report)
@@ -39,9 +31,11 @@ public class Day01Solver : IPuzzleSolver
         return -1;
     }
 
-    private static int SolvePart2(IReadOnlyList<int> report)
+    public object GetPart2Solution(string[] input)
     {
-        for (var i = 0; i < report.Count - 2; i++)
+        var report = GetReport(input);
+        
+        for (var i = 0; i < report.Length - 2; i++)
         {
             var expense1 = report[i];
             var missingExpenses = Sum - expense1;
@@ -58,5 +52,12 @@ public class Day01Solver : IPuzzleSolver
         }
 
         return -1;
+    }
+
+    private static int[] GetReport(IEnumerable<string> input)
+    {
+        return input
+            .Select(int.Parse)
+            .ToArray();
     }
 }

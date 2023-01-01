@@ -6,18 +6,12 @@ public class Day03Solver : IPuzzleSolver
 {
     public string Title => "Rucksack Reorganization";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
+    public object GetPart1Solution(string[] input)
     {
-        Part1Solution = SolvePart1(input).ToString();
-        Part2Solution = SolvePart2(input).ToString();
-    }
-
-    private static int SolvePart1(IEnumerable<string> rucksackContents)
-    {
-        var contentByCompartments = rucksackContents
+        var contentByCompartments = input
             .Select(content =>
                 new[]
                 {
@@ -31,9 +25,9 @@ public class Day03Solver : IPuzzleSolver
         return misplacedItemTypePerRucksack.Sum(GetPriority);
     }
 
-    private static int SolvePart2(IEnumerable<string> rucksackContents)
+    public object GetPart2Solution(string[] input)
     {
-        var elfGroups = rucksackContents.Chunk(3).ToList();
+        var elfGroups = input.Chunk(3).ToList();
 
         var badgePerElfGroup = elfGroups.Select(GetCommonItem);
         

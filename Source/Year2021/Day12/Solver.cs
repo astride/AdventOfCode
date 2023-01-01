@@ -7,28 +7,28 @@ public class Day12Solver : IPuzzleSolver
 	public string Title => "Passage Pathing";
 	public bool UsePartSpecificExampleInputFiles => true;
 	
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] input)
+	public object GetPart1Solution(string[] input)
 	{
-		SolvePart1(input);
-	}
+		var connectedCavesMap = GetConnectedCavesMap(input);
 
-	public void SolvePart1(string[] input)
-	{
-		var connectedCavesMap = input
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.Select(entry => entry.Split('-'));
-
-		Part1Solution = GetPart1Solution(connectedCavesMap).ToString();
-	}
-
-	private static int GetPart1Solution(IEnumerable<IEnumerable<string>> connectedCavesMap)
-	{
 		var pathCount = connectedCavesMap.GetPathCountVisitingSmallCavesOnceOrLess();
 
 		return pathCount;
+	}
+
+	public object GetPart2Solution(string[] input)
+	{
+		return "Not implemented";
+	}
+
+	private static IEnumerable<IEnumerable<string>> GetConnectedCavesMap(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.Select(entry => entry.Split('-'));
 	}
 }
 
