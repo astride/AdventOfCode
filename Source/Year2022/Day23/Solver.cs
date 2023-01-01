@@ -64,7 +64,7 @@ public class Day23Solver : IPuzzleSolver
         North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest
     };
     
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         const int rounds = 10;
 
@@ -98,7 +98,7 @@ public class Day23Solver : IPuzzleSolver
         return emptyGroundTileCount;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var elves = GetElfPositions(input);
         

@@ -12,7 +12,7 @@ public class Day14Solver : IPuzzleSolver
     private const int SandStartingPointX = 500;
     private const int SandStartingPointY = 0;
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var rockPathPoints = GetRockPathPoints(input);
         var berockedCoordinates = GetBerockedCoordinates(rockPathPoints);
@@ -30,7 +30,7 @@ public class Day14Solver : IPuzzleSolver
         return occupiedCoordinatesCount - rockCount;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var rockPathPoints = GetRockPathPoints(input);
         var berockedCoordinates = GetBerockedCoordinates(rockPathPoints);

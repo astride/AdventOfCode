@@ -16,7 +16,7 @@ public class Day09Solver : IPuzzleSolver
     private const string Up = "U";
     private const string Down = "D";
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var head = (Row: 0, Col: 0);
         var tail = (Row: 0, Col: 0);
@@ -88,7 +88,7 @@ public class Day09Solver : IPuzzleSolver
         return tailVisitLocations.Count;
     }
     
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         const int knots = 10;
         

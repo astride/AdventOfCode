@@ -8,7 +8,7 @@ public class Day14Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var polymerTemplate = GetPolymerTemplate(input);
 		var charByAddForPair = GetCharByAddForPairDictionary(input);
@@ -28,7 +28,7 @@ public class Day14Solver : IPuzzleSolver
 		return countPerElement.Max() - countPerElement.Min();
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var polymerTemplate = GetPolymerTemplate(input);
 		var charByAddForPair = GetCharByAddForPairDictionary(input);

@@ -13,12 +13,12 @@ public class Day05Solver : IPuzzleSolver
     private const int OffsetToFirstStack = 1;
     private const char EmptyStackItem = ' ';
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         return GetResultingTopItems(input, false);
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         return GetResultingTopItems(input, true);
     }

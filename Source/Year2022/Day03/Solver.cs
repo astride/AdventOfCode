@@ -9,7 +9,7 @@ public class Day03Solver : IPuzzleSolver
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var contentByCompartments = input
             .Select(content =>
@@ -25,7 +25,7 @@ public class Day03Solver : IPuzzleSolver
         return misplacedItemTypePerRucksack.Sum(GetPriority);
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var elfGroups = input.Chunk(3).ToList();
 

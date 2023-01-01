@@ -9,14 +9,14 @@ public class Day06Solver : IPuzzleSolver
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var datastreamBuffer = GetDatastreamBuffer(input);
         
         return DetectStartOfPacketMarkerEndIndex(datastreamBuffer);
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var datastreamBuffer = GetDatastreamBuffer(input);
         

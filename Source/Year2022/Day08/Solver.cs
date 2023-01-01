@@ -9,7 +9,7 @@ public class Day08Solver : IPuzzleSolver
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var trees = GetTrees(input);
         
@@ -70,7 +70,7 @@ public class Day08Solver : IPuzzleSolver
         return visibleTrees;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var trees = GetTrees(input);
         
