@@ -46,38 +46,35 @@ public class Day15Solver : IPuzzleSolver
             var beaconX = int.Parse(beaconXAsString);
             var beaconY = int.Parse(beaconYAsString);
 
-            var proxyDelta = Math.Min(sensorY, beaconY); // want to shift the diamond shape on Y axis to work with smaller numbers
-
-            var sensorYProxy = sensorY - proxyDelta;
-            var beaconYProxy = beaconY - proxyDelta;
-            var targetRowProxy = targetRow - proxyDelta;
-
             // If applicable: Add beacon to beacon presence dict
-            if (beaconYProxy == targetRowProxy)
+            if (beaconY == targetRow)
             {
                 beaconPresenceByColAtTargetRow[beaconX] = true;
             }
 
-            var manhattanOutreach = Math.Abs(beaconX - sensorX) + Math.Abs(beaconYProxy - sensorYProxy);
+            var manhattanOutreach = Math.Abs(beaconX - sensorX) + Math.Abs(beaconY - sensorY);
 
-            var sensorIsAboveTargetRow = sensorYProxy < targetRowProxy;
-            var sensorIsBelowTargetRow = sensorYProxy > targetRowProxy;
+            var sensorIsAboveTargetRow = sensorY < targetRow;
+            var sensorIsBelowTargetRow = sensorY > targetRow;
 
-            if ((sensorIsBelowTargetRow && sensorYProxy - manhattanOutreach > targetRowProxy) ||
-                (sensorIsAboveTargetRow && targetRowProxy - manhattanOutreach > sensorYProxy))
+            var targetRowIsOutsideOfUpwardSensorReach = sensorY - manhattanOutreach > targetRow;
+            var targetRowIsOutsideOfDownwardSensorReach = targetRow - manhattanOutreach > sensorY;
+
+            if ((sensorIsBelowTargetRow && targetRowIsOutsideOfUpwardSensorReach) ||
+                (sensorIsAboveTargetRow && targetRowIsOutsideOfDownwardSensorReach))
             {
                 // Sensor does not reach to the target row; not relevant for the puzzle
                 continue;
             }
 
             // If applicable: Add sensor to beacon presence dict
-            if (sensorYProxy == targetRowProxy &&
+            if (sensorY == targetRow &&
                 !beaconPresenceByColAtTargetRow.ContainsKey(sensorX))
             {
                 beaconPresenceByColAtTargetRow.Add(sensorX, false);
             }
 
-            var verticalDistanceBetweenSensorAndTargetRow = Math.Abs(targetRowProxy - sensorYProxy);
+            var verticalDistanceBetweenSensorAndTargetRow = Math.Abs(targetRow - sensorY);
             var horizontalDistanceFromTheSensor = manhattanOutreach - verticalDistanceBetweenSensorAndTargetRow;
 
             var targetRowOutreachMinX = sensorX - horizontalDistanceFromTheSensor;
