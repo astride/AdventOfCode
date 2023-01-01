@@ -8,7 +8,7 @@ public class Day15Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var map = GetMap(input);
 		
@@ -19,7 +19,7 @@ public class Day15Solver : IPuzzleSolver
 	}
 
 	// TODO Implementation is not finished at all
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var map = GetMap(input);
 		

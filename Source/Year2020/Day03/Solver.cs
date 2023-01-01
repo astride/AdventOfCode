@@ -11,7 +11,7 @@ public class Day03Solver : IPuzzleSolver
 
     private const char TreeChar = '#';
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var treeMap = GetTreeMap(input);
         var slope = new Coordinate(3, 1);
@@ -21,7 +21,7 @@ public class Day03Solver : IPuzzleSolver
         return treeCount;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var treeMap = GetTreeMap(input);
         

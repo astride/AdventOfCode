@@ -10,7 +10,7 @@ public class Day01Solver : IPuzzleSolver
 
     private const int Sum = 2020;
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var report = GetReport(input);
 
@@ -31,7 +31,7 @@ public class Day01Solver : IPuzzleSolver
         return -1;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var report = GetReport(input);
         

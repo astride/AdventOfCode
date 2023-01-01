@@ -20,7 +20,7 @@ public class Day25Solver : IPuzzleSolver
         ['='] = -2,
     }; 
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var fuelNeededPerHotAirBalloon = new List<double>(input.Length);
 
@@ -51,7 +51,7 @@ public class Day25Solver : IPuzzleSolver
         return snafuSum;
     }
 
-    public object GetPart2Solution(string[] input) => "Need 49 stars for this one!";
+    public object GetPart2Solution(string[] input, bool isExampleInput) => "Need 49 stars for this one!";
 
     private static string CalculateSnafuNumber(double decimalNumber)
     {

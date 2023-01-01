@@ -13,7 +13,7 @@ public class Day13Solver : IPuzzleSolver
     private const char ListClosingChar = ']';
     private const string Ten = "10";
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var packetPairs = input
             .Where(line => !string.IsNullOrEmpty(line))
@@ -163,7 +163,7 @@ public class Day13Solver : IPuzzleSolver
         return packetPairIndicesInCorrectOrder.Sum();
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         return 0;
     }

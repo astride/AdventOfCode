@@ -45,7 +45,7 @@ public class Day08Solver : IPuzzleSolver
 	private static readonly int SignalLinesSharingE = CharsMakingDigit.Values.Count(value => value.Contains(E));
 	private static readonly int SignalLinesSharingF = CharsMakingDigit.Values.Count(value => value.Contains(F));
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var values = GetValues(input);
 		
@@ -56,7 +56,7 @@ public class Day08Solver : IPuzzleSolver
 		return simpleDigitCount;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var values = GetValues(input);
 		

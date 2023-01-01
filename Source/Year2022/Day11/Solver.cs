@@ -11,7 +11,7 @@ public class Day11Solver : IPuzzleSolver
 
     private static int TotalDivisibleByProduct;
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         const int totalInspections = 20;
         const int worryLevelReductionFactor = 3;
@@ -21,7 +21,7 @@ public class Day11Solver : IPuzzleSolver
         return levelOfMonkeyBusiness;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         const int totalInspections = 10000;
 

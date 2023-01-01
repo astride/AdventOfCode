@@ -8,7 +8,7 @@ public class Day01Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var sonarSweepReport = GetSonarSweepReport(input);
 		
@@ -28,7 +28,7 @@ public class Day01Solver : IPuzzleSolver
 		return increaseCount;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var sonarSweepReport = GetSonarSweepReport(input);
 		

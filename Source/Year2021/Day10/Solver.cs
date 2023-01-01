@@ -8,7 +8,7 @@ public class Day10Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var navigationSystem = GetNavigationSystem(input);
 		
@@ -19,7 +19,7 @@ public class Day10Solver : IPuzzleSolver
 		return totalSyntaxErrorScore;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var navigationSystem = GetNavigationSystem(input);
 		

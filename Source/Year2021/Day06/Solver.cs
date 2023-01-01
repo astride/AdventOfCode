@@ -8,7 +8,7 @@ public class Day06Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var timerValues = GetTimerValues(input);
 		
@@ -22,7 +22,7 @@ public class Day06Solver : IPuzzleSolver
 		return shoal.Count;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var timerValues = GetTimerValues(input);
 		

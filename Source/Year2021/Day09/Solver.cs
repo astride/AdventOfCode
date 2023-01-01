@@ -9,7 +9,7 @@ public class Day09Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var heightMap = GetHeightMap(input);
 		
@@ -22,7 +22,7 @@ public class Day09Solver : IPuzzleSolver
 		return riskLevelSum;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var heightMap = GetHeightMap(input);
 		

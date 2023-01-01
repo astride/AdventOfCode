@@ -9,7 +9,7 @@ public class Day04Solver : IPuzzleSolver
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var pairs = GetPairs(input);
         
@@ -20,7 +20,7 @@ public class Day04Solver : IPuzzleSolver
         return fullyOverlappingPairs;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var pairs = GetPairs(input);
         
