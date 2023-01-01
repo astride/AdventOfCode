@@ -8,14 +8,14 @@ public class Day01Solver : IPuzzleSolver
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var caloriesPerElf = GetCaloriesPerElf(input);
         
         return caloriesPerElf.Max();
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var caloriesPerElf = GetCaloriesPerElf(input);
         

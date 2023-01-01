@@ -8,7 +8,7 @@ public class Day05Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var segments = GetSegments(input);
 		var maxRowIndex = GetMaxRowIndex(segments);
@@ -17,7 +17,7 @@ public class Day05Solver : IPuzzleSolver
 		return Solve(segments, maxRowIndex, maxColIndex);
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var segments = GetSegments(input);
 		var maxRowIndex = GetMaxRowIndex(segments);

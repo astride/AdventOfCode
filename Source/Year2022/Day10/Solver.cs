@@ -15,7 +15,7 @@ public class Day10Solver : IPuzzleSolver
         ["noop"] = "1 0",
     };
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var interestingCycles = new[] { 20, 60, 100, 140, 180, 220 };
 
@@ -56,7 +56,7 @@ public class Day10Solver : IPuzzleSolver
         return signalStrength;
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         DrawRctDisplayForPart2(input);
 

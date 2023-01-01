@@ -55,23 +55,23 @@ public abstract class TestsBase
     {
         var input = GetContentOf(InputFileName);
         
-        SolvePart1AndLogExecutionTime(input);
-        SolvePart2AndLogExecutionTime(input);
+        SolvePart1AndLogExecutionTime(input, false);
+        SolvePart2AndLogExecutionTime(input, false);
     }
 
     private void SolvePuzzleWithExampleInput()
     {
         var exampleInput = GetContentOf(ExampleInputFileName);
         
-        SolvePart1AndLogExecutionTime(exampleInput);
-        SolvePart2AndLogExecutionTime(exampleInput);
+        SolvePart1AndLogExecutionTime(exampleInput, true);
+        SolvePart2AndLogExecutionTime(exampleInput, true);
     }
 
     private void SolvePart1WithExampleInput()
     {
         var exampleInput = GetContentOf(ExampleInputFileNamePart1);
         
-        SolvePart1AndLogExecutionTime(exampleInput);
+        SolvePart1AndLogExecutionTime(exampleInput, true);
     }
 
     private void SolvePart2WithExampleInput()
@@ -83,17 +83,17 @@ public abstract class TestsBase
         
         var exampleInput = GetContentOf(ExampleInputFileNamePart2);
         
-        SolvePart2AndLogExecutionTime(exampleInput);
+        SolvePart2AndLogExecutionTime(exampleInput, true);
     }
 
-    private void SolvePart1AndLogExecutionTime(string[] input)
+    private void SolvePart1AndLogExecutionTime(string[] input, bool isExampleInput)
     {
-        ExecuteAndLogExecutionTime("Part 1", () => PuzzleSolver.SolvePart1(input));
+        ExecuteAndLogExecutionTime("Part 1", () => PuzzleSolver.SolvePart1(input, isExampleInput));
     }
 
-    private void SolvePart2AndLogExecutionTime(string[] input)
+    private void SolvePart2AndLogExecutionTime(string[] input, bool isExampleInput)
     {
-        ExecuteAndLogExecutionTime("Part 2", () => PuzzleSolver.SolvePart2(input));
+        ExecuteAndLogExecutionTime("Part 2", () => PuzzleSolver.SolvePart2(input, isExampleInput));
     }
 
     private static void ExecuteAndLogExecutionTime(string actionName, Action action)

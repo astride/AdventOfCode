@@ -12,7 +12,7 @@ public class Day07Solver : IPuzzleSolver
     private const string RootDirSign = "/";
     private const string RootDirName = "root";
 
-    public object GetPart1Solution(string[] input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var totalFileSizeByDirName = GetTotalFileSizeByDirNameDict(input);
         
@@ -25,7 +25,7 @@ public class Day07Solver : IPuzzleSolver
         return totalFileSizesOfRelevantDirectories.Sum();
     }
 
-    public object GetPart2Solution(string[] input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
         var totalFileSizeByDirName = GetTotalFileSizeByDirNameDict(input);
         

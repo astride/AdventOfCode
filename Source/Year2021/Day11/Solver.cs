@@ -8,7 +8,7 @@ public class Day11Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var octopusEnergyLevels = GetOctopusEnergyLevels(input);
 		
@@ -18,7 +18,7 @@ public class Day11Solver : IPuzzleSolver
 		return flashCounts.Sum();
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var octopusEnergyLevels = GetOctopusEnergyLevels(input);
 		

@@ -12,7 +12,7 @@ public class Day02Solver : IPuzzleSolver
 	private const string Down = "down";
 	private const string Up = "up";
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var commands = GetCommands(input);
 		
@@ -28,7 +28,7 @@ public class Day02Solver : IPuzzleSolver
 		return pos * depth;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var commands = GetCommands(input);
 		

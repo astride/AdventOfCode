@@ -8,7 +8,7 @@ public class Day21Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var startingPosition1 = GetStartingPositionForPlayer1(input);
 		var startingPosition2 = GetStartingPositionForPlayer2(input);
@@ -18,7 +18,7 @@ public class Day21Solver : IPuzzleSolver
 		return totalDieRolls * losingScore;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var startingPosition1 = GetStartingPositionForPlayer1(input);
 		var startingPosition2 = GetStartingPositionForPlayer2(input);

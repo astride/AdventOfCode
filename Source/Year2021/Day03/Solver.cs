@@ -8,7 +8,7 @@ public class Day03Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input)
+	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
 		var diagnosticReport = GetDiagnosticReport(input);
 		
@@ -31,7 +31,7 @@ public class Day03Solver : IPuzzleSolver
 		return powerConsumption;
 	}
 
-	public object GetPart2Solution(string[] input)
+	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
 		var diagnosticReport = GetDiagnosticReport(input);
 		
