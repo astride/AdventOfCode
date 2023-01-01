@@ -7,16 +7,10 @@ public class Day18Solver : IPuzzleSolver
 {
     public string Title => "Boiling Boulders";
 
-    public string Part1Solution { get; set; } = string.Empty;
-    public string Part2Solution { get; set; } = string.Empty;
+    public object? Part1Solution { get; set; }
+    public object? Part2Solution { get; set; }
 
-    public void SolvePuzzle(string[] input)
-    {
-        Part1Solution = GetPart1Solution(input).ToString();
-        Part2Solution = GetPart2Solution(input).ToString();
-    }
-
-    private static int GetPart1Solution(IEnumerable<string> input)
+    public object GetPart1Solution(string[] input, bool isExampleInput)
     {
         var cubes = input
             .Select(line => line.Split(',').Select(int.Parse).ToArray())
@@ -50,9 +44,9 @@ public class Day18Solver : IPuzzleSolver
         return 2 * (3 * cubes.Count - sharedSideCount);
     }
 
-    private static int GetPart2Solution(IEnumerable<string> input)
+    public object GetPart2Solution(string[] input, bool isExampleInput)
     {
-        return 0;
+        return "Not solved yet";
     }
 
     private static void PrintSlicewise(IReadOnlyList<XYZ> cubes)
