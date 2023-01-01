@@ -5,46 +5,8 @@ namespace Year2021;
 public class Day08Solver : IPuzzleSolver
 {
 	public string Title => "Seven Segment Search";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
-
-	public void SolvePuzzle(string[] rawInput)
-	{
-		List<(string[] InputValues, string[] OutputValues)> input;
-
-		if (rawInput.Any(entry => !entry.Contains(Separator)))
-		{
-			//We have example input
-			var outputValues = rawInput
-				.Where(entry => !entry.Contains(Separator))
-				.ToList();
-
-			var inputValues = rawInput
-				.Except(outputValues)
-				.Select(inputValue => inputValue.Remove(inputValue.IndexOf(Separator)).Trim()) //Remove separator and preceding space
-				.ToList();
-
-			input = Enumerable.Range(0, inputValues.Count)
-				.Select(i => 
-					(inputValues[i].Split(' '),
-					outputValues[i].Split(' ')))
-				.ToList();
-		}
-		else
-		{
-			//We have real input
-			input = rawInput
-				.Where(entry => !string.IsNullOrWhiteSpace(entry))
-				.Select(entry => entry.Split(Separator))
-				.Select(entry =>
-					(entry[0].Trim().Split(' ').ToArray(),
-					entry[1].Trim().Split(' ').ToArray()))
-				.ToList();
-		}
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
-	}
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
 	private const char Separator = '|';
 
@@ -83,22 +45,26 @@ public class Day08Solver : IPuzzleSolver
 	private static readonly int SignalLinesSharingE = CharsMakingDigit.Values.Count(value => value.Contains(E));
 	private static readonly int SignalLinesSharingF = CharsMakingDigit.Values.Count(value => value.Contains(F));
 
-	private static int SolvePart1(List<(string[] InputValues, string[] OutputValues)> input)
+	public object GetPart1Solution(string[] input)
 	{
-		var simpleDigitCount = input
+		var values = GetValues(input);
+		
+		var simpleDigitCount = values
 			.SelectMany(entry => entry.OutputValues)
 			.Count(outputValue => SimpleDigits.Contains(outputValue.Length));
 
 		return simpleDigitCount;
 	}
 
-	private static int SolvePart2(List<(string[] InputValues, string[] OutputValues)> input)
+	public object GetPart2Solution(string[] input)
 	{
+		var values = GetValues(input);
+		
 		var inputCharFromGoalChar = new Dictionary<char, char>();
 
 		var total = 0;
 
-		foreach (var line in input)
+		foreach (var line in values)
 		{
 			inputCharFromGoalChar.Clear();
 
@@ -153,5 +119,47 @@ public class Day08Solver : IPuzzleSolver
 		}
 
 		return total;
+	}
+
+	private static IReadOnlyCollection<(string[] InputValues, string[] OutputValues)> GetValues(string[] input)
+	{
+		if (input.All(entry => entry.Contains(Separator)))
+		{
+			return GetRealValues(input);
+		}
+
+		return GetExampleValues(input);
+	}
+
+	private static IReadOnlyCollection<(string[] InputValues, string[] OutputValues)> GetExampleValues(string[] input)
+	{
+		var outputValues = input
+			.Where(entry => !entry.Contains(Separator))
+			.ToList();
+
+		var inputValues = input
+			.Except(outputValues)
+			//Remove separator and preceding space
+			.Select(inputValue => inputValue.Remove(inputValue.IndexOf(Separator)).Trim())
+			.ToList();
+
+		var values = Enumerable.Range(0, inputValues.Count)
+			.Select(i => 
+				(inputValues[i].Split(' '),
+					outputValues[i].Split(' ')))
+			.ToList();
+
+		return values;
+	}
+
+	private static IReadOnlyCollection<(string[] InputValues, string[] OutputValues)> GetRealValues(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.Select(entry => entry.Split(Separator))
+			.Select(entry =>
+				(entry[0].Trim().Split(' ').ToArray(),
+					entry[1].Trim().Split(' ').ToArray()))
+			.ToList();
 	}
 }

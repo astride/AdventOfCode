@@ -6,21 +6,13 @@ namespace Year2021;
 public class Day09Solver : IPuzzleSolver
 {
 	public string Title => "Smoke Basin";
-	public string Part1Solution { get; set; } = string.Empty;
-	public string Part2Solution { get; set; } = string.Empty;
+	public object? Part1Solution { get; set; }
+	public object? Part2Solution { get; set; }
 
-	public void SolvePuzzle(string[] rawInput)
+	public object GetPart1Solution(string[] input)
 	{
-		var input = rawInput
-			.Where(entry => !string.IsNullOrWhiteSpace(entry))
-			.ToArray();
-
-		Part1Solution = SolvePart1(input).ToString();
-		Part2Solution = SolvePart2(input).ToString();
-	}
-
-	private static int SolvePart1(string[] heightMap)
-	{
+		var heightMap = GetHeightMap(input);
+		
 		var lowPoints = heightMap.GetLowPointCoordinates()
 			.Select(coordinate => int.Parse((heightMap[coordinate.Y])[coordinate.X].ToString()))
 			.ToList();
@@ -30,8 +22,10 @@ public class Day09Solver : IPuzzleSolver
 		return riskLevelSum;
 	}
 
-	private static int SolvePart2(string[] heightMap)
+	public object GetPart2Solution(string[] input)
 	{
+		var heightMap = GetHeightMap(input);
+		
 		var basinMap = heightMap.GenerateFramedBoolMap();
 
 		var basinOriginCoordinates = heightMap.GetLowPointCoordinates()
@@ -40,6 +34,13 @@ public class Day09Solver : IPuzzleSolver
 		var largestBasins = basinMap.GetLargestBasins(3, basinOriginCoordinates);
 
 		return largestBasins.Aggregate((x, y) => x * y);
+	}
+
+	private string[] GetHeightMap(string[] input)
+	{
+		return input
+			.Where(entry => !string.IsNullOrWhiteSpace(entry))
+			.ToArray();
 	}
 }
 
