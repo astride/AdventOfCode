@@ -9,6 +9,10 @@ public class Day13Solver : IPuzzleSolver
     public object? Part1Solution { get; set; }
     public object? Part2Solution { get; set; }
 
+    private const char ListOpeningChar = '[';
+    private const char ListClosingChar = ']';
+    private const string Ten = "10";
+
     public object GetPart1Solution(string[] input)
     {
         var packetPairs = input
@@ -16,12 +20,21 @@ public class Day13Solver : IPuzzleSolver
             .Chunk(2)
             .ToList();
 
-        var packetPairIndicesInRightOrder = new HashSet<int>();
+        var packetPairIndicesInCorrectOrder = new HashSet<int>();
 
-        for (var i = 0; i < packetPairs.Count; i++)
+        var left = string.Empty;
+        var right = string.Empty;
+
+        bool LeftPacketCanContain10(int i) => left.Length > i + 1;
+        bool RightPacketCanContain10(int i) => right.Length > i + 1;
+            
+        string GetTwoCharsFromLeftPacket(int i) => left[i..(i + 2)];
+        string GetTwoCharsFromRightPacket(int i) => right[i..(i + 2)];
+
+        for (var iPacketPair = 0; iPacketPair < packetPairs.Count; iPacketPair++)
         {
-            var left = packetPairs[i].First();
-            var right = packetPairs[i].Last();
+            left = packetPairs[iPacketPair].First();
+            right = packetPairs[iPacketPair].Last();
 
             var iLeft = -1;
             var iRight = -1;
@@ -33,10 +46,12 @@ public class Day13Solver : IPuzzleSolver
                 
                 var leftChar = left[iLeft];
                 var rightChar = right[iRight];
+                
+                #region Check for presence of number > 9 (more than one digit)
 
-                // Hacky business here...
-                var leftIsTen = left.Length > iLeft + 3 && left[iLeft..(iLeft + 2)] == "10";
-                var rightIsTen = right.Length > iRight + 3 && right[iRight..(iRight + 2)] == "10";
+                // Hacky business here... (we only know that the packets can contain no greater value than 10 due to visual verification)
+                var leftIsTen = LeftPacketCanContain10(iLeft) && GetTwoCharsFromLeftPacket(iLeft) == Ten;
+                var rightIsTen = RightPacketCanContain10(iRight) && GetTwoCharsFromRightPacket(iRight) == Ten;
 
                 if (leftIsTen)
                 {
@@ -60,49 +75,76 @@ public class Day13Solver : IPuzzleSolver
 
                 if (rightIsTen)
                 {
-                    packetPairIndicesInRightOrder.Add(i + 1);
+                    packetPairIndicesInCorrectOrder.Add(iPacketPair + 1);
                     break;
                 }
+                
+                #endregion
+                
+                #region Check for char equality (number < 10, or non-numeric char)
                 
                 if (leftChar == rightChar)
                 {
+                    // Undetermined
                     continue;
                 }
+                
+                #endregion
 
-                if (leftChar == '[' && rightChar == ']')
+                #region Check for clashing list opening/closing
+                
+                if (leftChar == ListOpeningChar && rightChar == ListClosingChar)
                 {
                     break;
                 }
                 
-                if (leftChar == ']' && rightChar == '[')
+                if (leftChar == ListClosingChar && rightChar == ListOpeningChar)
                 {
-                    packetPairIndicesInRightOrder.Add(i + 1);
+                    packetPairIndicesInCorrectOrder.Add(iPacketPair + 1);
+                    break;
+                }
+                
+                #endregion
+
+                #region Check and adjust for incoherent list closing
+                
+                if (leftChar == ListClosingChar)
+                {
+                    packetPairIndicesInCorrectOrder.Add(iPacketPair + 1);
                     break;
                 }
 
-                if (leftChar == ']')
-                {
-                    packetPairIndicesInRightOrder.Add(i + 1);
-                    break;
-                }
-
-                if (rightChar == ']')
+                if (rightChar == ListClosingChar)
                 {
                     break;
                 }
                 
-                if (leftChar == '[')
+                #endregion
+                
+                #region Check and adjust for incoherent list opening
+                
+                if (leftChar == ListOpeningChar)
                 {
-                    right = right[..iRight] + '[' + rightChar + ']' + right[(iRight + 1)..];
+                    var dataPrecedingRightChar = right[..iRight];
+                    var dataFollowingRightChar = right[(iRight + 1)..];
+                    
+                    right = dataPrecedingRightChar + ListOpeningChar + rightChar + ListClosingChar + dataFollowingRightChar;
                     continue;
                 }
 
-                if (rightChar == '[')
+                if (rightChar == ListOpeningChar)
                 {
-                    left = left[..iLeft] + '[' + leftChar + ']' + left[(iLeft + 1)..];
+                    var dataPrecedingLeftChar = left[..iLeft];
+                    var dataFollowingLeftChar = left[(iLeft + 1)..];
+                    
+                    left = dataPrecedingLeftChar + ListOpeningChar + leftChar + ListClosingChar + dataFollowingLeftChar;
                     continue;
                 }
                 
+                #endregion
+
+                #region Determine char inequality
+
                 if (leftChar > rightChar)
                 {
                     break;
@@ -110,13 +152,15 @@ public class Day13Solver : IPuzzleSolver
 
                 if (leftChar < rightChar)
                 {
-                    packetPairIndicesInRightOrder.Add(i + 1);
+                    packetPairIndicesInCorrectOrder.Add(iPacketPair + 1);
                     break;
                 }
+
+                #endregion
             }
         }
         
-        return packetPairIndicesInRightOrder.Sum();
+        return packetPairIndicesInCorrectOrder.Sum();
     }
 
     public object GetPart2Solution(string[] input)
