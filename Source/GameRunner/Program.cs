@@ -7,13 +7,14 @@ namespace GameRunner;
 
 public class Program
 {
-	private const bool PlayGame = true;
+	private const bool PlayGame = false;
 	
 	private static readonly IDictionary<int, Assembly> AssemblyByYear = new Dictionary<int, Assembly>
 	{
+		[2023] = typeof(Year2023.Day01Solver).Assembly,
 		[2022] = typeof(Year2022.Day01Solver).Assembly,
 		[2021] = typeof(Year2021.Day01Solver).Assembly,
-		[2020] = typeof(Year2020.Day01Solver).Assembly
+		[2020] = typeof(Year2020.Day01Solver).Assembly,
 	};
 
 	private static IReadOnlyCollection<PuzzleSolverInfo>? AvailablePuzzles;
@@ -43,15 +44,15 @@ public class Program
 		}
 		else
 		{
-			PlayPuzzleForSpecificDay();
+			IPuzzleSolver puzzleSolver = new Year2023.Day01Solver();
+			var date = new DateTime(2023, December, 1);
+
+			SolveFor(date, puzzleSolver);
 		}
 	}
 
-	private static void PlayPuzzleForSpecificDay()
+	private static void SolveFor(DateTime puzzleDate, IPuzzleSolver puzzleSolver)
 	{
-		IPuzzleSolver puzzleSolver = new Year2022.Day01Solver();
-		var puzzleDate = new DateTime(2022, December, 1);
-
 		// Example input
 		if (puzzleSolver.UsePartSpecificExampleInputFiles)
 		{
@@ -182,8 +183,8 @@ public class Program
 
 	private static void RequestModeAndSolve(PuzzleSolverInfo puzzleSolverInfo)
 	{
-		Console.WriteLine("\nTest mode? (leave blank for 'yes')");
-		var isTestMode = string.IsNullOrEmpty(Console.ReadLine());
+		Console.WriteLine("\nUsing example data? (leave blank for 'yes')");
+		var usingExampleData = string.IsNullOrEmpty(Console.ReadLine());
 
 		var puzzleInstance = Activator.CreateInstance(puzzleSolverInfo.Type);
 
@@ -194,7 +195,7 @@ public class Program
 
 		var puzzleSolver = (IPuzzleSolver)puzzleInstance;
 
-		if (isTestMode && puzzleSolver.UsePartSpecificExampleInputFiles)
+		if (usingExampleData && puzzleSolver.UsePartSpecificExampleInputFiles)
 		{
 			var inputPart1 = GetInput(puzzleSolverInfo.Date, InputExampleFileNamePart1);
 			var inputPart2 = GetInput(puzzleSolverInfo.Date, InputExampleFileNamePart2);
@@ -204,14 +205,14 @@ public class Program
 		}
 		else
 		{
-			var inputFileName = isTestMode ? InputExampleFileName : InputFileName;
+			var inputFileName = usingExampleData ? InputExampleFileName : InputFileName;
 
 			var input = GetInput(puzzleSolverInfo.Date, inputFileName);
 			
-			puzzleSolver.SolvePuzzle(input, isTestMode);
+			puzzleSolver.SolvePuzzle(input, usingExampleData);
 		}
 		
-		var additionalInfo = isTestMode ? " (test data)" : string.Empty;
+		var additionalInfo = usingExampleData ? " (example data)" : string.Empty;
 
 		Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		Console.WriteLine($"Let's go! We are playing the {puzzleSolver.Title} puzzle from {puzzleSolverInfo.Date.ToString(DateFormat)}.\n");
