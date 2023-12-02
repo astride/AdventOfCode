@@ -44,8 +44,8 @@ public class Program
 		}
 		else
 		{
-			IPuzzleSolver puzzleSolver = new Year2023.Day01Solver();
-			var date = new DateTime(2023, December, 1);
+			IPuzzleSolver puzzleSolver = new Year2023.Day02Solver();
+			var date = new DateTime(2023, December, 2);
 
 			SolveFor(date, puzzleSolver);
 		}
