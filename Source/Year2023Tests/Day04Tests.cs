@@ -9,8 +9,8 @@ public class Day04Tests : TestsBase
 	protected override string DirectoryName => "Day04";
 	protected override string Part1ExampleSolution => "13";
 	protected override string Part1Solution => "25010";
-	protected override string Part2ExampleSolution => string.Empty;
-	protected override string Part2Solution => string.Empty;
+	protected override string Part2ExampleSolution => "30";
+	protected override string Part2Solution => "9924412";
 
 	public Day04Tests() => PuzzleSolver = new Day04Solver();
     

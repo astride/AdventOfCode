@@ -13,7 +13,7 @@ public class Day04Solver : IPuzzleSolver
 	private const char NumberSeparator = '|';
 
 	private static readonly Regex NumberRegex = new(@"\d+");
-	private static readonly Regex CardIntroRegex = new(@"(Card)\s+\d+: ");
+	private static readonly Regex CardIntroRegex = new(@"Card\s+\d+: ");
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
@@ -44,6 +44,54 @@ public class Day04Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var copyCountByCardNumber = new Dictionary<int, int>();
+
+		var totalCardCount = 0;
+
+		foreach (var cardInformation in input)
+		{
+			var cardIntro = CardIntroRegex.Match(cardInformation).ToString();
+			var cardNumber = int.Parse(NumberRegex.Match(cardIntro).ToString());
+
+			// Update total card count
+			copyCountByCardNumber.TryGetValue(cardNumber, out var cardCopyCount);
+
+			var cardCount = 1 + cardCopyCount;
+
+			totalCardCount += cardCount;
+
+			// Find number matches in card
+			var numberInformation = CardIntroRegex.Replace(cardInformation, string.Empty);
+
+			var splitNumberInformation = numberInformation.Split(NumberSeparator, StringSplitOptions.TrimEntries);
+
+			var winningNumbers = NumberRegex.Matches(splitNumberInformation[0])
+				.Select(match => match.ToString())
+				.ToHashSet();
+
+			var matchCount = NumberRegex.Matches(splitNumberInformation[1])
+				.Select(match => match.ToString())
+				.Count(winningNumbers.Contains);
+
+			if (matchCount == 0)
+			{
+				continue;
+			}
+
+			// Update copies of succeeding cards
+			for (var i = 1; i <= matchCount; i++)
+			{
+				var succeedingCardNumber = cardNumber + i;
+
+				if (!copyCountByCardNumber.ContainsKey(succeedingCardNumber))
+				{
+					copyCountByCardNumber[succeedingCardNumber] = 0;
+				}
+
+				copyCountByCardNumber[succeedingCardNumber] += cardCount;
+			}
+		}
+
+		return totalCardCount;
 	}
 }
