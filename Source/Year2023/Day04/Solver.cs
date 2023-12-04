@@ -12,12 +12,12 @@ public class Day04Solver : IPuzzleSolver
 
 	private const char NumberSeparator = '|';
 
-	private static readonly Regex NumberRegex = new(@"\d*");
-	private static readonly Regex CardIntroRegex = new(@"(Card )\d*: ");
+	private static readonly Regex NumberRegex = new(@"\d+");
+	private static readonly Regex CardIntroRegex = new(@"(Card)\s+\d+: ");
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var points = 0;
+		var points = 0d;
 
 		foreach (var cardInformation in input)
 		{
@@ -27,21 +27,19 @@ public class Day04Solver : IPuzzleSolver
 
 			var winningNumbers = NumberRegex.Matches(splitNumbers[0])
 				.Select(match => match.ToString())
-				.Where(number => !string.IsNullOrEmpty(number))
 				.ToHashSet();
 
-			var actualMatches = NumberRegex.Matches(splitNumbers[1])
+			var matchCount = NumberRegex.Matches(splitNumbers[1])
 				.Select(match => match.ToString())
 				.Count(winningNumbers.Contains);
 
-			if (actualMatches > 0)
+			if (matchCount > 0)
 			{
-				points += (int)Math.Pow(2, actualMatches - 1);
+				points += Math.Pow(2, matchCount - 1);
 			}
 		}
 
 		return points;
-		// 26674 -- Wrong
 	}
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
