@@ -2,7 +2,7 @@ using Common.Interfaces;
 
 namespace Year2023;
 
-public class Day00Solver : IPuzzleSolver
+public class Day05Solver : IPuzzleSolver
 {
 	public string Title => string.Empty;
 
