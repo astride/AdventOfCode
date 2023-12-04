@@ -7,7 +7,7 @@ namespace Year2023Tests;
 public class Day04Tests : TestsBase
 {
 	protected override string DirectoryName => "Day04";
-	protected override string Part1ExampleSolution => string.Empty;
+	protected override string Part1ExampleSolution => "13";
 	protected override string Part1Solution => string.Empty;
 	protected override string Part2ExampleSolution => string.Empty;
 	protected override string Part2Solution => string.Empty;
