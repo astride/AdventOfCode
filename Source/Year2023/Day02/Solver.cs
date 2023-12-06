@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Common.Helpers;
 using Common.Interfaces;
 
 namespace Year2023;
@@ -21,8 +22,6 @@ public class Day02Solver : IPuzzleSolver
 		.Select(key => new Regex($@"(\d+ {key})"))
 		.ToArray();
 
-	private static readonly Regex NumberRegex = new(@"\d+");
-	private static readonly Regex WordRegex = new(@"[a-z]+");
 	private static readonly Regex RevealedCubeRegex = new(@"(\d+ [a-z]+)");
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
@@ -42,7 +41,7 @@ public class Day02Solver : IPuzzleSolver
 
 			var gameId = gameIdAndRevealedCubes[0];
 
-			var id = int.Parse(NumberRegex.Match(gameId).Value);
+			var id = RegexHelper.GetFirstNumberAsInt(gameId);
 
 			idSum += id;
 		}
@@ -72,9 +71,9 @@ public class Day02Solver : IPuzzleSolver
 		{
 			var revealedCube = revealedCubeMatch.ToString() ?? string.Empty;
 
-			var cubeCount = int.Parse(NumberRegex.Match(revealedCube).Value);
+			var cubeCount = RegexHelper.GetFirstNumberAsInt(revealedCube);
 
-			var maxCubeCount = MaxCubeCountByColor[WordRegex.Match(revealedCube).Value];
+			var maxCubeCount = MaxCubeCountByColor[RegexHelper.GetFirstWord(revealedCube)];
 
 			if (cubeCount > maxCubeCount)
 			{
@@ -94,7 +93,7 @@ public class Day02Solver : IPuzzleSolver
 			var revealedCubeMatches = revealedCubeByColorRegex.Matches(revealedCubes);
 
 			var maxRevealedCubeCount = revealedCubeMatches
-				.Max(revealedCubeMatch => int.Parse(NumberRegex.Match(revealedCubeMatch.ToString()).Value));
+				.Max(revealedCubeMatch => RegexHelper.GetFirstNumberAsInt(revealedCubeMatch.ToString()));
 
 			power *= maxRevealedCubeCount;
 		}

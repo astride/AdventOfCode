@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Common.Helpers;
 using Common.Interfaces;
 
 namespace Year2023;
@@ -34,9 +35,8 @@ public class Day01Solver : IPuzzleSolver
 	
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var digitRegex = new Regex(@"\d");
-
-		var sum = input.Sum(line => 10 * GetFirstDigit(line, digitRegex) + GetLastDigit(line, digitRegex));
+		var sum = input
+			.Sum(line => 10 * GetFirstDigit(line, RegexHelper.DigitRegex) + GetLastDigit(line, RegexHelper.DigitRegex));
 
 		return sum;
 	}
