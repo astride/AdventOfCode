@@ -25,53 +25,52 @@ public abstract class TestsBase
         Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent?.FullName ??
         string.Empty;
 
-    protected void HasCorrectSolutions()
-    {
-        SolvePuzzle();
-        VerifySolutions();
-    }
-
-    protected void HasCorrectSolutionsWithExampleInput()
-    {
-        if (PuzzleSolver.UsePartSpecificExampleInputFiles)
-        {
-            SolvePart1WithExampleInput();
-            SolvePart2WithExampleInput();
-        }
-        else
-        {
-            SolvePuzzleWithExampleInput();
-        }
-        
-        VerifySolutionsWithExampleInput();
-    }
-
-    private void SolvePuzzle()
+    protected void VerifyPart1()
     {
         var input = GetContentOf(InputFileName);
         
         SolvePart1AndLogExecutionTime(input, false);
+        VerifyPart1SolutionAgainstExpectedOutput(Part1Solution);
+    }
+
+    protected void VerifyPart2()
+    {
+        var input = GetContentOf(InputFileName);
+        
         SolvePart2AndLogExecutionTime(input, false);
+        VerifyPart2SolutionAgainstExpectedOutput(Part2Solution);
     }
 
-    private void SolvePuzzleWithExampleInput()
+    protected void VerifyPart1WithExampleInput()
     {
-        var exampleInput = GetContentOf(ExampleInputFileName);
+        var inputFileName = PuzzleSolver.UsePartSpecificExampleInputFiles
+            ? ExampleInputFileNamePart1
+            : ExampleInputFileName;
+
+        SolvePart1WithExampleInput(inputFileName);
+        VerifyPart1SolutionAgainstExpectedOutput(Part1ExampleSolution);
+    }
+
+    protected void VerifyPart2WithExampleInput()
+    {
+        var inputFileName = PuzzleSolver.UsePartSpecificExampleInputFiles
+            ? ExampleInputFileNamePart2
+            : ExampleInputFileName;
+
+        SolvePart2WithExampleInput(inputFileName);
+        VerifyPart2SolutionAgainstExpectedOutput(Part2ExampleSolution);
+    }
+
+    private void SolvePart1WithExampleInput(string fileName)
+    {
+        var exampleInput = GetContentOf(fileName);
         
         SolvePart1AndLogExecutionTime(exampleInput, true);
-        SolvePart2AndLogExecutionTime(exampleInput, true);
     }
 
-    private void SolvePart1WithExampleInput()
+    private void SolvePart2WithExampleInput(string fileName)
     {
-        var exampleInput = GetContentOf(ExampleInputFileNamePart1);
-        
-        SolvePart1AndLogExecutionTime(exampleInput, true);
-    }
-
-    private void SolvePart2WithExampleInput()
-    {
-        var exampleInput = GetContentOf(ExampleInputFileNamePart2);
+        var exampleInput = GetContentOf(fileName);
         
         SolvePart2AndLogExecutionTime(exampleInput, true);
     }
@@ -94,22 +93,6 @@ public abstract class TestsBase
         stopwatch.Stop();
 
         Console.WriteLine($"{actionName} needed {stopwatch.ElapsedMilliseconds} ms to execute.");
-    }
-
-    private void VerifySolutions()
-    {
-        VerifySolutionsAgainstExpectedOutput(Part1Solution, Part2Solution);
-    }
-
-    private void VerifySolutionsWithExampleInput()
-    {
-        VerifySolutionsAgainstExpectedOutput(Part1ExampleSolution, Part2ExampleSolution);
-    }
-
-    private void VerifySolutionsAgainstExpectedOutput(string expectedOutputPart1, string expectedOutputPart2)
-    {
-        VerifyPart1SolutionAgainstExpectedOutput(expectedOutputPart1);
-        VerifyPart2SolutionAgainstExpectedOutput(expectedOutputPart2);
     }
 
     private void VerifyPart1SolutionAgainstExpectedOutput(string expected)
