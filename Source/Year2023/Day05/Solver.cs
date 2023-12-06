@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using Common.Helpers;
 using Common.Interfaces;
 
 namespace Year2023;
@@ -10,15 +10,11 @@ public class Day05Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	private static readonly Regex NumberRegex = new(@"\d+");
-
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var sourceValues = NumberRegex.Matches(input[0])
-			.Select(match => double.Parse(match.ToString()))
-			.ToArray();
+		var sourceValues = RegexHelper.GetAllNumbersAsLong(input[0]).ToArray();
 
-		var destinationValues = new double[sourceValues.Length];
+		var destinationValues = new long[sourceValues.Length];
 
 		var remainingInput = input.Skip(2).ToList();
 
@@ -28,7 +24,7 @@ public class Day05Solver : IPuzzleSolver
 				.TakeWhile(line => !string.IsNullOrEmpty(line))
 				.Skip(1)
 				.Select(line => line.Split(' '))
-				.Select(line => (DestinationRangeStart: double.Parse(line[0]), SourceRangeStart: double.Parse(line[1]), Range: double.Parse(line[2])))
+				.Select(line => (DestinationRangeStart: long.Parse(line[0]), SourceRangeStart: long.Parse(line[1]), Range: long.Parse(line[2])))
 				.OrderByDescending(rangeLine => rangeLine.SourceRangeStart)
 				.ToList();
 

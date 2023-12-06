@@ -15,6 +15,12 @@ public static class RegexHelper
             .Select(match => int.Parse(match.ToString()));
     }
 
+    public static IEnumerable<long> GetAllNumbersAsLong(string source)
+    {
+        return NumberRegex.Matches(source)
+            .Select(match => long.Parse(match.ToString()));
+    }
+
     public static IEnumerable<string> GetAllNumbersAsString(string source)
     {
         return NumberRegex.Matches(source)
