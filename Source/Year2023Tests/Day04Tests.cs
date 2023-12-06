@@ -15,8 +15,14 @@ public class Day04Tests : TestsBase
 	public Day04Tests() => PuzzleSolver = new Day04Solver();
     
 	[TestMethod]
-	public void Day04IsValid() => HasCorrectSolutions();
+	public void Day04Part1_IsValid() => VerifyPart1();
+	
+	[TestMethod]
+	public void Day04Part2_IsValid() => VerifyPart2();
 
 	[TestMethod]
-	public void Day04IsValid_WithExampleInput() => HasCorrectSolutionsWithExampleInput();
+	public void Day04Part1_IsValid_WithExampleInput() => VerifyPart1WithExampleInput();
+	
+	[TestMethod]
+	public void Day04Part2_IsValid_WithExampleInput() => VerifyPart2WithExampleInput();
 }
