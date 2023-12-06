@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Common.Helpers;
 using Common.Interfaces;
 
 namespace Year2023;
@@ -10,7 +11,6 @@ public class Day03Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	private static readonly Regex NumberRegex = new(@"\d*");
 	private static readonly Regex SymbolRegex = new(@"\W");
 	private static readonly Regex NoDotRegex = new(@"[^\.]");
 	private static readonly Regex GearSymbolRegex = new(@"\*");
@@ -29,8 +29,7 @@ public class Day03Solver : IPuzzleSolver
 		{
 			var searchFromIndex = 0;
 
-			var numbersInLine = NumberRegex.Matches(input[i])
-				.Select(match => match.ToString())
+			var numbersInLine = RegexHelper.GetAllNumbersAsString(input[i])
 				.Where(match => NoDotRegex.IsMatch(match))
 				.ToList();
 
@@ -138,8 +137,7 @@ public class Day03Solver : IPuzzleSolver
 		{
 			var searchFromIndex = 0;
 
-			var numbersInLine = NumberRegex.Matches(input[i])
-				.Select(match => match.ToString())
+			var numbersInLine = RegexHelper.GetAllNumbersAsString(input[i])
 				.Where(match => NoDotRegex.IsMatch(match))
 				.ToList();
 

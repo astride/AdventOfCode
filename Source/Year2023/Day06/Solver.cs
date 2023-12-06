@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using Common.Helpers;
 using Common.Interfaces;
 
 namespace Year2023;
@@ -10,12 +10,10 @@ public class Day06Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	private static readonly Regex NumberRegex = new(@"\d+");
-
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var raceTimes = NumberRegex.Matches(input[0]).Select(match => int.Parse(match.ToString())).ToArray();
-		var currentDistanceRecords = NumberRegex.Matches(input[1]).Select(match => int.Parse(match.ToString())).ToArray();
+		var raceTimes = RegexHelper.GetAllNumbersAsInt(input[0]).ToArray();
+		var currentDistanceRecords = RegexHelper.GetAllNumbersAsInt(input[1]).ToArray();
 
 		var waysToWinMultiplied = 1;
 
@@ -53,8 +51,8 @@ public class Day06Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		var raceTime = double.Parse(string.Join(string.Empty, NumberRegex.Matches(input[0]).Select(match => match.ToString())));
-		var currentDistanceRecord = double.Parse(string.Join(string.Empty, NumberRegex.Matches(input[1]).Select(match => match.ToString())));
+		var raceTime = double.Parse(string.Join(string.Empty, RegexHelper.GetAllNumbersAsString(input[0])));
+		var currentDistanceRecord = double.Parse(string.Join(string.Empty, RegexHelper.GetAllNumbersAsString(input[1])));
 		
 		var raceTimeIsEvenNumber = raceTime % 2 == 0;
 		var raceHalfTime = raceTime / 2;

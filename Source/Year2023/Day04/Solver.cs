@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Common.Helpers;
 using Common.Interfaces;
 
 namespace Year2023;
@@ -12,7 +13,6 @@ public class Day04Solver : IPuzzleSolver
 
 	private const char NumberSeparator = '|';
 
-	private static readonly Regex NumberRegex = new(@"\d+");
 	private static readonly Regex CardIntroRegex = new(@"Card\s+\d+: ");
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
@@ -25,12 +25,10 @@ public class Day04Solver : IPuzzleSolver
 
 			var splitNumbers = numberInformation.Split(NumberSeparator, StringSplitOptions.TrimEntries);
 
-			var winningNumbers = NumberRegex.Matches(splitNumbers[0])
-				.Select(match => match.ToString())
+			var winningNumbers = RegexHelper.GetAllNumbersAsString(splitNumbers[0])
 				.ToHashSet();
 
-			var matchCount = NumberRegex.Matches(splitNumbers[1])
-				.Select(match => match.ToString())
+			var matchCount = RegexHelper.GetAllNumbersAsString(splitNumbers[1])
 				.Count(winningNumbers.Contains);
 
 			if (matchCount > 0)
@@ -51,7 +49,7 @@ public class Day04Solver : IPuzzleSolver
 		foreach (var cardInformation in input)
 		{
 			var cardIntro = CardIntroRegex.Match(cardInformation).ToString();
-			var cardNumber = int.Parse(NumberRegex.Match(cardIntro).ToString());
+			var cardNumber = RegexHelper.GetFirstNumberAsInt(cardIntro);
 
 			// Update total card count
 			copyCountByCardNumber.TryGetValue(cardNumber, out var cardCopyCount);
@@ -65,12 +63,10 @@ public class Day04Solver : IPuzzleSolver
 
 			var splitNumberInformation = numberInformation.Split(NumberSeparator, StringSplitOptions.TrimEntries);
 
-			var winningNumbers = NumberRegex.Matches(splitNumberInformation[0])
-				.Select(match => match.ToString())
+			var winningNumbers = RegexHelper.GetAllNumbersAsString(splitNumberInformation[0])
 				.ToHashSet();
 
-			var matchCount = NumberRegex.Matches(splitNumberInformation[1])
-				.Select(match => match.ToString())
+			var matchCount = RegexHelper.GetAllNumbersAsString(splitNumberInformation[1])
 				.Count(winningNumbers.Contains);
 
 			if (matchCount == 0)
