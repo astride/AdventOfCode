@@ -50,6 +50,48 @@ public class Day09Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var previousValueSum = 0L;
+
+		foreach (var line in input)
+		{
+			var extrapolatedSequence = line.Split(' ', StringSplitOptions.TrimEntries)
+				.Select(long.Parse)
+				.ToArray();
+
+			var historyBeginnings = new List<long>();
+
+			var extrapolatedNumbersCount = extrapolatedSequence.Length - 1;
+
+			while (extrapolatedSequence.Any(number => number != 0))
+			{
+				historyBeginnings.Add(extrapolatedSequence[0]);
+
+				for (var i = 0; i < extrapolatedNumbersCount; i++)
+				{
+					extrapolatedSequence[i] = extrapolatedSequence[i + 1] - extrapolatedSequence[i];
+				}
+
+				for (var i = extrapolatedNumbersCount; i < extrapolatedSequence.Length; i++)
+				{
+					extrapolatedSequence[i] = 0;
+				}
+				
+				extrapolatedNumbersCount--;
+			}
+
+			for (var i = 0; i < historyBeginnings.Count; i++)
+			{
+				if (i % 2 == 0)
+				{
+					previousValueSum += historyBeginnings[i];
+				}
+				else
+				{
+					previousValueSum -= historyBeginnings[i];
+				}
+			}
+		}
+
+		return previousValueSum;
 	}
 }
