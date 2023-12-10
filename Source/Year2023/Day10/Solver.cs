@@ -5,11 +5,12 @@ namespace Year2023;
 public class Day10Solver : IPuzzleSolver
 {
 	public string Title => "Pipe Maze";
+	public bool UsePartSpecificExampleInputFiles => true;
 
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	private const char StartingChar = 'S';
+	private const char StartingTile = 'S';
 
 	private static readonly Dictionary<char, Direction[]> ConnectedDirectionsByPipeTile = new()
 	{
@@ -20,6 +21,18 @@ public class Day10Solver : IPuzzleSolver
 		['7'] = new[] { Direction.South, Direction.West },
 		['F'] = new[] { Direction.South, Direction.East },
 		['.'] = Array.Empty<Direction>(),
+	};
+
+	private static readonly Dictionary<char, char> SymbolByPipeTile = new()
+	{
+		['|'] = '|',
+		['-'] = '-',
+		['L'] = '└',
+		['J'] = '┘',
+		['7'] = '┐',
+		['F'] = '┌',
+		['.'] = '.',
+		['S'] = 'S',
 	};
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
@@ -68,16 +81,80 @@ public class Day10Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var startingPosition = GetStartingPosition(input);
+
+		var currentPositionInPipe = GetPositionOneStepAwayFrom(startingPosition, input, out var directionToPreviousPipeTile);
+
+		var pipeTileByPosition = new Dictionary<(int Row, int Col), char>
+		{
+			[startingPosition] = StartingTile,
+		};
+
+		while (currentPositionInPipe != startingPosition)
+		{
+			var currentPipeTile = input[currentPositionInPipe.Row][currentPositionInPipe.Col];
+
+			pipeTileByPosition[currentPositionInPipe] = currentPipeTile;
+			
+			var directionToMoveInPipe = GetDirectionToMoveFromTile(currentPipeTile, directionToPreviousPipeTile);
+
+			switch (directionToMoveInPipe)
+			{
+				case Direction.North:
+					currentPositionInPipe.Row--;
+					break;
+				case Direction.South:
+					currentPositionInPipe.Row++;
+					break;
+				case Direction.West:
+					currentPositionInPipe.Col--;
+					break;
+				case Direction.East:
+					currentPositionInPipe.Col++;
+					break;
+			}
+			
+			directionToPreviousPipeTile = directionToMoveInPipe switch
+			{
+				Direction.North => Direction.South,
+				Direction.South => Direction.North,
+				Direction.West => Direction.East,
+				Direction.East => Direction.West,
+				_ => throw new ArgumentException(),
+			};
+		}
+
+		for (var row = 0; row < input.Length; row++)
+		{
+			for (var col = 0; col < input[0].Length; col++)
+			{
+				if (pipeTileByPosition.TryGetValue((row, col), out var pipeTile))
+				{
+					Console.Write(SymbolByPipeTile[pipeTile]);
+				}
+				else if ((row, col) == startingPosition)
+				{
+					Console.Write(StartingTile);
+				}
+				else
+				{
+					Console.Write('.');
+				}
+			}
+
+			Console.WriteLine();
+		}
+
+		return "Look at the map";
 	}
 
 	private static (int Row, int Col) GetStartingPosition(IReadOnlyList<string> map)
 	{
 		for (var i = 0; i < map.Count; i++)
 		{
-			if (map[i].Contains(StartingChar))
+			if (map[i].Contains(StartingTile))
 			{
-				return (i, map[i].IndexOf(StartingChar));
+				return (i, map[i].IndexOf(StartingTile));
 			}
 		}
 
