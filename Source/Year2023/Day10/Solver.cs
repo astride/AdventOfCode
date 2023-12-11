@@ -23,6 +23,11 @@ public class Day10Solver : IPuzzleSolver
 		['.'] = Array.Empty<Direction>(),
 	};
 
+	private static readonly char[] PipeTilesConnectingSouthwards = { '|', '7', 'F' };
+	private static readonly char[] PipeTilesConnectingNorthwards = { '|', 'L', 'J' };
+	private static readonly char[] PipeTilesConnectingEastwards = { '-', 'L', 'F' };
+	private static readonly char[] PipeTilesConnectingWestwards = { '-', 'J', '7' };
+
 	private static readonly Dictionary<char, char> SymbolByPipeTile = new()
 	{
 		['|'] = '|',
@@ -85,16 +90,22 @@ public class Day10Solver : IPuzzleSolver
 
 		var currentPositionInPipe = GetPositionOneStepAwayFrom(startingPosition, input, out var directionToPreviousPipeTile);
 
-		var pipeTileByPosition = new Dictionary<(int Row, int Col), char>
+		var mainLoopPipeTileByPosition = new Dictionary<(int Row, int Col), char>
 		{
 			[startingPosition] = StartingTile,
 		};
 
+		//  Map main loop pipe tiles
 		while (currentPositionInPipe != startingPosition)
 		{
 			var currentPipeTile = input[currentPositionInPipe.Row][currentPositionInPipe.Col];
+			
+			if (currentPipeTile == 'S')
+			{
+				currentPipeTile = GetStartingPipeTile(input, currentPositionInPipe);
+			}
 
-			pipeTileByPosition[currentPositionInPipe] = currentPipeTile;
+			mainLoopPipeTileByPosition[currentPositionInPipe] = currentPipeTile;
 			
 			var directionToMoveInPipe = GetDirectionToMoveFromTile(currentPipeTile, directionToPreviousPipeTile);
 
@@ -124,28 +135,68 @@ public class Day10Solver : IPuzzleSolver
 			};
 		}
 
-		for (var row = 0; row < input.Length; row++)
+		var enclosedTileCount = 0;
+		
+		// Calculate
+		for (var iRow = 0; iRow < input.Length; iRow++)
 		{
-			for (var col = 0; col < input[0].Length; col++)
+			var mainLoopPipeTilesInRow = mainLoopPipeTileByPosition.Keys.Where(key => key.Row == iRow).ToList();
+
+			if (!mainLoopPipeTilesInRow.Any())
 			{
-				if (pipeTileByPosition.TryGetValue((row, col), out var pipeTile))
-				{
-					Console.Write(SymbolByPipeTile[pipeTile]);
-				}
-				else if ((row, col) == startingPosition)
-				{
-					Console.Write(StartingTile);
-				}
-				else
-				{
-					Console.Write('.');
-				}
+				continue;
 			}
 
-			Console.WriteLine();
+			var iColMin = mainLoopPipeTilesInRow.Min(tile => tile.Col);
+			var iColMax = mainLoopPipeTilesInRow.Max(tile => tile.Col);
+
+			var countablePipeTilesInRow = 0;
+			char previousBendBeginningtile = default;
+
+			for (var iCol = iColMin; iCol <= iColMax; iCol++)
+			{
+				var currentTile = mainLoopPipeTileByPosition.TryGetValue((iRow, iCol), out var pipeTile)
+					? pipeTile
+					: '.';
+
+				if (currentTile == 'L' || currentTile == 'F')
+				{
+					previousBendBeginningtile = currentTile;
+					continue;
+				}
+
+				if (currentTile == '|')
+				{
+					countablePipeTilesInRow += 1;
+					previousBendBeginningtile = default;
+					continue;
+				}
+
+				if (currentTile == 'J')
+				{
+					countablePipeTilesInRow += previousBendBeginningtile == 'L' ? 2 : 1;
+					previousBendBeginningtile = default;
+				}
+
+				if (currentTile == '7')
+				{
+					countablePipeTilesInRow += previousBendBeginningtile == 'F' ? 2 : 1;
+					previousBendBeginningtile = default;
+				}
+
+				if (currentTile == '.')
+				{
+					if (countablePipeTilesInRow % 2 == 1)
+					{
+						enclosedTileCount++;
+					}
+					
+					previousBendBeginningtile = default;
+				}
+			}
 		}
 
-		return "Look at the map";
+		return enclosedTileCount;
 	}
 
 	private static (int Row, int Col) GetStartingPosition(IReadOnlyList<string> map)
@@ -202,11 +253,60 @@ public class Day10Solver : IPuzzleSolver
 		return (-1, -1);
 	}
 
+	private static char GetStartingPipeTile(string[] input, (int Row, int Col) position)
+	{
+		var isConnectedNorthwards = PipeTilesConnectingSouthwards.Contains(input[position.Row - 1][position.Col]);
+		var isConnectedSouthwards = PipeTilesConnectingNorthwards.Contains(input[position.Row + 1][position.Col]);
+		var isConnectedWestwards =  PipeTilesConnectingEastwards.Contains(input[position.Row][position.Col - 1]);
+		var isConnectedEastwards =  PipeTilesConnectingWestwards.Contains(input[position.Row][position.Col + 1]);
+
+		return isConnectedNorthwards && isConnectedSouthwards
+			? '|'
+			: isConnectedNorthwards && isConnectedWestwards
+				? 'J'
+				: isConnectedNorthwards && isConnectedEastwards
+					? 'L'
+					: isConnectedSouthwards && isConnectedWestwards
+						? '7'
+						: isConnectedSouthwards && isConnectedEastwards
+							? 'F'
+							: isConnectedWestwards && isConnectedEastwards
+								? '-'
+								: default;
+	}
+
 	private static Direction GetDirectionToMoveFromTile(char tile, Direction directionToPreviousPipeTile)
 	{
 		var possibleDirections = ConnectedDirectionsByPipeTile[tile];
 
 		return possibleDirections.Single(direction => direction != directionToPreviousPipeTile);
+	}
+
+	private static void PrintNiceMap(
+		string[] input,
+		(int Row, int Col) startingPosition,
+		Dictionary<(int Row, int Col), char> pipeTileByPosition)
+	{
+		for (var row = 0; row < input.Length; row++)
+		{
+			for (var col = 0; col < input[0].Length; col++)
+			{
+				if (pipeTileByPosition.TryGetValue((row, col), out var pipeTile))
+				{
+					Console.Write(SymbolByPipeTile[pipeTile]);
+				}
+				else if ((row, col) == startingPosition)
+				{
+					Console.Write(StartingTile);
+				}
+				else
+				{
+					Console.Write('.');
+				}
+			}
+		
+			Console.WriteLine();
+		}
 	}
 
 	private enum Direction
