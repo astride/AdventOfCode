@@ -11,14 +11,26 @@ public class Day16Solver : IPuzzleSolver
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
+		// Starting beam is incoming to the upper left corner
+		var startingBeam = new Beam(row: 0, col: -1, BeamDirection.Right);
+
+		return GetEnergizedTileCount(input, startingBeam);
+	}
+
+	public object GetPart2Solution(string[] input, bool isExampleInput)
+	{
+		return 0;
+	}
+
+	private static int GetEnergizedTileCount(string[] input, Beam startingBeam)
+	{
 		var rows = input.Length;
 		var cols = input[0].Length;
-		
+
 		var energizedMirrorsAndSplitters = new HashSet<(int Row, int Col)>();
 		var beamDirectionsByPosition = new Dictionary<(int Row, int Col), List<BeamDirection>>();
 
-		// Starting beam is incoming to the upper left corner
-		var activeBeams = new List<Beam> { new(0, -1, BeamDirection.Right) };
+		var activeBeams = new List<Beam> { startingBeam };
 
 		bool BeamHasTraveledThisEmptySpaceBefore(int row, int col, BeamDirection direction)
 		{
@@ -184,11 +196,6 @@ public class Day16Solver : IPuzzleSolver
 		var energizedTileCount = energizedMirrorsAndSplitters.Count + beamDirectionsByPosition.Count;
 
 		return energizedTileCount;
-	}
-
-	public object GetPart2Solution(string[] input, bool isExampleInput)
-	{
-		return 0;
 	}
 
 	private class Beam
