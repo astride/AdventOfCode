@@ -17,11 +17,8 @@ public class Day16Solver : IPuzzleSolver
 		var energizedMirrorsAndSplitters = new HashSet<(int Row, int Col)>();
 		var beamDirectionsByPosition = new Dictionary<(int Row, int Col), List<BeamDirection>>();
 
-		var startingBeam = new Beam(0, 0, BeamDirection.Right);
-
-		var activeBeams = new List<Beam> { startingBeam };
-
-		beamDirectionsByPosition[(startingBeam.Row, startingBeam.Col)] = new List<BeamDirection> { startingBeam.Direction };
+		// Starting beam is incoming to the upper left corner
+		var activeBeams = new List<Beam> { new(0, -1, BeamDirection.Right) };
 
 		bool BeamHasTraveledThisEmptySpaceBefore(int row, int col, BeamDirection direction)
 		{

@@ -8,7 +8,7 @@ public class Day16Tests : TestsBase
 {
 	protected override string DirectoryName => "Day16";
 	protected override string Part1ExampleSolution => "46";
-	protected override string Part1Solution => string.Empty; // 8153 -- too high
+	protected override string Part1Solution => "8125";
 	protected override string Part2ExampleSolution => string.Empty;
 	protected override string Part2Solution => string.Empty;
 
