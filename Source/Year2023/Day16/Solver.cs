@@ -19,7 +19,30 @@ public class Day16Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var rows = input.Length;
+		var cols = input[0].Length;
+
+		var energizedTileCountMax = 0;
+
+		for (var iCol = 0; iCol < cols; iCol++)
+		{
+			// Checking from upper edge
+			energizedTileCountMax = Math.Max(energizedTileCountMax, GetEnergizedTileCount(input, new Beam(row: -1, col: iCol, BeamDirection.Down)));
+			
+			// Checking from lower edge
+			energizedTileCountMax = Math.Max(energizedTileCountMax, GetEnergizedTileCount(input, new Beam(row: rows, col: iCol, BeamDirection.Up)));
+		}
+
+		for (var iRow = 0; iRow < rows; iRow++)
+		{
+			// Checking from left edge
+			energizedTileCountMax = Math.Max(energizedTileCountMax, GetEnergizedTileCount(input, new Beam(row: iRow, col: -1, BeamDirection.Right)));
+
+			// Checking from right edge
+			energizedTileCountMax = Math.Max(energizedTileCountMax, GetEnergizedTileCount(input, new Beam(row: iRow, col: cols, BeamDirection.Left)));
+		}
+
+		return energizedTileCountMax;
 	}
 
 	private static int GetEnergizedTileCount(string[] input, Beam startingBeam)
