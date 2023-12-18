@@ -1,3 +1,5 @@
+using System.Globalization;
+using Common.Extensions;
 using Common.Interfaces;
 
 namespace Year2023;
@@ -35,6 +37,14 @@ public class Day18Solver : IPuzzleSolver
 		[('R', 'D')] = '┐',
 		[('L', 'U')] = '└',
 		[('L', 'D')] = '┌',
+	};
+
+	private static readonly Dictionary<char, char> DirectionByValue = new()
+	{
+		['0'] = 'R',
+		['1'] = 'D',
+		['2'] = 'L',
+		['3'] = 'U',
 	};
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
@@ -152,6 +162,14 @@ public class Day18Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
+		foreach (var diggingInstruction in input)
+		{
+			var hexadecimalNumber = diggingInstruction.Split(' ')[^1].Without("(#").Without(")");
+
+			var distance = int.Parse(hexadecimalNumber[..5], NumberStyles.HexNumber);
+			var direction = DirectionByValue[hexadecimalNumber[^1]];
+		}
+
 		return 0;
 	}
 
