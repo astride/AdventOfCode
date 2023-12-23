@@ -8,7 +8,7 @@ public class Day21Tests : TestsBase
 {
 	protected override string DirectoryName => "Day21";
 	protected override string Part1ExampleSolution => "16"; // When using 6 steps
-	protected override string Part1Solution => string.Empty;
+	protected override string Part1Solution => "3677";
 	protected override string Part2ExampleSolution => string.Empty;
 	protected override string Part2Solution => string.Empty;
 
