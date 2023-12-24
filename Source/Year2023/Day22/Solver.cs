@@ -12,7 +12,64 @@ public class Day22Solver : IPuzzleSolver
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
-		var originalBricks = input
+		var landedBricks = GetLandedBricks(input);
+
+		var landedBricksByLowestOccupiedLevel = landedBricks
+			.GroupBy(brick => brick.MinZ)
+			.Where(group => group.Key > 1) // Disregard lowest level; the ground is supporting these bricks
+			.ToDictionary(group => group.Key, group => group.ToList());
+
+		var landedBricksByUppermostOccupiedLevel = landedBricks
+			.GroupBy(brick => brick.MaxZ)
+			.ToDictionary(group => group.Key, group => group.ToList());
+
+		var bricksThatAloneSupportAnotherBrick = new HashSet<Brick>();
+
+		foreach (var occupiedLevel in landedBricksByLowestOccupiedLevel.Keys)
+		{
+			var supportingLevel = occupiedLevel - 1;
+
+			var occupyingBricks = landedBricksByLowestOccupiedLevel[occupiedLevel];
+			var supportingBricks = landedBricksByUppermostOccupiedLevel[supportingLevel];
+
+			foreach (var occupyingBrick in occupyingBricks)
+			{
+				var bricksSupportingOccupyingBrick = new HashSet<Brick>();
+
+				for (var x = occupyingBrick.MinX; x <= occupyingBrick.MaxX; x++)
+				{
+					for (var y = occupyingBrick.MinY; y <= occupyingBrick.MaxY; y++)
+					{
+						var supportingBrick = supportingBricks
+							.SingleOrDefault(brick => brick.OccupiesPosition(x, y, supportingLevel));
+
+						if (supportingBrick != default)
+						{
+							bricksSupportingOccupyingBrick.Add(supportingBrick);
+						}
+					}
+				}
+
+				if (bricksSupportingOccupyingBrick.Count == 1)
+				{
+					bricksThatAloneSupportAnotherBrick.Add(bricksSupportingOccupyingBrick.Single());
+				}
+			}
+		}
+
+		var brickCountSafeToDisintegrate = landedBricks.Count - bricksThatAloneSupportAnotherBrick.Count;
+
+		return brickCountSafeToDisintegrate;
+	}
+
+	public object GetPart2Solution(string[] input, bool isExampleInput)
+	{
+		return 0;
+	}
+
+	private static List<Brick> GetLandedBricks(IEnumerable<string> brickDescriptions)
+	{
+		var originalBricks = brickDescriptions
 			.Select(Brick.DescribedBy)
 			.OrderBy(brick => brick.MinZ)
 			.ToList();
@@ -87,57 +144,7 @@ public class Day22Solver : IPuzzleSolver
 			}
 		}
 
-		var landedBricksByLowestOccupiedLevel = landedBricks
-			.GroupBy(brick => brick.MinZ)
-			.Where(group => group.Key > 1) // Disregard lowest level; the ground is supporting these bricks
-			.ToDictionary(group => group.Key, group => group.ToList());
-
-		var landedBricksByUppermostOccupiedLevel = landedBricks
-			.GroupBy(brick => brick.MaxZ)
-			.ToDictionary(group => group.Key, group => group.ToList());
-
-		var bricksThatAloneSupportAnotherBrick = new HashSet<Brick>();
-
-		foreach (var occupiedLevel in landedBricksByLowestOccupiedLevel.Keys)
-		{
-			var supportingLevel = occupiedLevel - 1;
-
-			var occupyingBricks = landedBricksByLowestOccupiedLevel[occupiedLevel];
-			var supportingBricks = landedBricksByUppermostOccupiedLevel[supportingLevel];
-
-			foreach (var occupyingBrick in occupyingBricks)
-			{
-				var bricksSupportingOccupyingBrick = new HashSet<Brick>();
-
-				for (var x = occupyingBrick.MinX; x <= occupyingBrick.MaxX; x++)
-				{
-					for (var y = occupyingBrick.MinY; y <= occupyingBrick.MaxY; y++)
-					{
-						var supportingBrick = supportingBricks
-							.SingleOrDefault(brick => brick.OccupiesPosition(x, y, supportingLevel));
-
-						if (supportingBrick != default)
-						{
-							bricksSupportingOccupyingBrick.Add(supportingBrick);
-						}
-					}
-				}
-
-				if (bricksSupportingOccupyingBrick.Count == 1)
-				{
-					bricksThatAloneSupportAnotherBrick.Add(bricksSupportingOccupyingBrick.Single());
-				}
-			}
-		}
-
-		var brickCountSafeToDisintegrate = landedBricks.Count - bricksThatAloneSupportAnotherBrick.Count;
-
-		return brickCountSafeToDisintegrate;
-	}
-
-	public object GetPart2Solution(string[] input, bool isExampleInput)
-	{
-		return 0;
+		return landedBricks;
 	}
 
 	private class Brick
