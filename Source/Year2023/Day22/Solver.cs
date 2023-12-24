@@ -151,25 +151,27 @@ public class Day22Solver : IPuzzleSolver
 	{
 		private Brick(XYZ endA, XYZ endB)
 		{
-			Ends = new[] { endA, endB };
+			_endA = endA;
+			_endB = endB;
 		}
 
-		public XYZ[] Ends { get; }
+		private readonly XYZ _endA;
+		private readonly XYZ _endB;
 
-		public int MinX => Math.Min(Ends[0].X, Ends[1].X);
-		public int MinY => Math.Min(Ends[0].Y, Ends[1].Y);
-		public int MinZ => Math.Min(Ends[0].Z, Ends[1].Z);
-		public int MaxX => Math.Max(Ends[0].X, Ends[1].X);
-		public int MaxY => Math.Max(Ends[0].Y, Ends[1].Y);
-		public int MaxZ => Math.Max(Ends[0].Z, Ends[1].Z);
+		public int MinX => Math.Min(_endA.X, _endB.X);
+		public int MinY => Math.Min(_endA.Y, _endB.Y);
+		public int MinZ => Math.Min(_endA.Z, _endB.Z);
+		public int MaxX => Math.Max(_endA.X, _endB.X);
+		public int MaxY => Math.Max(_endA.Y, _endB.Y);
+		public int MaxZ => Math.Max(_endA.Z, _endB.Z);
 
-		public bool IsVertical => Ends[0].Z != Ends[1].Z;
+		public bool IsVertical => _endA.Z != _endB.Z;
 
 		public bool OccupiesPosition(int x, int y, int z) => OccupiesX(x) && OccupiesY(y) && OccupiesZ(z);
 
 		public Brick AfterFalling(int distance) => new Brick(
-			new XYZ(Ends[0].X, Ends[0].Y, Ends[0].Z - distance),
-			new XYZ(Ends[1].X, Ends[1].Y, Ends[1].Z - distance));
+			new XYZ(_endA.X, _endA.Y, _endA.Z - distance),
+			new XYZ(_endB.X, _endB.Y, _endB.Z - distance));
 
 		public static Brick DescribedBy(string description)
 		{
