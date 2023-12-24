@@ -8,7 +8,7 @@ public class Day22Tests : TestsBase
 {
 	protected override string DirectoryName => "Day22";
 	protected override string Part1ExampleSolution => "5";
-	protected override string Part1Solution => string.Empty;
+	protected override string Part1Solution => "401";
 	protected override string Part2ExampleSolution => string.Empty;
 	protected override string Part2Solution => string.Empty;
 
