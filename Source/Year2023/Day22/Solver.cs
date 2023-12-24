@@ -64,7 +64,98 @@ public class Day22Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var landedBricks = GetLandedBricks(input);
+
+		var landedBricksByLowestOccupiedLevel = landedBricks
+			.GroupBy(brick => brick.MinZ)
+			.Where(group => group.Key > 1) // Disregard lowest level; the ground is supporting these bricks
+			.ToDictionary(group => group.Key, group => group.ToList());
+
+		var landedBricksByUppermostOccupiedLevel = landedBricks
+			.GroupBy(brick => brick.MaxZ)
+			.ToDictionary(group => group.Key, group => group.ToList());
+
+		var supportedBricksBySupportingBricks = new Dictionary<BrickCollection, List<Brick>>();
+
+		foreach (var occupiedLevel in landedBricksByLowestOccupiedLevel.Keys)
+		{
+			var supportingLevel = occupiedLevel - 1;
+
+			var occupyingBricks = landedBricksByLowestOccupiedLevel[occupiedLevel];
+			var supportingBricks = landedBricksByUppermostOccupiedLevel[supportingLevel];
+
+			foreach (var brick in occupyingBricks)
+			{
+				var bricksSupportingOccupyingBrick = new HashSet<Brick>();
+
+				for (var x = brick.MinX; x <= brick.MaxX; x++)
+				{
+					for (var y = brick.MinY; y <= brick.MaxY; y++)
+					{
+						var supportingBrick = supportingBricks
+							.SingleOrDefault(brick => brick.OccupiesPosition(x, y, supportingLevel));
+
+						if (supportingBrick != default)
+						{
+							bricksSupportingOccupyingBrick.Add(supportingBrick);
+						}
+					}
+				}
+
+				if (bricksSupportingOccupyingBrick.Count < 1)
+				{
+					continue;
+				}
+
+				var supportingBrickCollection = new BrickCollection(bricksSupportingOccupyingBrick);
+
+				if (supportedBricksBySupportingBricks.TryGetValue(supportingBrickCollection, out var supportedBricks))
+				{
+					supportedBricks.Add(brick);
+				}
+				else
+				{
+					supportedBricksBySupportingBricks[supportingBrickCollection] = new List<Brick> { brick };
+				}
+			}
+		}
+
+		int GetFallingBrickCountWhenDisintegratingBrick(Brick brick)
+		{
+			var brickCollection = new BrickCollection(new[] { brick });
+
+			if (!supportedBricksBySupportingBricks.TryGetValue(brickCollection, out var supportedBricks))
+			{
+				return 0;
+			}
+
+			return GetFallingBricksWhenDisintegratingBricks(supportedBricks.ToHashSet()).Count;
+		}
+
+		HashSet<Brick> GetFallingBricksWhenDisintegratingBricks(HashSet<Brick> bricks)
+		{
+			var fallingBricks = supportedBricksBySupportingBricks
+				.Where(item => !item.Key.Bricks.Except(bricks).Any())
+				.SelectMany(item => item.Value)
+				.Distinct()
+				.ToList();
+
+			if (!fallingBricks.Any() || !fallingBricks.Except(bricks).Any())
+			{
+				return bricks;
+			}
+
+			foreach (var fallingBrick in fallingBricks)
+			{
+				bricks.Add(fallingBrick);
+			}
+
+			return GetFallingBricksWhenDisintegratingBricks(bricks);
+		}
+
+		var sum = landedBricks.Sum(GetFallingBrickCountWhenDisintegratingBrick);
+
+		return sum;
 	}
 
 	private static List<Brick> GetLandedBricks(IEnumerable<string> brickDescriptions)
@@ -173,6 +264,17 @@ public class Day22Solver : IPuzzleSolver
 			new XYZ(_endA.X, _endA.Y, _endA.Z - distance),
 			new XYZ(_endB.X, _endB.Y, _endB.Z - distance));
 
+		public override string ToString()
+		{
+			var ends = new[] { _endA, _endB }
+				.OrderBy(end => end.X)
+				.ThenBy(end => end.Y)
+				.ThenBy(end => end.Z)
+				.Select(end => $"{end.X},{end.Y},{end.Z}");
+
+			return string.Join('~', ends);
+		}
+
 		public static Brick DescribedBy(string description)
 		{
 			var ends = description
@@ -187,5 +289,35 @@ public class Day22Solver : IPuzzleSolver
 		private bool OccupiesX(int x) => x >= MinX && x <= MaxX;
 		private bool OccupiesY(int y) => y >= MinY && y <= MaxY;
 		private bool OccupiesZ(int z) => z >= MinZ && z <= MaxZ;
+	}
+
+	private class BrickCollection
+	{
+		public BrickCollection(IEnumerable<Brick> bricks)
+		{
+			Bricks = new HashSet<Brick>();
+
+			foreach (var brick in bricks)
+			{
+				Bricks.Add(brick);
+			}
+		}
+
+		public HashSet<Brick> Bricks { get; }
+
+		public override bool Equals(object? obj)
+		{
+			if (obj is BrickCollection other)
+			{
+				return other.Bricks.SequenceEqual(Bricks);
+			}
+
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return string.Join('_', Bricks.Select(brick => brick.ToString())).GetHashCode();
+		}
 	}
 }
