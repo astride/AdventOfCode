@@ -7,10 +7,11 @@ namespace GameRunner;
 
 public class Program
 {
-	private const bool PlayGame = false;
+	private const bool PlayGame = true;
 	
 	private static readonly IDictionary<int, Assembly> AssemblyByYear = new Dictionary<int, Assembly>
 	{
+		[2024] = typeof(Year2024.Day01Solver).Assembly,
 		[2023] = typeof(Year2023.Day01Solver).Assembly,
 		[2022] = typeof(Year2022.Day01Solver).Assembly,
 		[2021] = typeof(Year2021.Day01Solver).Assembly,
