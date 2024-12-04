@@ -77,6 +77,38 @@ public class Day04Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var rows = input.Length;
+		var cols = input[0].Length;
+
+		var masCrossCount = 0;
+
+		// Looking for the A, which cannot be along the border
+		for (var iRow = 1; iRow < rows - 1; iRow++)
+		{
+			for (var iCol = 1; iCol < cols - 1; iCol++)
+			{
+				if (input[iRow][iCol] != A)
+				{
+					continue;
+				}
+				
+				if (IsM(-1, -1) && IsM(-1, +1) && IsS(+1, +1) && IsS(+1, -1) ||
+				    IsS(-1, -1) && IsM(-1, +1) && IsM(+1, +1) && IsS(+1, -1) ||
+				    IsS(-1, -1) && IsS(-1, +1) && IsM(+1, +1) && IsM(+1, -1) ||
+				    IsM(-1, -1) && IsS(-1, +1) && IsS(+1, +1) && IsM(+1, -1))
+				{
+					masCrossCount++;
+				}
+
+				continue;
+
+				bool IsM(int rowShift, int colShift) => IsMatch(M, rowShift, colShift);
+				bool IsS(int rowShift, int colShift) => IsMatch(S, rowShift, colShift);
+				
+				bool IsMatch(char ch, int rowShift, int colShift) => input[iRow + rowShift][iCol + colShift] == ch;
+			}
+		}
+		
+		return masCrossCount;
 	}
 }
