@@ -20,4 +20,14 @@ public class Coordinate : XY
     {
         return (X + '_' + Y).GetHashCode();
     }
+
+    public Coordinate Add(Coordinate other)
+    {
+        return new Coordinate(X + other.X, Y + other.Y);
+    }
+
+    public Coordinate Subtract(Coordinate other)
+    {
+        return new Coordinate(X - other.X, Y - other.Y);
+    }
 }
