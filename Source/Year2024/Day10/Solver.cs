@@ -75,31 +75,64 @@ public class Day10Solver : IPuzzleSolver
 			trailheadScore += reachablePeaks;
 		}
 
-		for (var i = 0; i < 9; i++)
-		{
-			var nextHeight = i + 1;
-			validCoordinatesByHeight[nextHeight] = new List<Coordinate>();
-			
-			foreach (var coordinate in validCoordinatesByHeight[i])
-			{
-				foreach (var coordinateShift in NeighborDeviations)
-				{
-					var neighborCoordinate = coordinate.Add(coordinateShift);
-
-					if (heightByPosition.TryGetValue(neighborCoordinate, out var neighborHeight) &&
-					    neighborHeight == nextHeight)
-					{
-						validCoordinatesByHeight[nextHeight].Add(neighborCoordinate);
-					}
-				}
-			}
-		}
-		
 		return trailheadScore;
 	}
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var rows = input.Length;
+		var cols = input[0].Length;
+
+		var trailheads = new List<Coordinate>();
+		var heightByPosition = new Dictionary<Coordinate, int>();
+		
+		for (var iRow = 0; iRow < rows; iRow++)
+		{
+			for (var iCol = 0; iCol < cols; iCol++)
+			{
+				var coordinate = new Coordinate(iCol, iRow);
+				var height = int.Parse(input[iRow][iCol].ToString());
+
+				heightByPosition[coordinate] = height;
+
+				if (height == 0)
+				{
+					trailheads.Add(coordinate);
+				}
+			}
+		}
+
+		var validCoordinatesByHeight = new Dictionary<int, List<Coordinate>>();
+		var trailheadScore = 0;
+		
+		foreach (var trailhead in trailheads)
+		{
+			validCoordinatesByHeight[0] = new List<Coordinate> { trailhead };
+
+			for (var i = 0; i < 9; i++)
+			{
+				var nextHeight = i + 1;
+				
+				validCoordinatesByHeight[nextHeight] = new List<Coordinate>();
+			
+				foreach (var coordinate in validCoordinatesByHeight[i])
+				{
+					foreach (var deviation in NeighborDeviations)
+					{
+						var neighborCoordinate = coordinate.Add(deviation);
+
+						if (heightByPosition.TryGetValue(neighborCoordinate, out var neighborHeight) &&
+						    neighborHeight == nextHeight)
+						{
+							validCoordinatesByHeight[nextHeight].Add(neighborCoordinate);
+						}
+					}
+				}
+			}
+
+			trailheadScore += validCoordinatesByHeight[9].Count;
+		}
+
+		return trailheadScore;
 	}
 }
