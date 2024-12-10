@@ -30,24 +30,6 @@ public class Day09Solver : IPuzzleSolver
 			}
 		}
 
-		if (isExampleInput)
-		{
-			Console.WriteLine("File block count:");
-			foreach (var count in fileBlockCount)
-			{
-				Console.Write(count);
-				Console.Write(" ");
-			}
-
-			Console.WriteLine();
-			Console.WriteLine("Free space block count:");
-			foreach (var count in freeSpaceBlockCount)
-			{
-				Console.Write(count);
-				Console.Write(" ");
-			}
-		}
-
 		var compactedFiles = new List<int>();
 
 		var fileBlockId = 0;
@@ -96,26 +78,92 @@ public class Day09Solver : IPuzzleSolver
 			freeSpaceBlockCount.RemoveAt(0);
 		}
 
-		Console.WriteLine();
-		Console.WriteLine("Compacted files:");
-		foreach (var digit in compactedFiles)
-		{
-			Console.Write(digit);
-		}
-		Console.WriteLine();
-		
-		var checksum = 0L;
-		
-		for (var i = 0; i < compactedFiles.Count; i++)
-		{
-			checksum += i * compactedFiles[i];
-		}
+		var checksum = compactedFiles.Select((id, index) => 1L * id * index).Sum();
 
 		return checksum;
 	}
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var fileCountInBlock = new List<int>();
+		var freeSpaceCountInBlock = new List<int>();
+
+		var diskMap = input.Single();
+
+		for (var i = 0; i < diskMap.Length; i++)
+		{
+			var blockCount = int.Parse(diskMap[i].ToString());
+
+			if (i % 2 == 0)
+			{
+				fileCountInBlock.Add(blockCount);
+			}
+			else
+			{
+				freeSpaceCountInBlock.Add(blockCount);
+			}
+		}
+
+		var fileBlockIdToMove = fileCountInBlock.Count - 1;
+		var firstBlockIdWithFreeSpace = freeSpaceCountInBlock.FindIndex(count => count > 0);
+
+		var removedFileCountInBlock = fileCountInBlock.Select(_ => 0).ToList();
+		var contentInFreeSpaceBlock = freeSpaceCountInBlock.Select(_ => new List<int>()).ToList();
+		
+		while (fileBlockIdToMove > firstBlockIdWithFreeSpace)
+		{
+			var fileBlockCount = fileCountInBlock[fileBlockIdToMove];
+
+			var freeSpaceTargetId = freeSpaceCountInBlock.FindIndex(count => count >= fileBlockCount);
+
+			// Move file blocks if possible, but only forwards
+			if (freeSpaceTargetId > -1 && freeSpaceTargetId < fileBlockIdToMove)
+			{
+				var fileCount = fileCountInBlock[fileBlockIdToMove];
+
+				fileCountInBlock[fileBlockIdToMove] = 0;
+				removedFileCountInBlock[fileBlockIdToMove] = fileCount;
+				contentInFreeSpaceBlock[freeSpaceTargetId].AddRange(Enumerable.Range(0, fileCount).Select(_ => fileBlockIdToMove));
+				freeSpaceCountInBlock[freeSpaceTargetId] -= fileCount;
+				
+				if (freeSpaceTargetId == firstBlockIdWithFreeSpace)
+				{
+					firstBlockIdWithFreeSpace = freeSpaceCountInBlock.FindIndex(count => count > 0);
+				}
+			}
+
+			fileBlockIdToMove--;
+		}
+
+		var compactedFiles = new List<int>();
+		
+		for (var i = 0; i < fileCountInBlock.Count; i++)
+		{
+			for (var _ = 0; _ < fileCountInBlock[i]; _++)
+			{
+				compactedFiles.Add(i);
+			}
+
+			for (var _ = 0; _ < removedFileCountInBlock[i]; _++)
+			{
+				compactedFiles.Add(0);
+			}
+
+			if (i >= freeSpaceCountInBlock.Count)
+			{
+				break;
+			}
+			
+			compactedFiles.AddRange(contentInFreeSpaceBlock[i]);
+
+			for (var _ = 0; _ < freeSpaceCountInBlock[i]; _++)
+			{
+				compactedFiles.Add(0);
+			}
+		}
+
+		var checksum = compactedFiles.Select((id, index) => 1L * id * index).Sum();
+
+		return checksum;
 	}
 }
