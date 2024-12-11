@@ -8,6 +8,8 @@ public class Day11Solver : IPuzzleSolver
 
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
+	
+	private static readonly Dictionary<string, string[]> StonesAfterBlinkingByStone = new();
 
 	public object GetPart1Solution(string[] input, bool isExampleInput)
 	{
@@ -30,21 +32,36 @@ public class Day11Solver : IPuzzleSolver
 	{
 		foreach (var stone in stones)
 		{
-			if (stone == "0")
+			if (!StonesAfterBlinkingByStone.TryGetValue(stone, out var stonesAfterBlinking))
 			{
-				yield return "1";
-			}
-			else if (stone.Length % 2 == 0)
-			{
-				yield return string.Join(string.Empty, stone[..(stone.Length / 2)]);
+				stonesAfterBlinking = CalculateStonesAfterBlinking();
 
-				var rightHalf = long.Parse(stone[(stone.Length / 2)..]);
-
-				yield return rightHalf.ToString();
+				StonesAfterBlinkingByStone[stone] = stonesAfterBlinking;
 			}
-			else
+
+			foreach (var stoneAfter in stonesAfterBlinking)
 			{
-				yield return (long.Parse(stone) * 2024).ToString();
+				yield return stoneAfter;
+			}
+
+			continue;
+
+			string[] CalculateStonesAfterBlinking()
+			{
+				if (stone == "0")
+				{
+					return new[] { "1" };
+				}
+
+				if (stone.Length % 2 == 1)
+				{
+					return new[] { (long.Parse(stone) * 2024).ToString() };
+				}
+
+				var leftHalf = stone[..(stone.Length / 2)];
+				var rightHalf = long.Parse(stone[(stone.Length / 2)..]).ToString();
+
+				return new[] { leftHalf, rightHalf };
 			}
 		}
 	}
