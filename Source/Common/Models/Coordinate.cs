@@ -30,4 +30,12 @@ public class Coordinate : XY
     {
         return new Coordinate(X - other.X, Y - other.Y);
     }
+
+    public Coordinate[] GetOrthogonalNeighbors() => new[]
+    {
+        new Coordinate(X - 1, Y),
+        new Coordinate(X + 1, Y),
+        new Coordinate(X, Y + 1),
+        new Coordinate(X, Y - 1),
+    };
 }
