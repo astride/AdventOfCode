@@ -9,7 +9,11 @@ public class Day13Solver : IPuzzleSolver
 	public object? Part1Solution { get; set; }
 	public object? Part2Solution { get; set; }
 
-	public object GetPart1Solution(string[] input, bool isExampleInput)
+	public object GetPart1Solution(string[] input, bool isExampleInput) => GetSolution(input);
+
+	public object GetPart2Solution(string[] input, bool isExampleInput) => GetSolution(input, shiftedTarget: true);
+
+	private object GetSolution(string[] input, bool shiftedTarget = false)
 	{
 		var machineConfigs = input
 			.Where(line => !string.IsNullOrEmpty(line))
@@ -19,7 +23,7 @@ public class Day13Solver : IPuzzleSolver
 
 		foreach (var config in machineConfigs)
 		{
-			config.CalculateClawMovement();
+			config.CalculateClawMovement(shiftedTarget);
 		}
 		
 		var spentTokens = machineConfigs.Select(CalculateTokenUsage).Sum();
@@ -27,25 +31,7 @@ public class Day13Solver : IPuzzleSolver
 		return spentTokens;
 	}
 
-	public object GetPart2Solution(string[] input, bool isExampleInput)
-	{
-		var machineConfigs = input
-			.Where(line => !string.IsNullOrEmpty(line))
-			.Chunk(3)
-			.Select(config => new MachineConfig(config[0], config[1], config[2]))
-			.ToList();
-
-		foreach (var config in machineConfigs)
-		{
-			config.CalculateShiftedClawMovement();
-		}
-		
-		var spentTokens = machineConfigs.Select(CalculateTokenUsage).Sum();
-
-		return spentTokens;
-	}
-
-	private decimal CalculateTokenUsage(MachineConfig machineConfig)
+	private static long CalculateTokenUsage(MachineConfig machineConfig)
 	{
 		return machineConfig.PrizeCanBeWon
 			? 3 * machineConfig.A + machineConfig.B
@@ -64,6 +50,14 @@ public class MachineConfig
 	private readonly long _b;
 	private readonly long _c;
 	private readonly long _d;
+	
+	private long ShiftedDividendA => Shift + _x - _c * B;
+	private long DividendA => _x - _c * B;
+	private long DivisorA => _a;
+
+	private long ShiftedDividendB => (_a - _b) * Shift + _a * _y - _b * _x;
+	private long DividendB => _a * _y - _b * _x;
+	private long DivisorB => _a * _d - _b * _c;
 
 	public long A { get; set; }
 	public long B { get; set; }
@@ -75,51 +69,47 @@ public class MachineConfig
 		// Aa + Bb = X
 		// Ca + Db = Y
 	
-		var buttonAConfig = buttonA.Split(',');
-		var buttonBConfig = buttonB.Split(',');
+		var buttonAConfig = GetConfig(buttonA);
+		var buttonBConfig = GetConfig(buttonB);
 
-		_a = long.Parse(buttonAConfig[0].Split('+')[1]);
-		_b = long.Parse(buttonAConfig[1].Split('+')[1]);
-		_c = long.Parse(buttonBConfig[0].Split('+')[1]);
-		_d = long.Parse(buttonBConfig[1].Split('+')[1]);
+		_a = GetButtonValue(buttonAConfig[0]);
+		_b = GetButtonValue(buttonAConfig[1]);
+		_c = GetButtonValue(buttonBConfig[0]);
+		_d = GetButtonValue(buttonBConfig[1]);
 
-		var prizeLocationConfig = prizeLocation.Split(',');
+		var prizeConfig = GetConfig(prizeLocation);
 
-		_x = long.Parse(prizeLocationConfig[0].Split('=')[1]);
-		_y = long.Parse(prizeLocationConfig[1].Split('=')[1]);
+		_x = GetPrizeLocation(prizeConfig[0]);
+		_y = GetPrizeLocation(prizeConfig[1]);
 	}
-	
-	public void CalculateClawMovement()
+
+	private static string[] GetConfig(string line) => line.Split(',');
+	private static long GetButtonValue(string buttonConfig) => long.Parse(buttonConfig.Split('+')[1]);
+	private static long GetPrizeLocation(string prizeConfig) => long.Parse(prizeConfig.Split('=')[1]);
+
+	public void CalculateClawMovement(bool shifted = false)
 	{
-		// b = (AY - BX) / (AD - BC)
-		// a = (X - Cb) / A
-
-		B = Math.DivRem(_a * _y - _b * _x, _a * _d - _b * _c, out var bRemainder);
-
-		PrizeCanBeWon = bRemainder is 0;
-
-		if (PrizeCanBeWon)
+		if (shifted)
 		{
-			A = Math.DivRem(_x - _c * B, _a, out var aRemainder);
-
-			PrizeCanBeWon = aRemainder is 0;
+			CalculateClawMovement(() => ShiftedDividendA, () => ShiftedDividendB);
+		}
+		else
+		{
+			CalculateClawMovement(() => DividendA, () => DividendB);
 		}
 	}
 
-	public void CalculateShiftedClawMovement()
+	private void CalculateClawMovement(Func<long> dividendA, Func<long> dividendB)
 	{
-		// b = ((A - B)Shift + A*Y - B*X) / (AD - BC)
-		// a = ((Shift + X) - Cb) / A
+		B = Math.DivRem(dividendB(), DivisorB, out var remainderB);
 
-		B = Math.DivRem((_a - _b) * Shift + _a * _y - _b * _x, _a * _d - _b * _c, out var bRemainder);
-
-		PrizeCanBeWon = bRemainder is 0;
+		PrizeCanBeWon = remainderB is 0;
 
 		if (PrizeCanBeWon)
 		{
-			A = Math.DivRem((Shift + _x) - _c * B, _a, out var aRemainder);
+			A = Math.DivRem(dividendA(), DivisorA, out var remainderA);
 
-			PrizeCanBeWon = aRemainder is 0;
+			PrizeCanBeWon = remainderA is 0;
 		}
 	}
 }
