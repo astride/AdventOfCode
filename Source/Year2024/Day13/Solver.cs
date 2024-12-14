@@ -29,7 +29,20 @@ public class Day13Solver : IPuzzleSolver
 
 	public object GetPart2Solution(string[] input, bool isExampleInput)
 	{
-		return 0;
+		var machineConfigs = input
+			.Where(line => !string.IsNullOrEmpty(line))
+			.Chunk(3)
+			.Select(config => new MachineConfig(config[0], config[1], config[2]))
+			.ToList();
+
+		foreach (var config in machineConfigs)
+		{
+			config.CalculateShiftedClawMovement();
+		}
+		
+		var spentTokens = machineConfigs.Select(CalculateTokenUsage).Sum();
+
+		return spentTokens;
 	}
 
 	private decimal CalculateTokenUsage(MachineConfig machineConfig)
@@ -42,6 +55,8 @@ public class Day13Solver : IPuzzleSolver
 
 public class MachineConfig
 {
+	private const long Shift = 10000000000000;
+
 	private readonly long _x;
 	private readonly long _y;
 	
@@ -73,7 +88,7 @@ public class MachineConfig
 		_x = long.Parse(prizeLocationConfig[0].Split('=')[1]);
 		_y = long.Parse(prizeLocationConfig[1].Split('=')[1]);
 	}
-
+	
 	public void CalculateClawMovement()
 	{
 		// b = (AY - BX) / (AD - BC)
@@ -86,6 +101,23 @@ public class MachineConfig
 		if (PrizeCanBeWon)
 		{
 			A = Math.DivRem(_x - _c * B, _a, out var aRemainder);
+
+			PrizeCanBeWon = aRemainder is 0;
+		}
+	}
+
+	public void CalculateShiftedClawMovement()
+	{
+		// b = ((A - B)Shift + A*Y - B*X) / (AD - BC)
+		// a = ((Shift + X) - Cb) / A
+
+		B = Math.DivRem((_a - _b) * Shift + _a * _y - _b * _x, _a * _d - _b * _c, out var bRemainder);
+
+		PrizeCanBeWon = bRemainder is 0;
+
+		if (PrizeCanBeWon)
+		{
+			A = Math.DivRem((Shift + _x) - _c * B, _a, out var aRemainder);
 
 			PrizeCanBeWon = aRemainder is 0;
 		}
