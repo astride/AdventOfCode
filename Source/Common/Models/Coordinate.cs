@@ -21,13 +21,9 @@ public class Coordinate : XY
         return (X + '_' + Y).GetHashCode();
     }
 
-    public Coordinate Add(Coordinate other)
-    {
-        return new Coordinate(X + other.X, Y + other.Y);
-    }
+    public Coordinate Add(Coordinate other) => Add(other.X, other.Y);
+    public Coordinate Subtract(Coordinate other) => Subtract(other.X, other.Y);
 
-    public Coordinate Subtract(Coordinate other)
-    {
-        return new Coordinate(X - other.X, Y - other.Y);
-    }
+    public Coordinate Add(int x, int y) => new(X + x, Y + y);
+    public Coordinate Subtract(int x, int y) => new(X - x, Y - y);
 }
